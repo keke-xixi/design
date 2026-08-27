@@ -1,0 +1,41 @@
+<view class="banner">
+  <view class="banner-title">想吃什么菜</view>
+  <view class="banner-sub">净菜配齐 · 骑手配送 · 回家直接炒</view>
+</view>
+
+<view class="section">
+  <view class="section-title">热门分类</view>
+  <scroll-view scroll-x class="category-scroll">
+    <view class="category-item" wx:for="{{categories}}" wx:key="id" bindtap="goCategory" data-id="{{item.id}}">
+      <text class="category-icon">{{item.icon || '🍽'}}</text>
+      <text class="category-name">{{item.name}}</text>
+    </view>
+  </scroll-view>
+</view>
+
+<view class="section">
+  <view class="section-title">今日推荐</view>
+  <view wx:if="{{loading}}" class="loading">加载中...</view>
+  <view wx:else class="product-list">
+    <view class="product-card" wx:for="{{products}}" wx:key="id" bindtap="goProduct" data-id="{{item.id}}">
+      <view class="product-img">
+        <text class="product-emoji">🥘</text>
+      </view>
+      <view class="product-info">
+        <view class="product-name">{{item.name}}</view>
+        <view class="product-sub">{{item.subtitle}}</view>
+        <view class="product-meta">
+          <text class="tag">{{item.servings}}人份</text>
+          <text class="tag">{{item.cook_time}}分钟</text>
+        </view>
+        <view class="product-bottom">
+          <view class="price">
+            <text class="price-symbol">¥</text>
+            <text class="price-int">{{item.price}}</text>
+          </view>
+          <view class="add-btn" catchtap="addToCart" data-item="{{item}}">+</view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

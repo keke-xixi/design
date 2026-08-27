@@ -1,0 +1,22 @@
+<view class="header">
+  <view class="avatar">👤</view>
+  <view class="info">
+    <view class="name">{{user.nickname || '微信用户'}}</view>
+    <view class="desc">净菜到家 · 回家直接炒</view>
+  </view>
+</view>
+
+<view class="menu">
+  <view class="menu-item" bindtap="goOrders">
+    <text>📋 我的订单</text>
+    <text class="arrow">›</text>
+  </view>
+  <view class="menu-item">
+    <text>📍 收货地址</text>
+    <text class="arrow">›</text>
+  </view>
+  <view class="menu-item">
+    <text>💬 联系客服</text>
+    <text class="arrow">›</text>
+  </view>
+</view>

@@ -1,0 +1,24 @@
+<view wx:if="{{loading}}" class="loading">加载中...</view>
+
+<view wx:elif="{{orders.length}}" class="page">
+  <view class="order-card" wx:for="{{orders}}" wx:key="id">
+    <view class="order-header">
+      <text class="order-no">{{item.order_no}}</text>
+      <text class="status">{{item.status_text}}</text>
+    </view>
+    <view class="order-item" wx:for="{{item.items}}" wx:for-item="product" wx:key="id">
+      <text>{{product.product_name}} x{{product.quantity}}</text>
+      <text>¥{{product.price}}</text>
+    </view>
+    <view class="order-footer">
+      <text>{{item.created_at}}</text>
+      <text class="pay-amount">¥{{item.pay_amount}}</text>
+    </view>
+    <view wx:if="{{item.rider_name}}" class="rider">🛵 骑手 {{item.rider_name}} {{item.rider_phone}}</view>
+  </view>
+</view>
+
+<view wx:else class="empty">
+  <view class="empty-icon">📋</view>
+  <view>暂无订单</view>
+</view>

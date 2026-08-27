@@ -1,0 +1,28 @@
+<view class="layout">
+  <scroll-view scroll-y class="sidebar">
+    <view
+      class="sidebar-item {{activeId === item.id ? 'active' : ''}}"
+      wx:for="{{categories}}"
+      wx:key="id"
+      bindtap="switchCategory"
+      data-id="{{item.id}}"
+    >
+      {{item.name}}
+    </view>
+  </scroll-view>
+
+  <scroll-view scroll-y class="content">
+    <view class="product-card" wx:for="{{products}}" wx:key="id" bindtap="goProduct" data-id="{{item.id}}">
+      <view class="product-img"><text class="emoji">🥘</text></view>
+      <view class="product-info">
+        <view class="name">{{item.name}}</view>
+        <view class="sub">{{item.subtitle}}</view>
+        <view class="bottom">
+          <text class="price">¥{{item.price}}</text>
+          <view class="add-btn" catchtap="addToCart" data-item="{{item}}">+</view>
+        </view>
+      </view>
+    </view>
+    <view wx:if="{{!products.length}}" class="empty">该分类暂无商品</view>
+  </scroll-view>
+</view>
