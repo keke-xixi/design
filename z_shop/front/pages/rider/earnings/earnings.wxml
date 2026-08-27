@@ -1,0 +1,34 @@
+<view class="header-card">
+  <view class="label">累计收入</view>
+  <view class="total">¥{{rider.total_earnings || 0}}</view>
+  <view class="sub-stats">
+    <view class="sub-stat">
+      <text class="num">{{rider.total_orders || 0}}</text>
+      <text class="lbl">完成单数</text>
+    </view>
+    <view class="sub-stat">
+      <text class="num">¥{{today.today_earnings || 0}}</text>
+      <text class="lbl">今日收入</text>
+    </view>
+    <view class="sub-stat">
+      <text class="num">{{today.today_orders || 0}}</text>
+      <text class="lbl">今日单数</text>
+    </view>
+  </view>
+</view>
+
+<view class="section-title">结算明细</view>
+
+<view wx:if="{{loading}}" class="loading">加载中...</view>
+
+<view wx:elif="{{!settlements.length}}" class="empty">暂无结算记录</view>
+
+<view wx:else class="list">
+  <view class="item" wx:for="{{settlements}}" wx:key="id">
+    <view class="item-left">
+      <view class="item-title">配送 {{item.order_no}}</view>
+      <view class="item-time">{{item.created_at}}</view>
+    </view>
+    <view class="item-amount">+¥{{item.amount}}</view>
+  </view>
+</view>

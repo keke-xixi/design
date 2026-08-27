@@ -4,17 +4,33 @@
   <view class="order-card" wx:for="{{orders}}" wx:key="id">
     <view class="order-header">
       <text class="order-no">{{item.order_no}}</text>
-      <text class="status">{{item.status_text}}</text>
+      <text class="status status-{{item.status}}">{{item.status_text}}</text>
     </view>
+
+    <view class="timeline">
+      <view class="step {{item.status >= 1 ? 'done' : ''}}">下单</view>
+      <view class="line {{item.status >= 2 ? 'done' : ''}}"></view>
+      <view class="step {{item.status >= 2 ? 'done' : ''}}">接单</view>
+      <view class="line {{item.status >= 3 ? 'done' : ''}}"></view>
+      <view class="step {{item.status >= 3 ? 'done' : ''}}">配送</view>
+      <view class="line {{item.status >= 4 ? 'done' : ''}}"></view>
+      <view class="step {{item.status >= 4 ? 'done' : ''}}">完成</view>
+    </view>
+
     <view class="order-item" wx:for="{{item.items}}" wx:for-item="product" wx:key="id">
       <text>{{product.product_name}} x{{product.quantity}}</text>
       <text>¥{{product.price}}</text>
     </view>
+
     <view class="order-footer">
       <text>{{item.created_at}}</text>
       <text class="pay-amount">¥{{item.pay_amount}}</text>
     </view>
-    <view wx:if="{{item.rider_name}}" class="rider">🛵 骑手 {{item.rider_name}} {{item.rider_phone}}</view>
+
+    <view wx:if="{{item.rider_name}}" class="rider">
+      🛵 骑手 {{item.rider_name}} {{item.rider_phone}}
+    </view>
+    <view wx:elif="{{item.status === 1}}" class="waiting">等待骑手接单中...</view>
   </view>
 </view>
 

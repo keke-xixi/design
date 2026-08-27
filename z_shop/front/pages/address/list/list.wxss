@@ -1,0 +1,79 @@
+.page { padding-bottom: 140rpx; min-height: 100vh; }
+
+.list { padding: 24rpx; }
+
+.addr-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  border: 2rpx solid transparent;
+}
+
+.addr-card.default {
+  border-color: #FF6B35;
+  background: #FFFBF9;
+}
+
+.addr-top {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 12rpx;
+}
+
+.name { font-weight: 700; font-size: 30rpx; }
+.phone { color: #666; font-size: 28rpx; }
+
+.default-tag {
+  font-size: 20rpx;
+  color: #FF6B35;
+  border: 1rpx solid #FF6B35;
+  padding: 2rpx 10rpx;
+  border-radius: 6rpx;
+}
+
+.detail {
+  color: #666;
+  font-size: 26rpx;
+  line-height: 1.5;
+  margin-bottom: 16rpx;
+}
+
+.actions {
+  display: flex;
+  gap: 24rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.action {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.action.del { color: #e74c3c; }
+
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16rpx 24rpx;
+  padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
+  background: #fff;
+  box-shadow: 0 -2rpx 12rpx rgba(0,0,0,0.06);
+}
+
+.footer .btn-primary { margin: 0; }
+
+.empty {
+  text-align: center;
+  padding: 120rpx 48rpx;
+  color: #999;
+}
+
+.empty-icon { font-size: 80rpx; margin-bottom: 20rpx; }
+.add-btn { margin-top: 32rpx; width: 300rpx; }
+
+.loading { text-align: center; padding: 80rpx; color: #999; }

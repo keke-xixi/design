@@ -1,0 +1,50 @@
+<view wx:if="{{loading}}" class="loading">加载中...</view>
+
+<view wx:elif="{{order}}" class="page">
+  <view class="status-bar status-{{order.status}}">
+    <text class="status-text">{{order.status_text}}</text>
+    <text class="order-no">{{order.order_no}}</text>
+  </view>
+
+  <!-- 待取货：显示取货点和清单 -->
+  <view wx:if="{{order.status === 2}}" class="card highlight">
+    <view class="card-title">🏪 先到取货点拿货</view>
+    <view class="store-name">{{store.name}}</view>
+    <view class="store-addr">{{store.address}}</view>
+    <button class="link-btn" bindtap="openStoreMap">打开导航</button>
+  </view>
+
+  <view class="card">
+    <view class="card-title">📋 取货清单（共{{order.item_count}}件）</view>
+    <view class="pick-item" wx:for="{{order.items}}" wx:key="id">
+      <image class="pick-img" src="{{item.product_image}}" mode="aspectFill" />
+      <view class="pick-info">
+        <view class="pick-name">{{item.product_name}}</view>
+        <view class="pick-qty">数量：{{item.quantity}}</view>
+      </view>
+      <view class="check-box">☐</view>
+    </view>
+  </view>
+
+  <!-- 配送地址 -->
+  <view class="card">
+    <view class="card-title">📍 送到这里</view>
+    <view class="customer-name">{{order.address_snapshot.name}} {{order.address_snapshot.phone}}</view>
+    <view class="customer-addr">{{order.address_snapshot.detail}}</view>
+    <view wx:if="{{order.remark}}" class="remark">备注：{{order.remark}}</view>
+    <view class="action-row">
+      <button class="sub-btn" bindtap="callCustomer">📞 联系客户</button>
+      <button class="sub-btn" bindtap="copyAddress">📋 复制地址</button>
+    </view>
+  </view>
+
+  <view class="footer">
+    <button
+      class="btn-primary main-btn"
+      bindtap="doAction"
+      loading="{{submitting}}"
+    >
+      {{order.status === 2 ? '确认已取货，开始配送' : '确认送达'}}
+    </button>
+  </view>
+</view>

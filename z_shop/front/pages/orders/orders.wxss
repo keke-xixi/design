@@ -17,6 +17,40 @@
 
 .order-no { font-size: 24rpx; color: #999; }
 .status { color: #FF6B35; font-size: 26rpx; }
+.status-4 { color: #52c41a; }
+
+.timeline {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+  padding: 16rpx 0;
+}
+
+.step {
+  font-size: 22rpx;
+  color: #ccc;
+  white-space: nowrap;
+}
+
+.step.done { color: #FF6B35; font-weight: 600; }
+
+.line {
+  flex: 1;
+  height: 2rpx;
+  background: #eee;
+  margin: 0 8rpx;
+}
+
+.line.done { background: #FF6B35; }
+
+.waiting {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  color: #FF6B35;
+  background: #FFF3EE;
+  padding: 12rpx 16rpx;
+  border-radius: 8rpx;
+}
 
 .order-item {
   display: flex;

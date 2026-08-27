@@ -13,6 +13,8 @@ function parseProduct(row) {
 }
 
 function safeJson(str, fallback) {
+  if (str == null || str === '') return fallback;
+  if (typeof str === 'object') return str;
   try {
     return JSON.parse(str);
   } catch {

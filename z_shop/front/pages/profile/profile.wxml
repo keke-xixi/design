@@ -7,15 +7,19 @@
 </view>
 
 <view class="menu">
+  <view class="menu-item" bindtap="goRider">
+    <text>🛵 骑手配送入口</text>
+    <text class="arrow">›</text>
+  </view>
   <view class="menu-item" bindtap="goOrders">
     <text>📋 我的订单</text>
     <text class="arrow">›</text>
   </view>
-  <view class="menu-item">
+  <view class="menu-item" bindtap="goAddress">
     <text>📍 收货地址</text>
     <text class="arrow">›</text>
   </view>
-  <view class="menu-item">
+  <view class="menu-item" bindtap="goService">
     <text>💬 联系客服</text>
     <text class="arrow">›</text>
   </view>

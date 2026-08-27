@@ -1,9 +1,17 @@
 <view class="page">
-  <view class="card">
-    <view class="card-title">🛵 配送地址</view>
-    <input placeholder="收货人姓名" value="{{address.name}}" data-field="name" bindinput="onInput" />
-    <input placeholder="手机号" type="number" value="{{address.phone}}" data-field="phone" bindinput="onInput" />
-    <input placeholder="详细地址（小区/楼栋/门牌号）" value="{{address.detail}}" data-field="detail" bindinput="onInput" />
+  <view class="card address-card" bindtap="chooseAddress">
+    <view wx:if="{{address}}" class="address-filled">
+      <view class="card-title">📍 收货地址</view>
+      <view class="addr-line">
+        <text class="name">{{address.name}}</text>
+        <text class="phone">{{address.phone}}</text>
+      </view>
+      <view class="addr-detail">{{address.full_detail || address.detail}}</view>
+      <text class="change-link">更换地址 ›</text>
+    </view>
+    <view wx:else class="address-empty">
+      <text class="empty-text">+ 选择收货地址</text>
+    </view>
   </view>
 
   <view class="card">

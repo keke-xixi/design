@@ -1,0 +1,41 @@
+.hero {
+  background: linear-gradient(135deg, #FF6B35, #FF8F65);
+  padding: 48rpx 32rpx;
+  color: #fff;
+  text-align: center;
+}
+
+.hero-icon { font-size: 64rpx; margin-bottom: 16rpx; }
+.hero-title { font-size: 36rpx; font-weight: 700; }
+.hero-sub { font-size: 26rpx; opacity: 0.9; margin-top: 12rpx; }
+
+.page { padding-bottom: 48rpx; }
+
+.card {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  margin: 20rpx 24rpx;
+  padding: 28rpx 24rpx;
+  border-radius: 16rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
+}
+
+.card-icon { font-size: 48rpx; margin-right: 20rpx; }
+.card-info { flex: 1; }
+.card-title { font-weight: 600; font-size: 28rpx; }
+.card-value { color: #FF6B35; font-size: 32rpx; font-weight: 700; margin: 8rpx 0; }
+.card-desc { font-size: 24rpx; color: #999; }
+.arrow { color: #ccc; font-size: 26rpx; }
+
+.faq {
+  margin: 32rpx 24rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+}
+
+.faq-title { font-weight: 700; margin-bottom: 16rpx; }
+.faq-item { font-size: 26rpx; color: #666; line-height: 2; }
+
+.loading { text-align: center; padding: 120rpx; color: #999; }

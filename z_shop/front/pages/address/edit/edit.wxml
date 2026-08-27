@@ -1,0 +1,26 @@
+<view class="page">
+  <view class="card">
+    <view class="label">收货人</view>
+    <input placeholder="姓名" value="{{form.name}}" data-field="name" bindinput="onInput" />
+  </view>
+  <view class="card">
+    <view class="label">手机号</view>
+    <input placeholder="11位手机号" type="number" maxlength="11" value="{{form.phone}}" data-field="phone" bindinput="onInput" />
+  </view>
+  <view class="card">
+    <view class="label">所在地区（选填）</view>
+    <input placeholder="省" value="{{form.province}}" data-field="province" bindinput="onInput" />
+    <input placeholder="市" value="{{form.city}}" data-field="city" bindinput="onInput" />
+    <input placeholder="区" value="{{form.district}}" data-field="district" bindinput="onInput" />
+  </view>
+  <view class="card">
+    <view class="label">详细地址</view>
+    <textarea placeholder="小区、楼栋、门牌号等" value="{{form.detail}}" data-field="detail" bindinput="onInput" auto-height />
+  </view>
+  <view class="card row">
+    <text>设为默认地址</text>
+    <switch checked="{{form.is_default}}" bindchange="toggleDefault" color="#FF6B35" />
+  </view>
+
+  <button class="btn-primary save-btn" bindtap="save" loading="{{submitting}}">保存</button>
+</view>

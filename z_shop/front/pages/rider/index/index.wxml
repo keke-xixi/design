@@ -1,0 +1,58 @@
+<view wx:if="{{!rider}}" class="login-page">
+  <view class="login-title">骑手登录</view>
+  <view class="login-sub">接单配送 · 按单结算</view>
+  <input class="input" placeholder="真实姓名" bindinput="onName" />
+  <input class="input" placeholder="手机号" type="number" bindinput="onPhone" />
+  <button class="btn-primary login-btn" bindtap="login">开始接单</button>
+</view>
+
+<view wx:else class="page">
+  <view class="header-card">
+    <view class="rider-info">
+      <view class="rider-name">{{rider.name}}</view>
+      <view class="rider-phone">{{rider.phone}}</view>
+    </view>
+    <view class="stats">
+      <view class="stat">
+        <text class="stat-num">{{todayOrders}}</text>
+        <text class="stat-label">今日单</text>
+      </view>
+      <view class="stat">
+        <text class="stat-num">¥{{todayEarnings}}</text>
+        <text class="stat-label">今日收入</text>
+      </view>
+      <view class="stat">
+        <text class="stat-num">¥{{rider.balance}}</text>
+        <text class="stat-label">累计余额</text>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{activeOrder}}" class="active-card" bindtap="goTask">
+    <view class="active-tag">进行中</view>
+    <view class="active-title">订单 {{activeOrder.order_no}}</view>
+    <view class="active-status">{{activeOrder.status_text}}</view>
+    <view class="active-addr">{{activeOrder.address_snapshot.detail}}</view>
+    <view class="active-btn">继续配送 ›</view>
+  </view>
+
+  <view wx:else class="empty-active">
+    <view class="empty-text">暂无进行中的订单</view>
+    <button class="btn-primary" bindtap="goPool">去接单</button>
+  </view>
+
+  <view class="menu">
+    <view class="menu-item" bindtap="goPool">
+      <text>📦 待接订单</text>
+      <text class="arrow">›</text>
+    </view>
+    <view class="menu-item" bindtap="goEarnings">
+      <text>💰 收入明细</text>
+      <text class="arrow">›</text>
+    </view>
+    <view class="menu-item" bindtap="callStore">
+      <text>🏪 取货点：{{store.name || '前置仓'}}</text>
+      <text class="arrow">📞</text>
+    </view>
+  </view>
+</view>

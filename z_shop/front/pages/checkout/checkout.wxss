@@ -58,3 +58,25 @@ input {
 }
 
 .submit-btn { width: 280rpx; margin: 0; }
+
+.address-card { min-height: 120rpx; }
+
+.address-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32rpx 0;
+}
+
+.empty-text { color: #FF6B35; font-size: 30rpx; font-weight: 600; }
+
+.addr-line {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 8rpx;
+}
+
+.name { font-weight: 700; font-size: 30rpx; }
+.phone { color: #666; }
+.addr-detail { color: #666; font-size: 26rpx; line-height: 1.5; margin-bottom: 12rpx; }
+.change-link { color: #FF6B35; font-size: 26rpx; }

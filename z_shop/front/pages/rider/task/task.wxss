@@ -1,0 +1,104 @@
+.page { padding-bottom: 160rpx; }
+
+.status-bar {
+  background: #FF6B35;
+  color: #fff;
+  padding: 32rpx 24rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-text { font-size: 36rpx; font-weight: 700; }
+.order-no { font-size: 24rpx; opacity: 0.85; }
+
+.card {
+  background: #fff;
+  margin: 20rpx 24rpx;
+  border-radius: 16rpx;
+  padding: 24rpx;
+}
+
+.card.highlight {
+  border: 2rpx solid #FF6B35;
+  background: #FFF8F5;
+}
+
+.card-title {
+  font-weight: 700;
+  font-size: 28rpx;
+  margin-bottom: 16rpx;
+}
+
+.store-name { font-size: 30rpx; font-weight: 600; }
+.store-addr { color: #666; font-size: 26rpx; margin: 8rpx 0 16rpx; }
+
+.link-btn {
+  background: none;
+  color: #FF6B35;
+  font-size: 26rpx;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  line-height: 1.5;
+}
+
+.link-btn::after { border: none; }
+
+.pick-item {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.pick-item:last-child { border-bottom: none; }
+
+.pick-img {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 8rpx;
+  background: #f5f5f5;
+}
+
+.pick-info { flex: 1; margin-left: 16rpx; }
+.pick-name { font-weight: 600; font-size: 28rpx; }
+.pick-qty { color: #999; font-size: 24rpx; margin-top: 4rpx; }
+
+.check-box {
+  font-size: 36rpx;
+  color: #ccc;
+}
+
+.customer-name { font-size: 30rpx; font-weight: 600; }
+.customer-addr { color: #666; font-size: 28rpx; margin: 12rpx 0; line-height: 1.5; }
+.remark { color: #999; font-size: 24rpx; margin-bottom: 16rpx; }
+
+.action-row { display: flex; gap: 16rpx; }
+
+.sub-btn {
+  flex: 1;
+  background: #f5f5f5;
+  color: #333;
+  font-size: 26rpx;
+  border-radius: 12rpx;
+  margin: 0;
+  line-height: 72rpx;
+}
+
+.sub-btn::after { border: none; }
+
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16rpx 24rpx;
+  padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
+  background: #fff;
+  box-shadow: 0 -2rpx 12rpx rgba(0,0,0,0.06);
+}
+
+.main-btn { width: 100%; margin: 0; }
+
+.loading { text-align: center; padding: 120rpx; color: #999; }

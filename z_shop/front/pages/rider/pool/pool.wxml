@@ -1,0 +1,43 @@
+<view class="store-bar" bindtap="openStoreMap">
+  <text class="store-icon">🏪</text>
+  <view class="store-info">
+    <view class="store-name">取货点：{{store.name}}</view>
+    <view class="store-addr">{{store.address}}</view>
+  </view>
+  <text class="store-nav">导航 ›</text>
+</view>
+
+<view wx:if="{{loading}}" class="loading">加载中...</view>
+
+<view wx:elif="{{!orders.length}}" class="empty">
+  <view class="empty-icon">📭</view>
+  <view>暂无待接订单</view>
+</view>
+
+<view wx:else class="list">
+  <view class="order-card" wx:for="{{orders}}" wx:key="id">
+    <view class="order-top">
+      <text class="order-no">{{item.order_no}}</text>
+      <text class="item-count">共{{item.item_count}}件</text>
+    </view>
+
+    <view class="pick-list">
+      <view class="pick-title">📋 取货清单</view>
+      <view class="pick-item" wx:for="{{item.items}}" wx:for-item="prod" wx:key="id">
+        <text class="pick-name">{{prod.product_name}}</text>
+        <text class="pick-qty">x{{prod.quantity}}</text>
+      </view>
+    </view>
+
+    <view class="deliver-info">
+      <view class="deliver-title">📍 送到</view>
+      <view class="deliver-name">{{item.address_snapshot.name}} {{item.address_snapshot.phone}}</view>
+      <view class="deliver-addr">{{item.address_snapshot.detail}}</view>
+    </view>
+
+    <view class="order-bottom">
+      <view class="fee">配送收入 ¥6</view>
+      <button class="accept-btn" bindtap="accept" data-id="{{item.id}}">接单</button>
+    </view>
+  </view>
+</view>

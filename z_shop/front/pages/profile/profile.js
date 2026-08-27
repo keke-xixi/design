@@ -12,4 +12,16 @@ Page({
   goOrders() {
     wx.navigateTo({ url: '/pages/orders/orders' });
   },
+
+  goRider() {
+    wx.navigateTo({ url: '/pages/rider/index/index' });
+  },
+
+  goAddress() {
+    wx.navigateTo({ url: '/pages/address/list/list' });
+  },
+
+  goService() {
+    wx.navigateTo({ url: '/pages/service/service' });
+  },
 });

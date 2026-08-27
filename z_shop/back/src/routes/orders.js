@@ -1,6 +1,7 @@
 const express = require('express');
 const pool = require('../config/db');
 const { success, fail } = require('../utils/response');
+const { STATUS_MAP, safeJson } = require('../constants/orderStatus');
 
 const router = express.Router();
 
@@ -10,13 +11,15 @@ function genOrderNo() {
   return `ZS${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}${Math.random().toString().slice(2, 6)}`;
 }
 
-const STATUS_MAP = {
-  0: '待支付',
-  1: '已支付',
-  2: '配送中',
-  3: '已完成',
-  4: '已取消',
-};
+async function enrichOrder(order) {
+  const [items] = await pool.query('SELECT * FROM order_items WHERE order_id = ?', [order.id]);
+  return {
+    ...order,
+    status_text: STATUS_MAP[order.status] || '未知',
+    address_snapshot: safeJson(order.address_snapshot),
+    items,
+  };
+}
 
 // 创建订单
 router.post('/', async (req, res, next) => {
@@ -67,8 +70,8 @@ router.post('/', async (req, res, next) => {
     const orderNo = genOrderNo();
 
     const [orderResult] = await conn.query(
-      `INSERT INTO orders (order_no, user_id, total_amount, delivery_fee, pay_amount, status, address_snapshot, remark)
-       VALUES (?, ?, ?, ?, ?, 1, ?, ?)`,
+      `INSERT INTO orders (order_no, user_id, total_amount, delivery_fee, pay_amount, status, address_snapshot, remark, paid_at)
+       VALUES (?, ?, ?, ?, ?, 1, ?, ?, NOW())`,
       [orderNo, user_id, totalAmount, deliveryFee, payAmount, JSON.stringify(address), remark]
     );
 
@@ -87,7 +90,7 @@ router.post('/', async (req, res, next) => {
     }
 
     await conn.commit();
-    success(res, { order_id: orderId, order_no: orderNo, pay_amount: payAmount }, '下单成功');
+    success(res, { order_id: orderId, order_no: orderNo, pay_amount: payAmount }, '下单成功，等待骑手接单');
   } catch (err) {
     await conn.rollback();
     next(err);
@@ -114,13 +117,7 @@ router.get('/', async (req, res, next) => {
 
     const result = [];
     for (const order of orders) {
-      const [items] = await pool.query('SELECT * FROM order_items WHERE order_id = ?', [order.id]);
-      result.push({
-        ...order,
-        status_text: STATUS_MAP[order.status] || '未知',
-        address_snapshot: safeJson(order.address_snapshot),
-        items,
-      });
+      result.push(await enrichOrder(order));
     }
     success(res, result);
   } catch (err) {
@@ -133,27 +130,10 @@ router.get('/:id', async (req, res, next) => {
   try {
     const [orders] = await pool.query('SELECT * FROM orders WHERE id = ?', [req.params.id]);
     if (!orders.length) return fail(res, '订单不存在', 404, 404);
-
-    const order = orders[0];
-    const [items] = await pool.query('SELECT * FROM order_items WHERE order_id = ?', [order.id]);
-    success(res, {
-      ...order,
-      status_text: STATUS_MAP[order.status] || '未知',
-      address_snapshot: safeJson(order.address_snapshot),
-      items,
-    });
+    success(res, await enrichOrder(orders[0]));
   } catch (err) {
     next(err);
   }
 });
-
-function safeJson(val) {
-  if (typeof val === 'object') return val;
-  try {
-    return JSON.parse(val);
-  } catch {
-    return null;
-  }
-}
 
 module.exports = router;

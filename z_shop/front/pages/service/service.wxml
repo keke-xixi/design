@@ -1,0 +1,36 @@
+<view wx:if="{{loading}}" class="loading">加载中...</view>
+
+<view wx:elif="{{contact}}" class="page">
+  <view class="hero">
+    <view class="hero-icon">💬</view>
+    <view class="hero-title">我们随时为您服务</view>
+    <view class="hero-sub">{{contact.tip}}</view>
+  </view>
+
+  <view class="card" bindtap="callPhone">
+    <view class="card-icon">📞</view>
+    <view class="card-info">
+      <view class="card-title">电话客服</view>
+      <view class="card-value">{{contact.phone}}</view>
+      <view class="card-desc">服务时间 {{contact.service_hours}}</view>
+    </view>
+    <text class="arrow">拨打 ›</text>
+  </view>
+
+  <view class="card" bindtap="copyWechat">
+    <view class="card-icon">💚</view>
+    <view class="card-info">
+      <view class="card-title">微信客服</view>
+      <view class="card-value">{{contact.wechat_id}}</view>
+      <view class="card-desc">点击复制微信号，添加客服微信</view>
+    </view>
+    <text class="arrow">复制 ›</text>
+  </view>
+
+  <view class="faq">
+    <view class="faq-title">常见问题</view>
+    <view class="faq-item">· 下单后多久送达？一般 30-60 分钟</view>
+    <view class="faq-item">· 如何修改地址？我的 → 收货地址</view>
+    <view class="faq-item">· 如何退款？请联系客服处理</view>
+  </view>
+</view>

@@ -7,7 +7,14 @@
     "pages/cart/cart",
     "pages/checkout/checkout",
     "pages/orders/orders",
-    "pages/profile/profile"
+    "pages/profile/profile",
+    "pages/address/list/list",
+    "pages/address/edit/edit",
+    "pages/service/service",
+    "pages/rider/index/index",
+    "pages/rider/pool/pool",
+    "pages/rider/task/task",
+    "pages/rider/earnings/earnings"
   ],
   "window": {
     "navigationBarBackgroundColor": "#FF6B35",
