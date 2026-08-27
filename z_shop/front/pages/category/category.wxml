@@ -1,3 +1,8 @@
+<view class="search-bar" bindtap="goSearch">
+  <text class="search-icon">🔍</text>
+  <text class="search-placeholder">搜索菜品</text>
+</view>
+
 <view class="layout">
   <scroll-view scroll-y class="sidebar">
     <view
@@ -7,18 +12,25 @@
       bindtap="switchCategory"
       data-id="{{item.id}}"
     >
-      {{item.name}}
+      <text class="sidebar-icon">{{item.icon || '🍽'}}</text>
+      <text class="sidebar-name">{{item.name}}</text>
     </view>
   </scroll-view>
 
   <scroll-view scroll-y class="content">
     <view class="product-card" wx:for="{{products}}" wx:key="id" bindtap="goProduct" data-id="{{item.id}}">
-      <view class="product-img"><text class="emoji">🥘</text></view>
+      <image class="product-img" src="{{item.image}}" mode="aspectFill" lazy-load />
       <view class="product-info">
         <view class="name">{{item.name}}</view>
         <view class="sub">{{item.subtitle}}</view>
+        <view class="tags">
+          <text class="tag">{{item.subtitle}}</text>
+        </view>
         <view class="bottom">
-          <text class="price">¥{{item.price}}</text>
+          <view class="price-box">
+            <text class="price">¥{{item.price}}</text>
+            <text wx:if="{{item.original_price}}" class="original">¥{{item.original_price}}</text>
+          </view>
           <view class="add-btn" catchtap="addToCart" data-item="{{item}}">+</view>
         </view>
       </view>

@@ -1,0 +1,64 @@
+<view class="search-header">
+  <view class="search-box">
+    <text class="search-icon">🔍</text>
+    <input
+      class="search-input"
+      placeholder="搜索商品，如西红柿、牛腩"
+      value="{{keyword}}"
+      focus="{{true}}"
+      confirm-type="search"
+      bindinput="onInput"
+      bindconfirm="onSearch"
+    />
+    <text wx:if="{{keyword}}" class="clear-btn" bindtap="onClear">✕</text>
+  </view>
+  <text class="search-btn" bindtap="onSearch">搜索</text>
+</view>
+
+<view wx:if="{{!searched}}" class="hot-section">
+  <view class="hot-title">热门搜索</view>
+  <view class="hot-tags">
+    <text
+      class="hot-tag"
+      wx:for="{{hotKeywords}}"
+      wx:key="*this"
+      bindtap="tapHot"
+      data-word="{{item}}"
+    >{{item}}</text>
+  </view>
+</view>
+
+<view wx:if="{{loading}}" class="loading">搜索中...</view>
+
+<view wx:elif="{{searched && !products.length}}" class="empty">
+  <view class="empty-icon">🔎</view>
+  <view>没有找到「{{keyword}}」相关菜品</view>
+</view>
+
+<view wx:elif="{{searched}}" class="result-section">
+  <view class="result-count">共 {{products.length}} 个结果</view>
+  <view class="product-list">
+    <view class="product-card" wx:for="{{products}}" wx:key="id" bindtap="goProduct" data-id="{{item.id}}">
+      <image class="product-img" src="{{item.image}}" mode="aspectFill" lazy-load />
+      <view class="product-info">
+        <view class="product-name">{{item.name}}</view>
+        <view class="product-sub">{{item.subtitle}}</view>
+          <view class="product-meta">
+            <text class="meta-tag">{{item.subtitle}}</text>
+          </view>
+        <view class="product-bottom">
+          <view class="price-box">
+            <view class="price">
+              <text class="price-symbol">¥</text>
+              <text class="price-int">{{item.price}}</text>
+            </view>
+            <text wx:if="{{item.original_price}}" class="original">¥{{item.original_price}}</text>
+          </view>
+          <view class="add-btn" catchtap="addToCart" data-item="{{item}}">
+            <text class="add-icon">+</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

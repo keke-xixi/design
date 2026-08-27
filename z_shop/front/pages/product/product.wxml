@@ -1,16 +1,15 @@
 <view wx:if="{{product}}" class="page">
   <view class="hero">
-    <text class="hero-emoji">🥘</text>
-    <view class="hero-badge">净菜配齐 · 免洗免切</view>
+    <image class="hero-img" src="{{product.image}}" mode="aspectFill" />
+    <view class="hero-badge">新鲜直供 · 当日配送</view>
   </view>
 
   <view class="card info-card">
     <view class="name">{{product.name}}</view>
     <view class="sub">{{product.subtitle}}</view>
     <view class="tags">
-      <text class="tag">{{product.servings}}人份</text>
-      <text class="tag">约{{product.cook_time}}分钟</text>
       <text class="tag">已售{{product.sales}}</text>
+      <text class="tag">库存充足</text>
     </view>
     <view class="price-row">
       <text class="price">¥{{product.price}}</text>
@@ -19,13 +18,13 @@
   </view>
 
   <view class="card">
-    <view class="section-title">食材清单（已洗已切）</view>
-    <view class="ingredient" wx:for="{{product.ingredients}}" wx:key="*this">· {{item}}</view>
+    <view class="section-title">商品介绍</view>
+    <view class="desc">{{product.description}}</view>
   </view>
 
-  <view class="card">
-    <view class="section-title">烹饪步骤</view>
-    <view class="step" wx:for="{{product.steps}}" wx:key="*this">{{item}}</view>
+  <view wx:if="{{product.ingredients.length}}" class="card">
+    <view class="section-title">商品信息</view>
+    <view class="ingredient" wx:for="{{product.ingredients}}" wx:key="*this">· {{item}}</view>
   </view>
 
   <view class="footer">

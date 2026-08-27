@@ -1,5 +1,6 @@
 const { request } = require('../../utils/request');
 const cartUtil = require('../../utils/cart');
+const { resolveImage } = require('../../utils/image');
 
 Page({
   data: {
@@ -15,6 +16,16 @@ Page({
 
   onShow() {
     cartUtil.updateTabBarBadge(cartUtil.getCart());
+    const pendingId = wx.getStorageSync('pendingCategoryId');
+    if (pendingId) {
+      wx.removeStorageSync('pendingCategoryId');
+      this.setData({ activeId: Number(pendingId) });
+      if (this.data.categories.length) this.loadProducts(Number(pendingId));
+    }
+  },
+
+  goSearch() {
+    wx.navigateTo({ url: '/pages/search/search' });
   },
 
   async loadCategories() {
@@ -26,7 +37,7 @@ Page({
 
   async loadProducts(categoryId) {
     const products = await request({ url: '/api/products', data: { category_id: categoryId } });
-    this.setData({ products });
+    this.setData({ products: products.map((p) => ({ ...p, image: resolveImage(p.image) })) });
   },
 
   switchCategory(e) {

@@ -1,5 +1,6 @@
 const { request } = require('../../utils/request');
 const cartUtil = require('../../utils/cart');
+const { resolveImage } = require('../../utils/image');
 
 Page({
   data: {
@@ -20,25 +21,36 @@ Page({
         request({ url: '/api/categories' }),
         request({ url: '/api/products', data: { pageSize: 10 } }),
       ]);
-      this.setData({ categories, products, loading: false });
+      const enriched = products.map((p) => ({
+        ...p,
+        image: resolveImage(p.image),
+      }));
+      this.setData({ categories, products: enriched, loading: false });
     } catch {
       this.setData({ loading: false });
     }
   },
 
+  goSearch() {
+    wx.navigateTo({ url: '/pages/search/search' });
+  },
+
   goCategory(e) {
     const id = e.currentTarget.dataset.id;
-    wx.navigateTo({ url: `/pages/category/category?id=${id}` });
+    wx.switchTab({ url: '/pages/category/category' });
+    wx.setStorageSync('pendingCategoryId', id);
+  },
+
+  goAllCategory() {
+    wx.switchTab({ url: '/pages/category/category' });
   },
 
   goProduct(e) {
-    const id = e.currentTarget.dataset.id;
-    wx.navigateTo({ url: `/pages/product/product?id=${id}` });
+    wx.navigateTo({ url: `/pages/product/product?id=${e.currentTarget.dataset.id}` });
   },
 
   addToCart(e) {
-    const product = e.currentTarget.dataset.item;
-    cartUtil.addItem(product);
+    cartUtil.addItem(e.currentTarget.dataset.item);
     wx.showToast({ title: '已加入购物车', icon: 'success' });
   },
 });

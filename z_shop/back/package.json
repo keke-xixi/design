@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node src/app.js",
     "dev": "node src/app.js",
-    "db:init": "node scripts/init-db.js"
+    "db:init": "node scripts/init-db.js",
+    "db:images": "node scripts/update-images.js",
+    "db:grocery": "node scripts/update-grocery.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

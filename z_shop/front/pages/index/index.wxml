@@ -1,39 +1,55 @@
-<view class="banner">
-  <view class="banner-title">想吃什么菜</view>
-  <view class="banner-sub">净菜配齐 · 骑手配送 · 回家直接炒</view>
-</view>
+<view class="page">
+  <view class="search-bar" bindtap="goSearch">
+    <text class="search-icon">🔍</text>
+    <text class="search-placeholder">搜索商品，如西红柿、牛腩、鸡蛋</text>
+  </view>
 
-<view class="section">
-  <view class="section-title">热门分类</view>
-  <scroll-view scroll-x class="category-scroll">
-    <view class="category-item" wx:for="{{categories}}" wx:key="id" bindtap="goCategory" data-id="{{item.id}}">
-      <text class="category-icon">{{item.icon || '🍽'}}</text>
-      <text class="category-name">{{item.name}}</text>
+  <view class="section category-section">
+    <view class="section-header">
+      <text class="section-title">商品分类</text>
+      <text class="section-more" bindtap="goAllCategory">全部 ›</text>
     </view>
-  </scroll-view>
-</view>
-
-<view class="section">
-  <view class="section-title">今日推荐</view>
-  <view wx:if="{{loading}}" class="loading">加载中...</view>
-  <view wx:else class="product-list">
-    <view class="product-card" wx:for="{{products}}" wx:key="id" bindtap="goProduct" data-id="{{item.id}}">
-      <view class="product-img">
-        <text class="product-emoji">🥘</text>
-      </view>
-      <view class="product-info">
-        <view class="product-name">{{item.name}}</view>
-        <view class="product-sub">{{item.subtitle}}</view>
-        <view class="product-meta">
-          <text class="tag">{{item.servings}}人份</text>
-          <text class="tag">{{item.cook_time}}分钟</text>
+    <scroll-view scroll-x class="category-scroll">
+      <view class="category-item" wx:for="{{categories}}" wx:key="id" bindtap="goCategory" data-id="{{item.id}}">
+        <view class="category-icon-wrap cat-bg-{{index % 5}}">
+          <text class="category-icon">{{item.icon || '🛒'}}</text>
         </view>
-        <view class="product-bottom">
-          <view class="price">
-            <text class="price-symbol">¥</text>
-            <text class="price-int">{{item.price}}</text>
+        <text class="category-name">{{item.name}}</text>
+      </view>
+    </scroll-view>
+  </view>
+
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">今日鲜货</text>
+      <text class="section-tip">新鲜直达 · 骑手配送到家</text>
+    </view>
+
+    <view wx:if="{{loading}}" class="loading">加载中...</view>
+    <view wx:else class="product-list">
+      <view class="product-card" wx:for="{{products}}" wx:key="id" bindtap="goProduct" data-id="{{item.id}}">
+        <view class="product-img-wrap">
+          <image class="product-img" src="{{item.image}}" mode="aspectFill" lazy-load />
+          <view wx:if="{{item.sales > 300}}" class="hot-badge">热销</view>
+        </view>
+        <view class="product-info">
+          <view class="product-name">{{item.name}}</view>
+          <view class="product-sub">{{item.subtitle}}</view>
+          <view class="product-meta">
+            <text class="meta-tag sales">已售{{item.sales}}</text>
           </view>
-          <view class="add-btn" catchtap="addToCart" data-item="{{item}}">+</view>
+          <view class="product-bottom">
+            <view class="price-box">
+              <view class="price">
+                <text class="price-symbol">¥</text>
+                <text class="price-int">{{item.price}}</text>
+              </view>
+              <text wx:if="{{item.original_price}}" class="original">¥{{item.original_price}}</text>
+            </view>
+            <view class="add-btn" catchtap="addToCart" data-item="{{item}}">
+              <text class="add-icon">+</text>
+            </view>
+          </view>
         </view>
       </view>
     </view>

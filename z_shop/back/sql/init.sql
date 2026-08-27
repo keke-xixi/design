@@ -1,35 +1,35 @@
 -- z_shop 数据库初始化
--- 净菜配送：用户下单 → 骑手配送 → 回家直接炒
+-- 菜市场生鲜：用户下单 → 骑手配送到家
 
 CREATE TABLE IF NOT EXISTS categories (
   id INT PRIMARY KEY AUTO_INCREMENT,
   name VARCHAR(50) NOT NULL COMMENT '分类名',
-  icon VARCHAR(255) DEFAULT '' COMMENT '图标 URL',
+  icon VARCHAR(255) DEFAULT '' COMMENT '图标',
   sort_order INT DEFAULT 0,
   status TINYINT DEFAULT 1 COMMENT '1启用 0禁用',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='菜品分类';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商品分类';
 
 CREATE TABLE IF NOT EXISTS products (
   id INT PRIMARY KEY AUTO_INCREMENT,
   category_id INT NOT NULL,
-  name VARCHAR(100) NOT NULL COMMENT '菜名',
-  subtitle VARCHAR(200) DEFAULT '' COMMENT '副标题，如"免洗免切 30分钟上桌"',
+  name VARCHAR(100) NOT NULL COMMENT '商品名',
+  subtitle VARCHAR(200) DEFAULT '' COMMENT '规格副标题',
   description TEXT COMMENT '详情描述',
   image VARCHAR(255) DEFAULT '',
   price DECIMAL(10,2) NOT NULL COMMENT '售价',
   original_price DECIMAL(10,2) DEFAULT NULL COMMENT '原价',
-  servings INT DEFAULT 2 COMMENT '几人份',
-  cook_time INT DEFAULT 30 COMMENT '预计烹饪分钟',
-  ingredients TEXT COMMENT '食材清单 JSON',
-  steps TEXT COMMENT '烹饪步骤 JSON',
+  servings INT DEFAULT 1 COMMENT '预留字段',
+  cook_time INT DEFAULT 0 COMMENT '预留字段',
+  ingredients TEXT COMMENT '商品信息 JSON',
+  steps TEXT COMMENT '预留字段',
   stock INT DEFAULT 999 COMMENT '库存',
   sales INT DEFAULT 0 COMMENT '销量',
   status TINYINT DEFAULT 1,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_category (category_id),
   INDEX idx_status (status)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='净菜套餐';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='生鲜商品';
 
 CREATE TABLE IF NOT EXISTS users (
   id INT PRIMARY KEY AUTO_INCREMENT,
@@ -87,26 +87,17 @@ CREATE TABLE IF NOT EXISTS order_items (
 
 -- 初始分类
 INSERT INTO categories (name, icon, sort_order) VALUES
-  ('家常小炒', '🍳', 1),
-  ('硬菜大宴', '🥩', 2),
-  ('汤羹暖锅', '🍲', 3),
-  ('快手简餐', '🍜', 4)
+  ('新鲜蔬菜', '🥬', 1),
+  ('肉禽蛋品', '🥩', 2),
+  ('海鲜水产', '🦐', 3),
+  ('熟食卤味', '🦆', 4),
+  ('粮油调味', '🧂', 5)
 ON DUPLICATE KEY UPDATE name=VALUES(name);
 
--- 示例净菜套餐
-INSERT INTO products (category_id, name, subtitle, description, image, price, original_price, servings, cook_time, ingredients, steps, sales) VALUES
-  (1, '鱼香肉丝', '免洗免切 · 经典川味', '猪里脊、木耳、胡萝卜、青椒全部切好配齐，附鱼香汁包，回家热锅快炒即可。', '', 28.80, 35.00, 2, 15,
-   '["猪里脊 150g","木耳 30g","胡萝卜 50g","青椒 50g","鱼香汁 1包","葱姜蒜 各1份"]',
-   '["1. 热锅凉油，下肉丝滑散","2. 加入蔬菜快炒","3. 倒入鱼香汁翻匀即可"]', 128),
-  (1, '番茄炒蛋', '净菜配齐 · 10分钟上桌', '番茄切块、鸡蛋打好，调料配齐，新手也能做出餐厅味。', '', 18.80, 22.00, 2, 10,
-   '["番茄 2个","鸡蛋 3个","葱花 1份","盐糖 各1包"]',
-   '["1. 鸡蛋炒熟盛出","2. 番茄炒出汁","3. 倒入鸡蛋翻炒均匀"]', 256),
-  (2, '红烧排骨', '已焯水 · 附红烧料包', '排骨切好块并焯水，配红烧料包，回家慢炖40分钟软烂入味。', '', 45.80, 52.00, 3, 40,
-   '["排骨 500g","姜片 3片","红烧料包 1份","八角 2颗"]',
-   '["1. 排骨加料包和水","2. 大火烧开转小火","3. 炖至汤汁浓稠"]', 89),
-  (3, '番茄蛋花汤', '食材洗净 · 5分钟搞定', '番茄、鸡蛋、香菜配齐，清淡暖胃。', '', 15.80, NULL, 2, 8,
-   '["番茄 2个","鸡蛋 2个","香菜 1份","盐 1包"]',
-   '["1. 番茄煮软","2. 淋入蛋液","3. 撒香菜调味"]', 167),
-  (4, '扬州炒饭', '隔夜饭+配料全齐', '米饭、火腿丁、青豆、玉米、虾仁全部配好，一锅炒香。', '', 22.80, 26.00, 2, 12,
-   '["米饭 300g","火腿丁 50g","青豆玉米 80g","虾仁 50g","酱油 1包"]',
-   '["1. 热锅下料","2. 倒入米饭","3. 大火翻炒均匀"]', 203);
+-- 示例生鲜商品（图片需先运行 npm run db:grocery 下载）
+INSERT INTO products (category_id, name, subtitle, description, image, price, original_price, ingredients, sales) VALUES
+  (1, '西红柿', '约500g · 新鲜采摘', '自然成熟，沙瓤多汁。', '/assets/products/tomato.jpg', 4.80, 6.00, '["产地直供","当日分拣"]', 892),
+  (1, '大白菜', '约1kg · 当季鲜货', '叶嫩帮薄，清炒炖汤都合适。', '/assets/products/cabbage.jpg', 3.50, NULL, '["本地菜农","带泥保鲜"]', 654),
+  (2, '牛腩', '约500g · 原切新鲜', '肥瘦相间，适合炖汤红烧。', '/assets/products/beef.jpg', 48.80, 55.00, '["冷鲜配送","原切不拼接"]', 186),
+  (2, '鸡蛋', '10枚 · 农家散养', '蛋黄饱满，煎炒蒸煮皆宜。', '/assets/products/egg.jpg', 6.80, 8.00, '["当日到仓","无破损"]', 1203),
+  (4, '北京烤鸭', '半只 · 门店现烤', '皮脆肉嫩，附饼酱葱丝。', '/assets/products/duck.jpg', 68.80, 78.00, '["现烤现配","2小时内送达"]', 245);

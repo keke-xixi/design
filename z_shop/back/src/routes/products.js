@@ -33,8 +33,9 @@ router.get('/', async (req, res, next) => {
       params.push(category_id);
     }
     if (keyword) {
-      sql += ' AND name LIKE ?';
-      params.push(`%${keyword}%`);
+      sql += ' AND (name LIKE ? OR subtitle LIKE ? OR description LIKE ?)';
+      const kw = `%${keyword}%`;
+      params.push(kw, kw, kw);
     }
     sql += ' ORDER BY sales DESC LIMIT ? OFFSET ?';
     params.push(Number(pageSize), offset);

@@ -1,4 +1,5 @@
 const { request } = require('../../utils/request');
+const { resolveImage } = require('../../utils/image');
 const cartUtil = require('../../utils/cart');
 
 Page({
@@ -13,7 +14,7 @@ Page({
 
   async loadProduct(id) {
     const product = await request({ url: `/api/products/${id}` });
-    this.setData({ product });
+    this.setData({ product: { ...product, image: resolveImage(product.image) } });
   },
 
   changeQty(e) {

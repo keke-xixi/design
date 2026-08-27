@@ -1,6 +1,7 @@
 {
   "pages": [
     "pages/index/index",
+    "pages/search/search",
     "pages/category/category",
     "pages/product/product",
     "pages/cart/cart",
@@ -15,10 +16,10 @@
     "backgroundColor": "#F5F5F5"
   },
   "tabBar": {
-    "color": "#999999",
+    "color": "#AAAAAA",
     "selectedColor": "#FF6B35",
     "backgroundColor": "#ffffff",
-    "borderStyle": "black",
+    "borderStyle": "white",
     "list": [
       {
         "pagePath": "pages/index/index",

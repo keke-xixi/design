@@ -2,7 +2,7 @@
   <view class="avatar">👤</view>
   <view class="info">
     <view class="name">{{user.nickname || '微信用户'}}</view>
-    <view class="desc">净菜到家 · 回家直接炒</view>
+    <view class="desc">新鲜买菜 · 配送到家</view>
   </view>
 </view>
 
