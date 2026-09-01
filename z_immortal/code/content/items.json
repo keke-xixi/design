@@ -1,0 +1,25 @@
+{
+  "items": [
+    {
+      "id": "qi_pill_low",
+      "name": "聚气丹",
+      "kind": "pill",
+      "qi_restore": 30,
+      "description": "凡品丹药，服后略增灵气。"
+    },
+    {
+      "id": "spirit_grass",
+      "name": "灵草",
+      "kind": "material",
+      "qi_restore": 0,
+      "description": "路边常见的带灵气的草药，可炼丹。"
+    },
+    {
+      "id": "wooden_sword",
+      "name": "木剑",
+      "kind": "weapon",
+      "qi_restore": 0,
+      "description": "凡人防身兵器，聊胜于无。"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "enemies": [
+    {
+      "id": "wild_wolf",
+      "name": "野狼",
+      "hp": 30,
+      "attack": 6,
+      "defense": 1,
+      "realm_id": "mortal",
+      "loot": [
+        { "item_id": "spirit_grass", "chance": 0.5, "amount": 1 }
+      ]
+    },
+    {
+      "id": "spirit_hare",
+      "name": "灵兔",
+      "hp": 12,
+      "attack": 2,
+      "defense": 0,
+      "realm_id": "mortal",
+      "loot": [
+        { "item_id": "qi_pill_low", "chance": 0.15, "amount": 1 }
+      ]
+    }
+  ]
+}

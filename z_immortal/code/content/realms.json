@@ -1,0 +1,39 @@
+{
+  "realms": [
+    {
+      "id": "mortal",
+      "name": "凡人",
+      "order": 0,
+      "breakthrough_qi": 0,
+      "description": "尚未踏入修仙之途。"
+    },
+    {
+      "id": "qi_refining_1",
+      "name": "炼气一层",
+      "order": 1,
+      "breakthrough_qi": 100,
+      "description": "感应天地灵气，踏入修仙门槛。"
+    },
+    {
+      "id": "qi_refining_2",
+      "name": "炼气二层",
+      "order": 2,
+      "breakthrough_qi": 180,
+      "description": "灵气入体，经脉初通。"
+    },
+    {
+      "id": "qi_refining_3",
+      "name": "炼气三层",
+      "order": 3,
+      "breakthrough_qi": 280,
+      "description": "吐纳有成，可驱使些许灵力。"
+    },
+    {
+      "id": "foundation",
+      "name": "筑基",
+      "order": 4,
+      "breakthrough_qi": 600,
+      "description": "凝气筑基，寿元大增，正式踏入修士行列。"
+    }
+  ]
+}

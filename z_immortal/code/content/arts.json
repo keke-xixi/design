@@ -1,0 +1,18 @@
+{
+  "arts": [
+    {
+      "id": "basic_breathing",
+      "name": "吐纳术",
+      "realm_req": "mortal",
+      "qi_per_tick": 8,
+      "description": "最基础的引气法门，缓缓吸纳天地灵气。"
+    },
+    {
+      "id": "qi_gathering",
+      "name": "聚气诀",
+      "realm_req": "qi_refining_1",
+      "qi_per_tick": 16,
+      "description": "炼气期功法，引气效率更高。"
+    }
+  ]
+}
