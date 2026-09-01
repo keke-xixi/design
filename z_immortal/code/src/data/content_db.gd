@@ -2,10 +2,13 @@ extends Node
 
 ## Loads JSON tables from res://content. Callers use typed lookups, not raw dicts.
 
+var balance: Dictionary = {}
 var realms := RealmTable.new()
 var arts: Dictionary = {}
 var items: Dictionary = {}
 var enemies: Dictionary = {}
+var gacha: Dictionary = {}
+var equipment: Dictionary = {}
 
 
 func _ready() -> void:
@@ -13,6 +16,7 @@ func _ready() -> void:
 
 
 func reload() -> void:
+	balance = _load_json("res://content/balance.json")
 	var realm_data: Dictionary = _load_json("res://content/realms.json")
 	var realm_rows: Variant = realm_data.get("realms", [])
 	if typeof(realm_rows) == TYPE_ARRAY:
@@ -22,8 +26,20 @@ func reload() -> void:
 	arts = _index_rows("res://content/arts.json", "arts", Callable(ArtDef, "from_dict"))
 	items = _index_rows("res://content/items.json", "items", Callable(ItemDef, "from_dict"))
 	enemies = _index_rows("res://content/enemies.json", "enemies", Callable(EnemyDef, "from_dict"))
-	if realms.get_realm("mortal") == null:
-		push_error("ContentDB: missing required realm 'mortal'")
+	gacha = _load_json("res://content/gacha.json")
+	equipment = _load_json("res://content/equipment.json")
+	var start_id := str(section("start").get("attack_realm_id", "ninglu_chu"))
+	if realms.get_realm(start_id) == null:
+		push_error("ContentDB: missing start realm '%s'" % start_id)
+
+
+func section(name: String) -> Dictionary:
+	var raw: Variant = balance.get(name, {})
+	return raw if typeof(raw) == TYPE_DICTIONARY else {}
+
+
+func breakthrough_costs() -> Dictionary:
+	return section("breakthrough_attack")
 
 
 func get_art(id: String) -> ArtDef:

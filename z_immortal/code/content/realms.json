@@ -1,39 +1,37 @@
 {
+  "_doc": "攻境结构，来自修炼表。band=mortal 通玄之下，mystic 通玄之上。子阶：初/成/极/圆满（表写作「初、成、极）圆」，若圆不是第四阶，删掉 *_yuan 行并改 order）。突破所需攻在 balance.json 的 breakthrough_attack，不在本文件。",
   "realms": [
-    {
-      "id": "mortal",
-      "name": "凡人",
-      "order": 0,
-      "breakthrough_qi": 0,
-      "description": "尚未踏入修仙之途。"
-    },
-    {
-      "id": "qi_refining_1",
-      "name": "炼气一层",
-      "order": 1,
-      "breakthrough_qi": 100,
-      "description": "感应天地灵气，踏入修仙门槛。"
-    },
-    {
-      "id": "qi_refining_2",
-      "name": "炼气二层",
-      "order": 2,
-      "breakthrough_qi": 180,
-      "description": "灵气入体，经脉初通。"
-    },
-    {
-      "id": "qi_refining_3",
-      "name": "炼气三层",
-      "order": 3,
-      "breakthrough_qi": 280,
-      "description": "吐纳有成，可驱使些许灵力。"
-    },
-    {
-      "id": "foundation",
-      "name": "筑基",
-      "order": 4,
-      "breakthrough_qi": 600,
-      "description": "凝气筑基，寿元大增，正式踏入修士行列。"
-    }
+    { "id": "ninglu_chu", "name": "凝露境·初", "band": "mortal", "group": "ninglu", "group_name": "凝露境", "stage": "chu", "stage_name": "初", "order": 1, "is_hidden": false },
+    { "id": "ninglu_cheng", "name": "凝露境·成", "band": "mortal", "group": "ninglu", "group_name": "凝露境", "stage": "cheng", "stage_name": "成", "order": 2, "is_hidden": false },
+    { "id": "ninglu_ji", "name": "凝露境·极", "band": "mortal", "group": "ninglu", "group_name": "凝露境", "stage": "ji", "stage_name": "极", "order": 3, "is_hidden": false },
+    { "id": "ninglu_yuan", "name": "凝露境·圆满", "band": "mortal", "group": "ninglu", "group_name": "凝露境", "stage": "yuan", "stage_name": "圆满", "order": 4, "is_hidden": false },
+    { "id": "yinchao_chu", "name": "引潮境·初", "band": "mortal", "group": "yinchao", "group_name": "引潮境", "stage": "chu", "stage_name": "初", "order": 5, "is_hidden": false },
+    { "id": "yinchao_cheng", "name": "引潮境·成", "band": "mortal", "group": "yinchao", "group_name": "引潮境", "stage": "cheng", "stage_name": "成", "order": 6, "is_hidden": false },
+    { "id": "yinchao_ji", "name": "引潮境·极", "band": "mortal", "group": "yinchao", "group_name": "引潮境", "stage": "ji", "stage_name": "极", "order": 7, "is_hidden": false },
+    { "id": "yinchao_yuan", "name": "引潮境·圆满", "band": "mortal", "group": "yinchao", "group_name": "引潮境", "stage": "yuan", "stage_name": "圆满", "order": 8, "is_hidden": false },
+    { "id": "zhuyuan_chu", "name": "铸渊境·初", "band": "mortal", "group": "zhuyuan", "group_name": "铸渊境", "stage": "chu", "stage_name": "初", "order": 9, "is_hidden": false },
+    { "id": "zhuyuan_cheng", "name": "铸渊境·成", "band": "mortal", "group": "zhuyuan", "group_name": "铸渊境", "stage": "cheng", "stage_name": "成", "order": 10, "is_hidden": false },
+    { "id": "zhuyuan_ji", "name": "铸渊境·极", "band": "mortal", "group": "zhuyuan", "group_name": "铸渊境", "stage": "ji", "stage_name": "极", "order": 11, "is_hidden": false },
+    { "id": "zhuyuan_yuan", "name": "铸渊境·圆满", "band": "mortal", "group": "zhuyuan", "group_name": "铸渊境", "stage": "yuan", "stage_name": "圆满", "order": 12, "is_hidden": false },
+    { "id": "jie_1", "name": "劫境·一阶", "band": "mortal", "group": "jie", "group_name": "劫境", "stage": "1", "stage_name": "一阶", "order": 13, "is_hidden": false },
+    { "id": "jie_2", "name": "劫境·二阶", "band": "mortal", "group": "jie", "group_name": "劫境", "stage": "2", "stage_name": "二阶", "order": 14, "is_hidden": false },
+    { "id": "jie_3", "name": "劫境·三阶", "band": "mortal", "group": "jie", "group_name": "劫境", "stage": "3", "stage_name": "三阶", "order": 15, "is_hidden": false },
+    { "id": "jie_4", "name": "劫境·四阶", "band": "mortal", "group": "jie", "group_name": "劫境", "stage": "4", "stage_name": "四阶", "order": 16, "is_hidden": false },
+    { "id": "jie_5", "name": "劫境·五阶", "band": "mortal", "group": "jie", "group_name": "劫境", "stage": "5", "stage_name": "五阶", "order": 17, "is_hidden": false },
+    { "id": "jie_6", "name": "劫境·六阶", "band": "mortal", "group": "jie", "group_name": "劫境", "stage": "6", "stage_name": "六阶", "order": 18, "is_hidden": false },
+    { "id": "jie_7", "name": "劫境·七阶", "band": "mortal", "group": "jie", "group_name": "劫境", "stage": "7", "stage_name": "七阶", "order": 19, "is_hidden": false },
+    { "id": "jie_8", "name": "劫境·八阶", "band": "mortal", "group": "jie", "group_name": "劫境", "stage": "8", "stage_name": "八阶", "order": 20, "is_hidden": false },
+    { "id": "jie_9", "name": "劫境·九阶", "band": "mortal", "group": "jie", "group_name": "劫境", "stage": "9", "stage_name": "九阶", "order": 21, "is_hidden": false },
+    { "id": "jie_absolute", "name": "劫境·九阶绝劫", "band": "mortal", "group": "jie", "group_name": "劫境", "stage": "absolute", "stage_name": "九阶绝劫", "order": 22, "is_hidden": false },
+    { "id": "jie_10_hidden", "name": "劫境·十阶", "band": "mortal", "group": "jie", "group_name": "劫境", "stage": "10", "stage_name": "十阶", "order": 23, "is_hidden": true },
+    { "id": "chucheng", "name": "初澄", "band": "mystic", "group": "mystic_1", "group_name": "初澄寒照君", "stage": "", "stage_name": "", "order": 24, "is_hidden": false },
+    { "id": "hanzhao", "name": "寒照", "band": "mystic", "group": "mystic_1", "group_name": "初澄寒照君", "stage": "", "stage_name": "", "order": 25, "is_hidden": false },
+    { "id": "jun", "name": "君", "band": "mystic", "group": "mystic_1", "group_name": "初澄寒照君", "stage": "", "stage_name": "", "order": 26, "is_hidden": false },
+    { "id": "lingxiao", "name": "凌霄", "band": "mystic", "group": "mystic_2", "group_name": "凌霄仙", "stage": "", "stage_name": "", "order": 27, "is_hidden": false },
+    { "id": "xian", "name": "仙", "band": "mystic", "group": "mystic_2", "group_name": "凌霄仙", "stage": "", "stage_name": "", "order": 28, "is_hidden": false },
+    { "id": "zangtian", "name": "葬天", "band": "mystic", "group": "mystic_3", "group_name": "葬天天", "stage": "", "stage_name": "", "order": 29, "is_hidden": false },
+    { "id": "tian", "name": "天", "band": "mystic", "group": "mystic_3", "group_name": "葬天天", "stage": "", "stage_name": "", "order": 30, "is_hidden": false },
+    { "id": "mieyuan", "name": "灭源", "band": "mystic", "group": "mystic_4", "group_name": "灭源源", "stage": "", "stage_name": "", "order": 31, "is_hidden": false },
+    { "id": "yuan", "name": "源", "band": "mystic", "group": "mystic_4", "group_name": "灭源源", "stage": "", "stage_name": "", "order": 32, "is_hidden": false }
   ]
 }

@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+<Styles>
+<Style ss:ID="Default" ss:Name="Normal"><Alignment ss:Vertical="Top" ss:WrapText="1"/></Style>
+<Style ss:ID="Header"><Font ss:Bold="1"/><Interior ss:Color="#F3F4F6" ss:Pattern="Solid"/><Alignment ss:Vertical="Center" ss:WrapText="1"/><Borders>
+<Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#999999"/>
+<Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#999999"/>
+<Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#999999"/>
+<Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#999999"/>
+</Borders></Style>
+<Style ss:ID="Cell"><Alignment ss:Vertical="Top" ss:WrapText="1"/><Borders>
+<Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#999999"/>
+<Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#999999"/>
+<Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#999999"/>
+<Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#999999"/>
+</Borders></Style>
+<Style ss:ID="Center"><Alignment ss:Vertical="Top" ss:Horizontal="Center" ss:WrapText="1"/><Borders>
+<Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#999999"/>
+<Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#999999"/>
+<Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#999999"/>
+<Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#999999"/>
+</Borders></Style>
+</Styles>
+<Worksheet ss:Name="抽卡"><Table>
+<Column ss:Width="36"/>
+<Column ss:Width="80"/>
+<Column ss:Width="140"/>
+<Column ss:Width="180"/>
+<Column ss:Width="140"/>
+<Row><Cell ss:StyleID="Header"><Data ss:Type="String">序号</Data></Cell><Cell ss:StyleID="Header"><Data ss:Type="String">模块</Data></Cell><Cell ss:StyleID="Header"><Data ss:Type="String">内容</Data></Cell><Cell ss:StyleID="Header"><Data ss:Type="String">详细</Data></Cell><Cell ss:StyleID="Header"><Data ss:Type="String">备注</Data></Cell></Row><Row><Cell ss:MergeDown="2" ss:StyleID="Center"><Data ss:Type="String">1</Data></Cell><Cell ss:MergeDown="2" ss:StyleID="Cell"><Data ss:Type="String">白色</Data></Cell><Cell ss:MergeDown="1" ss:StyleID="Cell"><Data ss:Type="String">丹药（攻/智/防）</Data></Cell><Cell ss:StyleID="Cell"><Data ss:Type="String">一阶丹药（99%）</Data></Cell><Cell ss:MergeDown="1" ss:StyleID="Cell"><Data ss:Type="String"></Data></Cell></Row><Row><Cell ss:Index="4" ss:StyleID="Cell"><Data ss:Type="String">二阶丹药（1%）</Data></Cell></Row><Row><Cell ss:Index="3" ss:StyleID="Cell"><Data ss:Type="String">武器（攻/防）</Data></Cell><Cell ss:StyleID="Cell"><Data ss:Type="String"></Data></Cell><Cell ss:StyleID="Cell"><Data ss:Type="String"></Data></Cell></Row><Row><Cell ss:MergeDown="1" ss:StyleID="Center"><Data ss:Type="String">2</Data></Cell><Cell ss:MergeDown="1" ss:StyleID="Cell"><Data ss:Type="String">蓝色</Data></Cell><Cell ss:StyleID="Cell"><Data ss:Type="String">丹药（攻/智/防）</Data></Cell><Cell ss:StyleID="Cell"><Data ss:Type="String"></Data></Cell><Cell ss:StyleID="Cell"><Data ss:Type="String"></Data></Cell></Row><Row><Cell ss:Index="3" ss:StyleID="Cell"><Data ss:Type="String">武器（攻/防）</Data></Cell><Cell ss:StyleID="Cell"><Data ss:Type="String"></Data></Cell><Cell ss:StyleID="Cell"><Data ss:Type="String"></Data></Cell></Row><Row><Cell ss:MergeDown="1" ss:StyleID="Center"><Data ss:Type="String">3</Data></Cell><Cell ss:MergeDown="1" ss:StyleID="Cell"><Data ss:Type="String">紫色</Data></Cell><Cell ss:StyleID="Cell"><Data ss:Type="String">丹药（攻/智/防）&#10;</Data></Cell><Cell ss:StyleID="Cell"><Data ss:Type="String"></Data></Cell><Cell ss:StyleID="Cell"><Data ss:Type="String"></Data></Cell></Row><Row><Cell ss:Index="3" ss:StyleID="Cell"><Data ss:Type="String">武器（攻/防）</Data></Cell><Cell ss:StyleID="Cell"><Data ss:Type="String"></Data></Cell><Cell ss:StyleID="Cell"><Data ss:Type="String"></Data></Cell></Row><Row><Cell ss:MergeDown="1" ss:StyleID="Center"><Data ss:Type="String">4</Data></Cell><Cell ss:MergeDown="1" ss:StyleID="Cell"><Data ss:Type="String">金色</Data></Cell><Cell ss:StyleID="Cell"><Data ss:Type="String">丹药（攻/智/防）</Data></Cell><Cell ss:StyleID="Cell"><Data ss:Type="String"></Data></Cell><Cell ss:StyleID="Cell"><Data ss:Type="String"></Data></Cell></Row><Row><Cell ss:Index="3" ss:StyleID="Cell"><Data ss:Type="String">武器（攻/防）</Data></Cell><Cell ss:StyleID="Cell"><Data ss:Type="String"></Data></Cell><Cell ss:StyleID="Cell"><Data ss:Type="String"></Data></Cell></Row><Row><Cell ss:MergeDown="1" ss:StyleID="Center"><Data ss:Type="String">5</Data></Cell><Cell ss:MergeDown="1" ss:StyleID="Cell"><Data ss:Type="String">红色</Data></Cell><Cell ss:StyleID="Cell"><Data ss:Type="String">丹药（攻/智/防）&#10;</Data></Cell><Cell ss:StyleID="Cell"><Data ss:Type="String"></Data></Cell><Cell ss:StyleID="Cell"><Data ss:Type="String"></Data></Cell></Row><Row><Cell ss:Index="3" ss:StyleID="Cell"><Data ss:Type="String">武器（攻/防）</Data></Cell><Cell ss:StyleID="Cell"><Data ss:Type="String"></Data></Cell><Cell ss:StyleID="Cell"><Data ss:Type="String"></Data></Cell></Row>
+</Table></Worksheet>
+</Workbook>

@@ -1,85 +1,66 @@
 # 长生
 
-2D 修仙 RPG 脚手架，目标平台 Steam。引擎为 **Godot 4.7**，玩法数值全部走 JSON 配置表。
+2D 修仙 RPG，目标平台 Steam。引擎 **Godot 4.7**。玩法按 `design/sheets/` 里的 Excel 大纲来；**所有可调数字只放 `content/balance.json`**。
 
 ## 运行
 
-1. 安装 [Godot 4.7.x 稳定版](https://godotengine.org/download/windows/)（标准版即可，不需要 .NET / C#）。
-2. 用 Godot 打开本目录（含 `project.godot` 的文件夹）。
-3. 按 F5 运行。主场景是 `scenes/world/main.tscn`。
-
-若本机已把编辑器解压到 `../tools/godot/`，也可以在该目录找到 `Godot_v4.7.2-stable_win64.exe`，用「导入」选择本项目。
+1. 打开 `D:\design\design\z_immortal\tools\godot\Godot_v4.7.2-stable_win64.exe`
+2. 导入并编辑文件夹 `D:\design\design\z_immortal\code`（里面有 `project.godot`）
+3. 按 **F5** 运行，**F8** 停
 
 ### 操作
 
 - `WASD` / 方向键：移动
-- `J` 或空格：吐纳（按当前功法增加灵气）
-- `K`：尝试突破到下一境界（灵气不足时不会升境）
+- `J` 或空格：吐纳（加攻，数量在 `balance.json` 的 `cultivate_gain`）
+- `K`：突破下一攻境（所需攻在 `breakthrough_attack`）
+
+## 你改表、改数值的方式
+
+继续用 Excel 五列写：**序号 / 模块 / 内容 / 详细 / 备注**。把文件放到 `design/sheets/`（现在是 `cultivation.xls`、`equipment.xls`、`gacha.xls`）。
+
+然后在本目录执行：
+
+```
+python tools/import_sheets.py
+```
+
+这会生成 `content/design_notes.json`（设计大纲快照，游戏不直接当数值用）。
+
+**改数字只改** [`content/balance.json`](content/balance.json)：
+
+- 攻上限、是否通玄重置、每次吐纳加多少
+- 智 1～100、防 1～100 及凡/灵/绝/玄区间
+- 每个攻境的突破需求 `breakthrough_attack`
+- 白色丹药 99% / 1% 等抽卡权重
+
+文件里的 `_doc` 就是注释，改数字时不要删。改完回 Godot 按 F5 即可，不用改脚本。
+
+境界名字、抽卡档位、装备来源分别在 `content/realms.json`、`gacha.json`、`equipment.json`。
+
+## 为什么现在不用那台 MySQL
+
+这是 Steam 单机（以后再考虑交易市场）。攻/智/防、突破、抽卡概率必须打进游戏包，才能离线玩、过 Steam Deck 审核，也不会因为服务器挂了整局不能开。
+
+那台库以后如果要做这些再接：
+
+- 账号登录
+- 交易市场
+- 全服排行
+
+现在不要把数据库密码写进游戏或 Git。我在仓库里只放了 `.env.example` 模板。你贴出来的密码建议在云服务器上**改掉**，当作已经泄露。
+
+本地若想练手 SQL，用 **SQLite** 一个文件即可，不必连远程。Navicat 连远程时：主机 `127.0.0.1` 先别填成生产库做数值调试。
 
 ## 目录
 
-| 路径 | 职责 |
-| --- | --- |
-| `content/` | 境界、功法、物品、敌人配置表。加内容优先改这里 |
-| `src/core/` | 纯规则：突破、吐纳、背包、战斗结算。不 `extends Node`，不引用场景 |
-| `src/data/` | 读表、运行时状态 |
-| `src/world/` | 地图、角色、NPC |
-| `src/ui/` | HUD / 之后的背包、功法界面 |
-| `src/steam/` | Steamworks 封装，开发期是 mock |
-| `scenes/` | 场景与预制体 |
-| `assets/` | 贴图、音频、字体 |
-
-约定：新系统（炼丹、天劫、宗门）只加「一张表 + 一个 core 模块 + 必要时一个 UI 场景」。用 `EventBus` 通知表现层，不要让 UI 直接改玩家数值。
-
-## 配置表格式
-
-根对象里放一个数组。`id` 必须唯一。
-
-`content/realms.json`：
-
-```json
-{
-  "realms": [
-    {
-      "id": "qi_refining_1",
-      "name": "炼气一层",
-      "order": 1,
-      "breakthrough_qi": 100,
-      "description": "感应天地灵气，踏入修仙门槛。"
-    }
-  ]
-}
-```
-
-`content/arts.json` 字段：`id`、`name`、`realm_req`、`qi_per_tick`、`description`。
-
-`content/items.json` 字段：`id`、`name`、`kind`（`pill` / `material` / `weapon`）、`qi_restore`、`description`。
-
-`content/enemies.json` 字段：`id`、`name`、`hp`、`attack`、`defense`、`realm_id`、`loot`。
-
-改表后在编辑器里重新运行即可，不必改脚本。
+- `content/balance.json` — 唯一数值总表
+- `content/*.json` — 境界 / 抽卡 / 装备 / 物品结构
+- `design/sheets/` — 你的 Excel 原稿
+- `tools/import_sheets.py` — Excel → 大纲 JSON
+- `src/core/` — 规则（不挂场景）
+- `src/data/` — 读表与运行时状态
+- `src/steam/` — Steam 接口空壳
 
 ## Steam
 
-现在不要接 Steamworks。等垂直切片（走图、战斗、突破、存档）能玩之后，再用 [GodotSteam](https://godotsteam.com/) 替换 `src/steam/steam_service.gd` 的实现。成就、云存档只通过这一层调用。
-
-## 下一步
-
-- 把程序生成的色块地图换成正式 TileSet
-- 战斗与掉落接到 `CombatResolver` / `enemies.json`
-- 本地 JSON 存档（`user://`）
-- 对话与任务表
-
-
-## 启动
-打开项目
-
-运行 D:\design\design\z_immortal\tools\godot\Godot_v4.7.2-stable_win64.exe （你的 godot 安装目录 ）
-如果弹出项目管理器，点 导入，选中文件夹 D:\design\design\z_immortal\code（里面有 project.godot）
-再点 编辑
-也可以把 code 文件夹直接拖到 Godot 图标上。
-
-开始玩
-
-进编辑器后按 F5（或点右上角播放按钮）
-关掉游戏窗口回到编辑器：按 F8
+垂直切片能玩之后，再用 [GodotSteam](https://godotsteam.com/) 替换 `src/steam/steam_service.gd`。

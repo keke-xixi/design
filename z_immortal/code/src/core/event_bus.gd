@@ -4,5 +4,5 @@ extends Node
 ## Keep payloads as primitive values or resource ids, not scene nodes.
 
 signal cultivation_broke_through(new_realm_id: String)
-signal qi_gained(amount: int, total: int)
+signal attack_gained(amount: int, total: int)
 signal item_gained(item_id: String, amount: int)

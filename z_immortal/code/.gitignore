@@ -13,3 +13,5 @@ export.cfg
 Thumbs.db
 *~
 *.tmp
+.env
+.env.local

@@ -1,0 +1,83 @@
+{
+  "_doc": "平衡总表。所有可调数字只放这一份。JSON 没有真注释，用 _doc 当说明：改数字时不要删 _doc，也不要改 id。改完保存，Godot 里 F5 即生效。表结构（境界名、抽卡档、装备来源）在同目录其它 json，以及 design/sheets/ 的 Excel。",
+
+  "attack": {
+    "_doc": "攻。表：通玄之下～凡、通玄之上～玄，两段都是 1～1亿。",
+    "min": 1,
+    "mortal_max": 100000000,
+    "mystic_max": 100000000,
+    "mystic_resets_attack": true,
+    "mystic_resets_attack_doc": "进入通玄之上时，攻是否从 mystic_start 重新计。表里两段都写 1～1亿，先按重置。若应连续累加，改成 false。",
+    "mystic_start": 1,
+    "cultivate_gain": 20,
+    "cultivate_gain_doc": "按 J 吐纳一次加多少攻。只是开发期手感，正式功法出来后再改。"
+  },
+
+  "wisdom": {
+    "_doc": "智。表：1～100 阶。暂时没有子境名字。",
+    "min_rank": 1,
+    "max_rank": 100
+  },
+
+  "defense": {
+    "_doc": "防。表：1～100 点，再按区间分凡/灵/绝/玄。",
+    "min": 1,
+    "max": 100,
+    "bands": [
+      { "id": "mortal", "name": "凡", "min": 1, "max": 10 },
+      { "id": "spirit", "name": "灵", "min": 11, "max": 40 },
+      { "id": "extreme", "name": "绝", "min": 41, "max": 70 },
+      { "id": "mystic", "name": "玄", "min": 71, "max": 100 }
+    ]
+  },
+
+  "start": {
+    "_doc": "新号初始值。",
+    "attack": 1,
+    "wisdom_rank": 1,
+    "defense": 1,
+    "attack_realm_id": "ninglu_chu"
+  },
+
+  "breakthrough_attack": {
+    "_doc": "进入该攻境所需的攻。0 表示起点。全部是占位，请按手感改。通玄之上的数字是重置后的攻（若 mystic_resets_attack 为 true）。",
+    "ninglu_chu": 0,
+    "ninglu_cheng": 80,
+    "ninglu_ji": 200,
+    "ninglu_yuan": 400,
+    "yinchao_chu": 700,
+    "yinchao_cheng": 1100,
+    "yinchao_ji": 1600,
+    "yinchao_yuan": 2200,
+    "zhuyuan_chu": 3000,
+    "zhuyuan_cheng": 4000,
+    "zhuyuan_ji": 5200,
+    "zhuyuan_yuan": 6600,
+    "jie_1": 8200,
+    "jie_2": 10000,
+    "jie_3": 12200,
+    "jie_4": 14800,
+    "jie_5": 18000,
+    "jie_6": 22000,
+    "jie_7": 27000,
+    "jie_8": 33000,
+    "jie_9": 40000,
+    "jie_absolute": 50000,
+    "jie_10_hidden": 80000,
+    "chucheng": 0,
+    "hanzhao": 100,
+    "jun": 300,
+    "lingxiao": 800,
+    "xian": 2000,
+    "zangtian": 5000,
+    "tian": 12000,
+    "mieyuan": 30000,
+    "yuan": 80000
+  },
+
+  "gacha": {
+    "_doc": "抽卡权重。没填的档位先空着。白色丹药按表：一阶 99%、二阶 1%。",
+    "white_pill_tier1_weight": 99,
+    "white_pill_tier2_weight": 1
+  }
+}

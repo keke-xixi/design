@@ -15,7 +15,7 @@ func _ready() -> void:
 	_tiles.tile_set = _build_tileset()
 	_paint_map()
 	_player.position = Vector2(MAP_SIZE.x * TILE * 0.5, MAP_SIZE.y * TILE * 0.5)
-	var realm := ContentDB.realms.get_realm(GameState.cultivation.realm_id)
+	var realm := ContentDB.realms.get_realm(GameState.cultivation.attack_realm_id)
 	if realm:
 		print("Current realm: %s (%s)" % [realm.display_name, realm.id])
 
