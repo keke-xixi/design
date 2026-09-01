@@ -1,26 +1,17 @@
 {
+  "_doc": "小怪模板。sprite 指向 assets/characters/ 下的 png；color 是色调。数值在 balance.json 也可全局调。",
   "enemies": [
-    {
-      "id": "wild_wolf",
-      "name": "野狼",
-      "hp": 30,
-      "attack": 6,
-      "defense": 1,
-      "realm_id": "mortal",
-      "loot": [
-        { "item_id": "spirit_grass", "chance": 0.5, "amount": 1 }
-      ]
-    },
-    {
-      "id": "spirit_hare",
-      "name": "灵兔",
-      "hp": 12,
-      "attack": 2,
-      "defense": 0,
-      "realm_id": "mortal",
-      "loot": [
-        { "item_id": "qi_pill_low", "chance": 0.15, "amount": 1 }
-      ]
-    }
+    { "id": "outer_disciple", "name": "外门弟子", "hp": 14, "attack": 4, "defense": 0, "speed": 42, "size": 6, "sprite": "mob_disciple.png", "sprite_scale": 0.05, "color": "#ffffff", "xp_attack": 1, "loot": [] },
+    { "id": "spirit_hare", "name": "灵兔", "hp": 8, "attack": 2, "defense": 0, "speed": 70, "size": 5, "sprite": "mob_hare.png", "sprite_scale": 0.045, "color": "#ffffff", "xp_attack": 1, "loot": [] },
+    { "id": "patrol_guard", "name": "巡城卫", "hp": 22, "attack": 7, "defense": 1, "speed": 46, "size": 7, "sprite": "mob_disciple.png", "sprite_scale": 0.052, "color": "#b8c8e8", "xp_attack": 2, "loot": [] },
+    { "id": "bandit", "name": "刀客", "hp": 16, "attack": 8, "defense": 0, "speed": 58, "size": 6, "sprite": "mob_disciple.png", "sprite_scale": 0.05, "color": "#e8b0a0", "xp_attack": 2, "loot": [] },
+    { "id": "star_beast", "name": "星兽", "hp": 32, "attack": 10, "defense": 2, "speed": 48, "size": 8, "sprite": "mob_hare.png", "sprite_scale": 0.055, "color": "#ffd8a0", "xp_attack": 3, "loot": [] },
+    { "id": "dust_worm", "name": "尘沙虫", "hp": 20, "attack": 9, "defense": 1, "speed": 62, "size": 6, "sprite": "mob_hare.png", "sprite_scale": 0.048, "color": "#d8c090", "xp_attack": 2, "loot": [] },
+    { "id": "void_moth", "name": "空冥蛾", "hp": 28, "attack": 12, "defense": 1, "speed": 72, "size": 7, "sprite": "mob_hare.png", "sprite_scale": 0.05, "color": "#c8a8ff", "xp_attack": 3, "loot": [] },
+    { "id": "meteor_sprite", "name": "陨星灵", "hp": 36, "attack": 11, "defense": 2, "speed": 50, "size": 7, "sprite": "mob_hare.png", "sprite_scale": 0.052, "color": "#ffe080", "xp_attack": 3, "loot": [] },
+    { "id": "world_shade", "name": "界影", "hp": 44, "attack": 14, "defense": 3, "speed": 54, "size": 8, "sprite": "mob_disciple.png", "sprite_scale": 0.055, "color": "#ff9098", "xp_attack": 4, "loot": [] },
+    { "id": "ancient_soldier", "name": "古战卒", "hp": 52, "attack": 13, "defense": 4, "speed": 44, "size": 8, "sprite": "mob_disciple.png", "sprite_scale": 0.056, "color": "#c0b0a0", "xp_attack": 4, "loot": [] },
+    { "id": "star_wraith", "name": "星骸", "hp": 58, "attack": 16, "defense": 4, "speed": 56, "size": 8, "sprite": "mob_disciple.png", "sprite_scale": 0.056, "color": "#a0e8ff", "xp_attack": 5, "loot": [] },
+    { "id": "chaos_seed", "name": "混沌种", "hp": 70, "attack": 18, "defense": 5, "speed": 40, "size": 9, "sprite": "mob_hare.png", "sprite_scale": 0.06, "color": "#e0a0ff", "xp_attack": 6, "loot": [] }
   ]
 }

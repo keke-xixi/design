@@ -1,0 +1,81 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://src/world/hub.gd" id="1_hub"]
+[ext_resource type="Texture2D" path="res://assets/backgrounds/hub_bg.png" id="2_bg"]
+[ext_resource type="Texture2D" path="res://assets/portraits/player.png" id="3_portrait"]
+
+[node name="Hub" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_hub")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 18.0
+offset_right = 260.0
+offset_bottom = 52.0
+theme_override_colors/font_color = Color(0.95, 0.9, 0.72, 1)
+theme_override_colors/font_shadow_color = Color(0.05, 0.07, 0.05, 0.85)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 28
+text = "长生"
+
+[node name="Subtitle" type="Label" parent="."]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 52.0
+offset_right = 360.0
+offset_bottom = 76.0
+theme_override_colors/font_color = Color(0.82, 0.86, 0.9, 1)
+theme_override_font_sizes/font_size = 14
+text = "宗门广场 · 选择关卡后进入战斗"
+
+[node name="ChallengeButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 96.0
+offset_right = 180.0
+offset_bottom = 132.0
+theme_override_font_sizes/font_size = 16
+text = "挑战关卡"
+
+[node name="QuitButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 144.0
+offset_right = 180.0
+offset_bottom = 176.0
+text = "退出"
+
+[node name="PortraitPanel" type="PanelContainer" parent="."]
+layout_mode = 0
+offset_left = 470.0
+offset_top = 170.0
+offset_right = 620.0
+offset_bottom = 340.0
+
+[node name="Portrait" type="TextureRect" parent="PortraitPanel"]
+layout_mode = 2
+texture = ExtResource("3_portrait")
+expand_mode = 1
+stretch_mode = 5
+
+[connection signal="pressed" from="ChallengeButton" to="." method="_on_challenge_pressed"]
+[connection signal="pressed" from="QuitButton" to="." method="_on_quit_pressed"]

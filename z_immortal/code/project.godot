@@ -13,7 +13,7 @@ config_version=5
 config/name="长生"
 config/description="A 2D cultivation RPG built for Steam."
 config/version="0.1.0"
-run/main_scene="res://scenes/world/main.tscn"
+run/main_scene="res://scenes/world/hub.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 
@@ -23,6 +23,7 @@ EventBus="*res://src/core/event_bus.gd"
 ContentDB="*res://src/data/content_db.gd"
 GameState="*res://src/data/game_state.gd"
 SteamService="*res://src/steam/steam_service.gd"
+SceneManager="*res://src/core/scene_manager.gd"
 
 [display]
 
@@ -45,6 +46,8 @@ locale/fallback="zh_CN"
 2d_physics/layer_1="world"
 2d_physics/layer_2="player"
 2d_physics/layer_3="npc"
+2d_physics/layer_4="enemy"
+2d_physics/layer_5="projectile"
 
 [rendering]
 

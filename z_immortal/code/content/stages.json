@@ -1,0 +1,143 @@
+{
+  "_doc": "关卡层级：宗门→国家→星球→星系→世界→宇宙。结构在这里，刷怪间隔/人数/击杀目标等数字在 balance.json 的 combat，可被本表字段覆盖。",
+  "stages": [
+    {
+      "id": "sect",
+      "name": "宗门",
+      "description": "外门试炼 · 外门弟子与灵兔",
+      "order": 1,
+      "next_id": "country",
+      "kill_target": 20,
+      "spawn_interval": 0.85,
+      "max_alive": 14,
+      "map": {
+        "pattern": "yard",
+        "width": 64,
+        "height": 40,
+        "ground": "#3a6b38",
+        "ground_alt": "#2f582e",
+        "path": "#8d7044",
+        "border": "#6a6e76"
+      },
+      "spawns": [
+        { "enemy_id": "outer_disciple", "weight": 70 },
+        { "enemy_id": "spirit_hare", "weight": 30 }
+      ]
+    },
+    {
+      "id": "country",
+      "name": "国家",
+      "description": "巡城与江湖 · 巡城卫与刀客",
+      "order": 2,
+      "next_id": "planet",
+      "kill_target": 28,
+      "spawn_interval": 0.75,
+      "max_alive": 16,
+      "map": {
+        "pattern": "city",
+        "width": 64,
+        "height": 40,
+        "ground": "#5a5346",
+        "ground_alt": "#4a4438",
+        "path": "#9a8a6a",
+        "border": "#7a7568"
+      },
+      "spawns": [
+        { "enemy_id": "patrol_guard", "weight": 65 },
+        { "enemy_id": "bandit", "weight": 35 }
+      ]
+    },
+    {
+      "id": "planet",
+      "name": "星球",
+      "description": "荒星猎场 · 星兽与尘沙虫",
+      "order": 3,
+      "next_id": "galaxy",
+      "kill_target": 36,
+      "spawn_interval": 0.7,
+      "max_alive": 18,
+      "map": {
+        "pattern": "crater",
+        "width": 72,
+        "height": 44,
+        "ground": "#5c4336",
+        "ground_alt": "#4a342a",
+        "path": "#8a6a52",
+        "border": "#3a3030"
+      },
+      "spawns": [
+        { "enemy_id": "star_beast", "weight": 60 },
+        { "enemy_id": "dust_worm", "weight": 40 }
+      ]
+    },
+    {
+      "id": "galaxy",
+      "name": "星系",
+      "description": "星域乱流 · 空冥蛾与陨星灵",
+      "order": 4,
+      "next_id": "world",
+      "kill_target": 44,
+      "spawn_interval": 0.65,
+      "max_alive": 20,
+      "map": {
+        "pattern": "nebula",
+        "width": 72,
+        "height": 44,
+        "ground": "#2a2450",
+        "ground_alt": "#1e1a3c",
+        "path": "#5a4a88",
+        "border": "#14102a"
+      },
+      "spawns": [
+        { "enemy_id": "void_moth", "weight": 60 },
+        { "enemy_id": "meteor_sprite", "weight": 40 }
+      ]
+    },
+    {
+      "id": "world",
+      "name": "世界",
+      "description": "界隙战场 · 界影与古战卒",
+      "order": 5,
+      "next_id": "universe",
+      "kill_target": 52,
+      "spawn_interval": 0.6,
+      "max_alive": 22,
+      "map": {
+        "pattern": "rift",
+        "width": 80,
+        "height": 48,
+        "ground": "#4a1e22",
+        "ground_alt": "#381418",
+        "path": "#8a3a3a",
+        "border": "#2a1012"
+      },
+      "spawns": [
+        { "enemy_id": "world_shade", "weight": 55 },
+        { "enemy_id": "ancient_soldier", "weight": 45 }
+      ]
+    },
+    {
+      "id": "universe",
+      "name": "宇宙",
+      "description": "混沌终局 · 星骸与混沌种",
+      "order": 6,
+      "next_id": "",
+      "kill_target": 66,
+      "spawn_interval": 0.55,
+      "max_alive": 24,
+      "map": {
+        "pattern": "void",
+        "width": 80,
+        "height": 48,
+        "ground": "#0c1020",
+        "ground_alt": "#080c18",
+        "path": "#3a5088",
+        "border": "#04060c"
+      },
+      "spawns": [
+        { "enemy_id": "star_wraith", "weight": 55 },
+        { "enemy_id": "chaos_seed", "weight": 45 }
+      ]
+    }
+  ]
+}

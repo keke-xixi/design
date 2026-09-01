@@ -6,3 +6,8 @@ extends Node
 signal cultivation_broke_through(new_realm_id: String)
 signal attack_gained(amount: int, total: int)
 signal item_gained(item_id: String, amount: int)
+signal enemy_killed(enemy_id: String, stage_id: String)
+signal player_hp_changed(hp: int, max_hp: int)
+signal player_died
+signal stage_changed(stage_id: String)
+signal stage_cleared(stage_id: String)

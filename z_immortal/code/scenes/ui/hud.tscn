@@ -19,8 +19,35 @@ layout_mode = 0
 offset_left = 10.0
 offset_top = 8.0
 offset_right = 520.0
-offset_bottom = 110.0
+offset_bottom = 148.0
 theme_override_constants/separation = 1
+
+[node name="StageLabel" type="Label" parent="Root/Panel"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
+theme_override_colors/font_shadow_color = Color(0.05, 0.07, 0.05, 0.85)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 16
+text = "关卡"
+
+[node name="HpLabel" type="Label" parent="Root/Panel"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.9, 0.55, 1)
+theme_override_colors/font_shadow_color = Color(0.05, 0.07, 0.05, 0.85)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 14
+text = "气血"
+
+[node name="KillLabel" type="Label" parent="Root/Panel"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.78, 0.55, 1)
+theme_override_colors/font_shadow_color = Color(0.05, 0.07, 0.05, 0.85)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 14
+text = "杀敌"
 
 [node name="RealmLabel" type="Label" parent="Root/Panel"]
 layout_mode = 2
@@ -66,3 +93,12 @@ theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 12
 text = "WASD 移动    J 吐纳    K 突破"
+
+[node name="Portrait" type="TextureRect" parent="Root"]
+layout_mode = 0
+offset_left = 520.0
+offset_top = 210.0
+offset_right = 630.0
+offset_bottom = 350.0
+expand_mode = 1
+stretch_mode = 5

@@ -4,15 +4,22 @@
 
 ## 运行
 
-1. 打开 `D:\design\design\z_immortal\tools\godot\Godot_v4.7.2-stable_win64.exe`
-2. 导入并编辑文件夹 `D:\design\design\z_immortal\code`（里面有 `project.godot`）
-3. 按 **F5** 运行，**F8** 停
+1. 打开 Godot，导入 `code` 目录
+2. 按 **F5**：先进入**宗门广场**，点「挑战关卡」选关，再进战斗
+3. 战斗中 **Esc** 返回选关
 
-### 操作
+### 流程
+
+**广场** → **选关**（宗门→宇宙）→ **战斗**（刷怪、自动攻击）
+
+### 操作（战斗内）
 
 - `WASD` / 方向键：移动
-- `J` 或空格：吐纳（加攻，数量在 `balance.json` 的 `cultivate_gain`）
-- `K`：突破下一攻境（所需攻在 `breakthrough_attack`）
+- 靠近小怪自动出剑气
+- `J`：吐纳加攻
+- `K`：突破
+- `R`：阵亡后重生
+- `Esc`：返回选关
 
 ## 你改表、改数值的方式
 

@@ -36,7 +36,27 @@
     "attack": 1,
     "wisdom_rank": 1,
     "defense": 1,
-    "attack_realm_id": "ninglu_chu"
+    "attack_realm_id": "ninglu_chu",
+    "stage_id": "sect"
+  },
+
+  "combat": {
+    "_doc": "刷怪战斗手感。关卡击杀目标/刷怪间隔在 stages.json，这里是全局默认和玩家弹道。",
+    "player_speed": 96,
+    "hp_base": 80,
+    "hp_per_defense": 18,
+    "hp_per_defense_doc": "最大气血 = hp_base + 防 * hp_per_defense",
+    "damage_flat": 8,
+    "damage_per_attack": 1,
+    "damage_doc": "弹道伤害 = damage_flat + 攻 * damage_per_attack - 怪防，至少 1",
+    "auto_attack_interval": 0.42,
+    "projectile_speed": 240,
+    "projectile_lifetime": 0.85,
+    "contact_cooldown": 0.55,
+    "hurt_iframes": 0.35,
+    "spawn_min_radius": 150,
+    "spawn_max_radius": 230,
+    "essence_magnet": 48
   },
 
   "breakthrough_attack": {

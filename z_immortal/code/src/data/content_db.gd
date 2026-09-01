@@ -9,6 +9,7 @@ var items: Dictionary = {}
 var enemies: Dictionary = {}
 var gacha: Dictionary = {}
 var equipment: Dictionary = {}
+var stages := StageTable.new()
 
 
 func _ready() -> void:
@@ -28,9 +29,18 @@ func reload() -> void:
 	enemies = _index_rows("res://content/enemies.json", "enemies", Callable(EnemyDef, "from_dict"))
 	gacha = _load_json("res://content/gacha.json")
 	equipment = _load_json("res://content/equipment.json")
+	var stage_data: Dictionary = _load_json("res://content/stages.json")
+	var stage_rows: Variant = stage_data.get("stages", [])
+	if typeof(stage_rows) == TYPE_ARRAY:
+		stages.load_from_array(stage_rows)
+	else:
+		push_error("ContentDB: 'stages' must be an array")
 	var start_id := str(section("start").get("attack_realm_id", "ninglu_chu"))
 	if realms.get_realm(start_id) == null:
 		push_error("ContentDB: missing start realm '%s'" % start_id)
+	var start_stage := str(section("start").get("stage_id", "sect"))
+	if stages.get_stage(start_stage) == null:
+		push_error("ContentDB: missing start stage '%s'" % start_stage)
 
 
 func section(name: String) -> Dictionary:
@@ -52,6 +62,10 @@ func get_item(id: String) -> ItemDef:
 
 func get_enemy(id: String) -> EnemyDef:
 	return enemies.get(id) as EnemyDef
+
+
+func get_stage(id: String) -> StageDef:
+	return stages.get_stage(id)
 
 
 func _index_rows(path: String, key: String, mapper: Callable) -> Dictionary:
