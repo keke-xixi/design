@@ -1,0 +1,40 @@
+{
+  "_doc": "主动技能。cd 秒。damage_mult 基于 GameState.effective_attack()。",
+  "skills": [
+    {
+      "id": "dash",
+      "name": "闪避",
+      "key": "L",
+      "cooldown": 2.8,
+      "dash_distance": 90,
+      "iframe": 0.25,
+      "description": "向移动方向瞬移并短暂无敌。"
+    },
+    {
+      "id": "ring_slash",
+      "name": "环斩",
+      "key": "U",
+      "cooldown": 5.0,
+      "radius": 110,
+      "damage_mult": 1.6,
+      "description": "以自身为中心释放剑气，伤害周围敌人。"
+    },
+    {
+      "id": "use_pill",
+      "name": "服丹",
+      "key": "I",
+      "cooldown": 1.2,
+      "pill_priority": ["white_pill", "qi_pill_low"],
+      "description": "消耗背包丹药恢复气血。"
+    },
+    {
+      "id": "spirit_burst",
+      "name": "灵爆",
+      "key": "O",
+      "cooldown": 8.0,
+      "projectiles": 8,
+      "damage_mult": 0.85,
+      "description": "向八方同时射出剑气。"
+    }
+  ]
+}

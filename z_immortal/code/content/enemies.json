@@ -1,17 +1,120 @@
 {
-  "_doc": "小怪模板。sprite 指向 assets/characters/ 下的 png；color 是色调。数值在 balance.json 也可全局调。",
+  "_doc": "小怪与 Boss。loot 用 chance 独立判定。is_boss 放大体型并提高稀有掉落。",
   "enemies": [
-    { "id": "outer_disciple", "name": "外门弟子", "hp": 14, "attack": 4, "defense": 0, "speed": 42, "size": 6, "sprite": "mob_disciple.png", "sprite_scale": 0.05, "color": "#ffffff", "xp_attack": 1, "loot": [] },
-    { "id": "spirit_hare", "name": "灵兔", "hp": 8, "attack": 2, "defense": 0, "speed": 70, "size": 5, "sprite": "mob_hare.png", "sprite_scale": 0.045, "color": "#ffffff", "xp_attack": 1, "loot": [] },
-    { "id": "patrol_guard", "name": "巡城卫", "hp": 22, "attack": 7, "defense": 1, "speed": 46, "size": 7, "sprite": "mob_disciple.png", "sprite_scale": 0.052, "color": "#b8c8e8", "xp_attack": 2, "loot": [] },
-    { "id": "bandit", "name": "刀客", "hp": 16, "attack": 8, "defense": 0, "speed": 58, "size": 6, "sprite": "mob_disciple.png", "sprite_scale": 0.05, "color": "#e8b0a0", "xp_attack": 2, "loot": [] },
-    { "id": "star_beast", "name": "星兽", "hp": 32, "attack": 10, "defense": 2, "speed": 48, "size": 8, "sprite": "mob_hare.png", "sprite_scale": 0.055, "color": "#ffd8a0", "xp_attack": 3, "loot": [] },
-    { "id": "dust_worm", "name": "尘沙虫", "hp": 20, "attack": 9, "defense": 1, "speed": 62, "size": 6, "sprite": "mob_hare.png", "sprite_scale": 0.048, "color": "#d8c090", "xp_attack": 2, "loot": [] },
-    { "id": "void_moth", "name": "空冥蛾", "hp": 28, "attack": 12, "defense": 1, "speed": 72, "size": 7, "sprite": "mob_hare.png", "sprite_scale": 0.05, "color": "#c8a8ff", "xp_attack": 3, "loot": [] },
-    { "id": "meteor_sprite", "name": "陨星灵", "hp": 36, "attack": 11, "defense": 2, "speed": 50, "size": 7, "sprite": "mob_hare.png", "sprite_scale": 0.052, "color": "#ffe080", "xp_attack": 3, "loot": [] },
-    { "id": "world_shade", "name": "界影", "hp": 44, "attack": 14, "defense": 3, "speed": 54, "size": 8, "sprite": "mob_disciple.png", "sprite_scale": 0.055, "color": "#ff9098", "xp_attack": 4, "loot": [] },
-    { "id": "ancient_soldier", "name": "古战卒", "hp": 52, "attack": 13, "defense": 4, "speed": 44, "size": 8, "sprite": "mob_disciple.png", "sprite_scale": 0.056, "color": "#c0b0a0", "xp_attack": 4, "loot": [] },
-    { "id": "star_wraith", "name": "星骸", "hp": 58, "attack": 16, "defense": 4, "speed": 56, "size": 8, "sprite": "mob_disciple.png", "sprite_scale": 0.056, "color": "#a0e8ff", "xp_attack": 5, "loot": [] },
-    { "id": "chaos_seed", "name": "混沌种", "hp": 70, "attack": 18, "defense": 5, "speed": 40, "size": 9, "sprite": "mob_hare.png", "sprite_scale": 0.06, "color": "#e0a0ff", "xp_attack": 6, "loot": [] }
+    {
+      "id": "outer_disciple", "name": "外门弟子", "hp": 14, "attack": 4, "defense": 0, "speed": 42, "size": 8,
+      "sprite": "mob_disciple_clear.png", "sprite_scale": 0.14, "color": "#ffffff", "xp_attack": 1,
+      "loot": [
+        { "item_id": "spirit_grass", "chance": 0.28, "min": 1, "max": 1 },
+        { "item_id": "sect_token", "chance": 0.06, "min": 1, "max": 1 }
+      ]
+    },
+    {
+      "id": "spirit_hare", "name": "灵兔", "hp": 8, "attack": 2, "defense": 0, "speed": 70, "size": 7,
+      "sprite": "mob_beast_clear.png", "sprite_scale": 0.13, "color": "#ffffff", "xp_attack": 1,
+      "loot": [{ "item_id": "spirit_grass", "chance": 0.35, "min": 1, "max": 2 }]
+    },
+    {
+      "id": "patrol_guard", "name": "巡城卫", "hp": 22, "attack": 7, "defense": 1, "speed": 46, "size": 8,
+      "sprite": "mob_guard_clear.png", "sprite_scale": 0.145, "color": "#ffffff", "xp_attack": 2,
+      "loot": [
+        { "item_id": "spirit_grass", "chance": 0.22, "min": 1, "max": 1 },
+        { "item_id": "white_pill", "chance": 0.08, "min": 1, "max": 1 }
+      ]
+    },
+    {
+      "id": "bandit", "name": "刀客", "hp": 16, "attack": 8, "defense": 0, "speed": 58, "size": 8,
+      "sprite": "mob_bandit_clear.png", "sprite_scale": 0.14, "color": "#ffffff", "xp_attack": 2,
+      "loot": [
+        { "item_id": "wooden_sword", "chance": 0.1, "min": 1, "max": 1 },
+        { "item_id": "white_pill", "chance": 0.05, "min": 1, "max": 1 }
+      ]
+    },
+    {
+      "id": "star_beast", "name": "星兽", "hp": 32, "attack": 10, "defense": 2, "speed": 48, "size": 9,
+      "sprite": "mob_beast_clear.png", "sprite_scale": 0.16, "color": "#ffe0a8", "xp_attack": 3,
+      "loot": [
+        { "item_id": "star_shard", "chance": 0.12, "min": 1, "max": 1 },
+        { "item_id": "spirit_grass", "chance": 0.25, "min": 1, "max": 2 }
+      ]
+    },
+    {
+      "id": "dust_worm", "name": "尘沙虫", "hp": 20, "attack": 9, "defense": 1, "speed": 62, "size": 7,
+      "sprite": "mob_beast_clear.png", "sprite_scale": 0.13, "color": "#d8c090", "xp_attack": 2,
+      "loot": [{ "item_id": "spirit_grass", "chance": 0.3, "min": 1, "max": 1 }]
+    },
+    {
+      "id": "void_moth", "name": "空冥蛾", "hp": 28, "attack": 12, "defense": 1, "speed": 72, "size": 8,
+      "sprite": "mob_beast_clear.png", "sprite_scale": 0.14, "color": "#c8a8ff", "xp_attack": 3,
+      "loot": [
+        { "item_id": "void_silk", "chance": 0.1, "min": 1, "max": 1 },
+        { "item_id": "white_pill", "chance": 0.08, "min": 1, "max": 1 }
+      ]
+    },
+    {
+      "id": "meteor_sprite", "name": "陨星灵", "hp": 36, "attack": 11, "defense": 2, "speed": 50, "size": 8,
+      "sprite": "mob_beast_clear.png", "sprite_scale": 0.145, "color": "#ffe080", "xp_attack": 3,
+      "loot": [{ "item_id": "star_shard", "chance": 0.15, "min": 1, "max": 1 }]
+    },
+    {
+      "id": "world_shade", "name": "界影", "hp": 44, "attack": 14, "defense": 3, "speed": 54, "size": 9,
+      "sprite": "mob_disciple_clear.png", "sprite_scale": 0.15, "color": "#ff9098", "xp_attack": 4,
+      "loot": [{ "item_id": "rift_core", "chance": 0.06, "min": 1, "max": 1 }]
+    },
+    {
+      "id": "ancient_soldier", "name": "古战卒", "hp": 52, "attack": 13, "defense": 4, "speed": 44, "size": 9,
+      "sprite": "mob_guard_clear.png", "sprite_scale": 0.155, "color": "#c0b0a0", "xp_attack": 4,
+      "loot": [
+        { "item_id": "ancient_manual", "chance": 0.04, "min": 1, "max": 1 },
+        { "item_id": "white_pill", "chance": 0.1, "min": 1, "max": 1 }
+      ]
+    },
+    {
+      "id": "star_wraith", "name": "星骸", "hp": 58, "attack": 16, "defense": 4, "speed": 56, "size": 9,
+      "sprite": "mob_disciple_clear.png", "sprite_scale": 0.155, "color": "#a0e8ff", "xp_attack": 5,
+      "loot": [{ "item_id": "chaos_fragment", "chance": 0.05, "min": 1, "max": 1 }]
+    },
+    {
+      "id": "chaos_seed", "name": "混沌种", "hp": 70, "attack": 18, "defense": 5, "speed": 40, "size": 10,
+      "sprite": "mob_beast_clear.png", "sprite_scale": 0.17, "color": "#e0a0ff", "xp_attack": 6,
+      "loot": [{ "item_id": "chaos_fragment", "chance": 0.12, "min": 1, "max": 1 }]
+    },
+    {
+      "id": "sect_elder", "name": "守关长老", "is_boss": true, "hp": 120, "attack": 12, "defense": 3, "speed": 38, "size": 10,
+      "sprite": "mob_disciple_clear.png", "sprite_scale": 0.18, "color": "#ffd080", "xp_attack": 8,
+      "loot": [
+        { "item_id": "sect_token", "chance": 1.0, "min": 2, "max": 3 },
+        { "item_id": "white_pill", "chance": 0.6, "min": 1, "max": 2 },
+        { "item_id": "ancient_manual", "chance": 0.15, "min": 1, "max": 1 }
+      ]
+    },
+    {
+      "id": "dynasty_general", "name": "镇国将军", "is_boss": true, "hp": 180, "attack": 16, "defense": 5, "speed": 40, "size": 10,
+      "sprite": "mob_guard_clear.png", "sprite_scale": 0.19, "color": "#ffb060", "xp_attack": 10,
+      "loot": [
+        { "item_id": "white_pill", "chance": 0.8, "min": 2, "max": 3 },
+        { "item_id": "wooden_sword", "chance": 0.3, "min": 1, "max": 1 }
+      ]
+    },
+    {
+      "id": "star_tyrant", "name": "星陆霸主", "is_boss": true, "hp": 240, "attack": 18, "defense": 6, "speed": 44, "size": 11,
+      "sprite": "mob_beast_clear.png", "sprite_scale": 0.2, "color": "#ffa040", "xp_attack": 12,
+      "loot": [{ "item_id": "star_shard", "chance": 1.0, "min": 2, "max": 3 }]
+    },
+    {
+      "id": "void_matriarch", "name": "空冥母神", "is_boss": true, "hp": 300, "attack": 20, "defense": 7, "speed": 48, "size": 11,
+      "sprite": "mob_beast_clear.png", "sprite_scale": 0.2, "color": "#c080ff", "xp_attack": 14,
+      "loot": [{ "item_id": "void_silk", "chance": 1.0, "min": 2, "max": 2 }]
+    },
+    {
+      "id": "rift_lord", "name": "裂隙领主", "is_boss": true, "hp": 360, "attack": 22, "defense": 8, "speed": 46, "size": 11,
+      "sprite": "mob_disciple_clear.png", "sprite_scale": 0.2, "color": "#ff6070", "xp_attack": 16,
+      "loot": [{ "item_id": "rift_core", "chance": 1.0, "min": 1, "max": 2 }]
+    },
+    {
+      "id": "chaos_overlord", "name": "混沌主宰", "is_boss": true, "hp": 480, "attack": 26, "defense": 10, "speed": 42, "size": 12,
+      "sprite": "mob_beast_clear.png", "sprite_scale": 0.22, "color": "#e0a0ff", "xp_attack": 20,
+      "loot": [{ "item_id": "chaos_fragment", "chance": 1.0, "min": 1, "max": 2 }]
+    }
   ]
 }

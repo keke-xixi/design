@@ -1,25 +1,182 @@
 {
+  "_doc": "物品表。equip_slot: weapon/armor/accessory。bonus_* 为穿戴加成。",
   "items": [
     {
       "id": "qi_pill_low",
       "name": "聚气丹",
       "kind": "pill",
+      "rarity": "common",
       "qi_restore": 30,
-      "description": "凡品丹药，服后略增灵气。"
+      "value": 8,
+      "tradeable": true,
+      "description": "凡品丹药，服后恢复气血。"
     },
     {
       "id": "spirit_grass",
       "name": "灵草",
       "kind": "material",
-      "qi_restore": 0,
-      "description": "路边常见的带灵气的草药，可炼丹。"
+      "rarity": "common",
+      "value": 5,
+      "tradeable": true,
+      "description": "路边常见的带灵气草药，可炼丹。"
     },
     {
       "id": "wooden_sword",
       "name": "木剑",
       "kind": "weapon",
-      "qi_restore": 0,
-      "description": "凡人防身兵器，聊胜于无。"
+      "rarity": "common",
+      "equip_slot": "weapon",
+      "bonus_attack": 3,
+      "value": 12,
+      "tradeable": true,
+      "description": "凡人防身兵器，略增攻击。"
+    },
+    {
+      "id": "iron_blade",
+      "name": "铸铁刃",
+      "kind": "weapon",
+      "rarity": "uncommon",
+      "equip_slot": "weapon",
+      "bonus_attack": 8,
+      "value": 55,
+      "tradeable": true,
+      "description": "宗门铁匠所铸，锋锐有余。"
+    },
+    {
+      "id": "star_blade",
+      "name": "星纹剑",
+      "kind": "weapon",
+      "rarity": "rare",
+      "equip_slot": "weapon",
+      "bonus_attack": 18,
+      "bonus_speed_pct": 0.05,
+      "value": 200,
+      "tradeable": true,
+      "description": "星屑淬炼的灵剑，杀伐凌厉。"
+    },
+    {
+      "id": "sect_robe",
+      "name": "外门道袍",
+      "kind": "armor",
+      "rarity": "common",
+      "equip_slot": "armor",
+      "bonus_defense": 2,
+      "bonus_hp": 25,
+      "value": 30,
+      "tradeable": true,
+      "description": "外门弟子制式，略增防护。"
+    },
+    {
+      "id": "void_cloak",
+      "name": "空冥披风",
+      "kind": "armor",
+      "rarity": "rare",
+      "equip_slot": "armor",
+      "bonus_defense": 6,
+      "bonus_hp": 60,
+      "value": 180,
+      "tradeable": true,
+      "description": "空冥丝织就，御力非凡。"
+    },
+    {
+      "id": "jade_pendant",
+      "name": "玉佩",
+      "kind": "accessory",
+      "rarity": "uncommon",
+      "equip_slot": "accessory",
+      "bonus_attack": 2,
+      "bonus_defense": 2,
+      "bonus_hp": 15,
+      "value": 48,
+      "tradeable": true,
+      "description": "温润灵玉，攻防兼补。"
+    },
+    {
+      "id": "rift_amulet",
+      "name": "界核护符",
+      "kind": "accessory",
+      "rarity": "epic",
+      "equip_slot": "accessory",
+      "bonus_attack": 5,
+      "bonus_defense": 5,
+      "bonus_hp": 40,
+      "value": 350,
+      "tradeable": true,
+      "description": "界核碎片凝炼，通玄修士梦寐以求。"
+    },
+    {
+      "id": "white_pill",
+      "name": "白丹",
+      "kind": "pill",
+      "rarity": "uncommon",
+      "qi_restore": 80,
+      "value": 35,
+      "tradeable": true,
+      "description": "一阶灵丹，服后大幅恢复气血。"
+    },
+    {
+      "id": "star_elixir",
+      "name": "星华丹",
+      "kind": "pill",
+      "rarity": "rare",
+      "qi_restore": 150,
+      "value": 90,
+      "tradeable": true,
+      "description": "星力凝丹，疗伤圣品。"
+    },
+    {
+      "id": "sect_token",
+      "name": "宗门令",
+      "kind": "material",
+      "rarity": "uncommon",
+      "value": 45,
+      "tradeable": true,
+      "description": "外门弟子身份凭证，可换贡献。"
+    },
+    {
+      "id": "star_shard",
+      "name": "星屑",
+      "kind": "material",
+      "rarity": "rare",
+      "value": 120,
+      "tradeable": true,
+      "description": "星陆崩裂时坠落的碎片，蕴含星力。"
+    },
+    {
+      "id": "void_silk",
+      "name": "空冥丝",
+      "kind": "material",
+      "rarity": "rare",
+      "value": 150,
+      "tradeable": true,
+      "description": "空冥蛾吐丝，轻若无物却韧如玄铁。"
+    },
+    {
+      "id": "rift_core",
+      "name": "界核",
+      "kind": "treasure",
+      "rarity": "epic",
+      "value": 380,
+      "tradeable": true,
+      "description": "界域裂隙中凝成的核心，通玄之上亦视为珍品。"
+    },
+    {
+      "id": "chaos_fragment",
+      "name": "混沌碎片",
+      "kind": "treasure",
+      "rarity": "legendary",
+      "value": 900,
+      "tradeable": true,
+      "description": "混沌星海本源所化，万中无一。"
+    },
+    {
+      "id": "ancient_manual",
+      "name": "古修残卷",
+      "kind": "treasure",
+      "rarity": "epic",
+      "value": 420,
+      "tradeable": true,
+      "description": "上古修士遗留的功法残页，价值连城。"
     }
   ]
 }

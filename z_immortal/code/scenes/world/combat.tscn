@@ -3,15 +3,20 @@
 [ext_resource type="Script" path="res://src/world/game_world.gd" id="1_world"]
 [ext_resource type="Script" path="res://src/world/player.gd" id="2_player"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="3_hud"]
-[ext_resource type="Texture2D" path="res://assets/characters/player.png" id="4_player_tex"]
+[ext_resource type="Texture2D" path="res://assets/characters/player_clear.png" id="4_player_tex"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
-size = Vector2(14, 22)
+size = Vector2(16, 28)
 
 [node name="Combat" type="Node2D"]
 script = ExtResource("1_world")
 
+[node name="Background" type="Sprite2D" parent="."]
+z_index = -20
+centered = false
+
 [node name="TileMapLayer" type="TileMapLayer" parent="."]
+modulate = Color(1, 1, 1, 0.32)
 
 [node name="Player" type="CharacterBody2D" parent="."]
 collision_layer = 2
@@ -19,13 +24,29 @@ collision_mask = 1
 script = ExtResource("2_player")
 
 [node name="Visual" type="Sprite2D" parent="Player"]
-scale = Vector2(0.055, 0.055)
+texture_filter = 1
+scale = Vector2(0.16, 0.16)
 texture = ExtResource("4_player_tex")
+
+[node name="HpBarBg" type="ColorRect" parent="Player"]
+offset_left = -14.0
+offset_top = -34.0
+offset_right = 14.0
+offset_bottom = -30.0
+color = Color(0.1, 0.1, 0.1, 0.7)
+
+[node name="HpBar" type="ColorRect" parent="Player"]
+offset_left = -14.0
+offset_top = -34.0
+offset_right = 14.0
+offset_bottom = -30.0
+color = Color(0.35, 0.9, 0.45, 0.95)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Player"]
 shape = SubResource("RectangleShape2D_player")
 
 [node name="Camera2D" type="Camera2D" parent="Player"]
+zoom = Vector2(1.15, 1.15)
 position_smoothing_enabled = true
 position_smoothing_speed = 8.0
 
@@ -36,3 +57,8 @@ position_smoothing_speed = 8.0
 [node name="Projectiles" type="Node2D" parent="."]
 
 [node name="Pickups" type="Node2D" parent="."]
+
+[node name="Obstacles" type="Node2D" parent="."]
+
+[node name="Zones" type="Node2D" parent="."]
+z_index = -5

@@ -1,0 +1,64 @@
+{
+  "_doc": "炼丹配方与抽卡。改 balance.json 的 alchemy / gacha 段调成本与权重。",
+  "recipes": [
+    {
+      "id": "basic_pill",
+      "name": "炼聚气丹",
+      "cost_stones": 5,
+      "inputs": [{ "item_id": "spirit_grass", "qty": 3 }],
+      "output": { "item_id": "qi_pill_low", "qty": 2 }
+    },
+    {
+      "id": "white_pill",
+      "name": "炼白丹",
+      "cost_stones": 15,
+      "inputs": [
+        { "item_id": "spirit_grass", "qty": 5 },
+        { "item_id": "qi_pill_low", "qty": 1 }
+      ],
+      "output": { "item_id": "white_pill", "qty": 1 }
+    },
+    {
+      "id": "iron_blade",
+      "name": "铸铁刃",
+      "cost_stones": 25,
+      "inputs": [
+        { "item_id": "wooden_sword", "qty": 1 },
+        { "item_id": "sect_token", "qty": 2 }
+      ],
+      "output": { "item_id": "iron_blade", "qty": 1 }
+    },
+    {
+      "id": "star_elixir",
+      "name": "星华丹",
+      "cost_stones": 40,
+      "inputs": [
+        { "item_id": "star_shard", "qty": 2 },
+        { "item_id": "white_pill", "qty": 1 }
+      ],
+      "output": { "item_id": "star_elixir", "qty": 1 }
+    }
+  ],
+  "gacha_pools": [
+    {
+      "id": "white_pill_gacha",
+      "name": "白丹抽卡",
+      "cost_stones": 10,
+      "rarity_id": "white",
+      "pool_id": "pill"
+    },
+    {
+      "id": "weapon_gacha",
+      "name": "兵器抽卡",
+      "cost_stones": 20,
+      "rarity_id": "white",
+      "pool_id": "weapon"
+    }
+  ],
+  "gacha_rewards": {
+    "pill_t1": { "item_id": "qi_pill_low", "qty": 2 },
+    "pill_t2": { "item_id": "white_pill", "qty": 1 },
+    "weapon_t1": { "item_id": "wooden_sword", "qty": 1 },
+    "weapon_t2": { "item_id": "iron_blade", "qty": 1 }
+  }
+}

@@ -9,6 +9,10 @@ var items: Dictionary = {}
 var enemies: Dictionary = {}
 var gacha: Dictionary = {}
 var equipment: Dictionary = {}
+var lore: Dictionary = {}
+var market: Dictionary = {}
+var alchemy: Dictionary = {}
+var skills: Array = []
 var stages := StageTable.new()
 
 
@@ -29,6 +33,12 @@ func reload() -> void:
 	enemies = _index_rows("res://content/enemies.json", "enemies", Callable(EnemyDef, "from_dict"))
 	gacha = _load_json("res://content/gacha.json")
 	equipment = _load_json("res://content/equipment.json")
+	lore = _load_json("res://content/lore.json")
+	market = _load_json("res://content/market.json")
+	alchemy = _load_json("res://content/alchemy.json")
+	var skill_data: Dictionary = _load_json("res://content/skills.json")
+	var skill_rows: Variant = skill_data.get("skills", [])
+	skills = skill_rows if typeof(skill_rows) == TYPE_ARRAY else []
 	var stage_data: Dictionary = _load_json("res://content/stages.json")
 	var stage_rows: Variant = stage_data.get("stages", [])
 	if typeof(stage_rows) == TYPE_ARRAY:
@@ -66,6 +76,52 @@ func get_enemy(id: String) -> EnemyDef:
 
 func get_stage(id: String) -> StageDef:
 	return stages.get_stage(id)
+
+
+func lore_tagline() -> String:
+	return str(lore.get("tagline", ""))
+
+
+func lore_intro() -> String:
+	return str(lore.get("intro", ""))
+
+
+func market_npc_listings() -> Array:
+	var rows: Variant = market.get("npc_listings", [])
+	return rows if typeof(rows) == TYPE_ARRAY else []
+
+
+func alchemy_recipes() -> Array:
+	var rows: Variant = alchemy.get("recipes", [])
+	return rows if typeof(rows) == TYPE_ARRAY else []
+
+
+func alchemy_gacha_pools() -> Array:
+	var rows: Variant = alchemy.get("gacha_pools", [])
+	return rows if typeof(rows) == TYPE_ARRAY else []
+
+
+func gacha_reward(entry_id: String) -> Dictionary:
+	var raw: Variant = alchemy.get("gacha_rewards", {}).get(entry_id, {})
+	return raw if typeof(raw) == TYPE_DICTIONARY else {}
+
+
+func get_skill(id: String) -> Dictionary:
+	for raw in skills:
+		if typeof(raw) == TYPE_DICTIONARY and str(raw.get("id", "")) == id:
+			return raw
+	return {}
+
+
+func gacha_pool_entries(rarity_id: String, pool_id: String) -> Array:
+	for raw in gacha.get("rarities", []):
+		if typeof(raw) != TYPE_DICTIONARY or str(raw.get("id", "")) != rarity_id:
+			continue
+		for pool in raw.get("pools", []):
+			if typeof(pool) == TYPE_DICTIONARY and str(pool.get("id", "")) == pool_id:
+				var entries: Variant = pool.get("entries", [])
+				return entries if typeof(entries) == TYPE_ARRAY else []
+	return []
 
 
 func _index_rows(path: String, key: String, mapper: Callable) -> Dictionary:

@@ -3,6 +3,7 @@ extends Area2D
 var _dir := Vector2.RIGHT
 var _life := 0.85
 var _speed := 240.0
+var _damage_mult := 1.0
 
 
 func _ready() -> void:
@@ -13,9 +14,10 @@ func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 
 
-func launch(from: Vector2, dir: Vector2) -> void:
+func launch(from: Vector2, dir: Vector2, damage_mult: float = 1.0) -> void:
 	global_position = from
 	_dir = dir.normalized()
+	_damage_mult = damage_mult
 	rotation = _dir.angle()
 	var cbt := ContentDB.section("combat")
 	_speed = float(cbt.get("projectile_speed", 240))
@@ -37,5 +39,5 @@ func _on_body_entered(body: Node) -> void:
 		var enemy_def: Variant = body.get("def")
 		if enemy_def != null:
 			defense = int(enemy_def.defense)
-		body.take_damage(GameState.projectile_damage_against(defense))
+		body.take_damage(GameState.projectile_damage_against(defense, _damage_mult))
 	queue_free()

@@ -1,5 +1,5 @@
 {
-  "_doc": "抽卡结构，来自抽卡表。权重在 balance.json 的 gacha。蓝色及以上的详细概率表里还是空的，你补 Excel 后再填 entries。",
+  "_doc": "抽卡结构。entries 的 id 对应 alchemy.json 的 gacha_rewards。",
   "rarities": [
     {
       "id": "white",
@@ -19,44 +19,11 @@
           "id": "weapon",
           "name": "武器",
           "stats": ["attack", "defense"],
-          "entries": []
+          "entries": [
+            { "id": "weapon_t1", "name": "木剑", "weight_key": "white_weapon_t1_weight" },
+            { "id": "weapon_t2", "name": "铸铁刃", "weight_key": "white_weapon_t2_weight" }
+          ]
         }
-      ]
-    },
-    {
-      "id": "blue",
-      "name": "蓝色",
-      "order": 2,
-      "pools": [
-        { "id": "pill", "name": "丹药", "stats": ["attack", "wisdom", "defense"], "entries": [] },
-        { "id": "weapon", "name": "武器", "stats": ["attack", "defense"], "entries": [] }
-      ]
-    },
-    {
-      "id": "purple",
-      "name": "紫色",
-      "order": 3,
-      "pools": [
-        { "id": "pill", "name": "丹药", "stats": ["attack", "wisdom", "defense"], "entries": [] },
-        { "id": "weapon", "name": "武器", "stats": ["attack", "defense"], "entries": [] }
-      ]
-    },
-    {
-      "id": "gold",
-      "name": "金色",
-      "order": 4,
-      "pools": [
-        { "id": "pill", "name": "丹药", "stats": ["attack", "wisdom", "defense"], "entries": [] },
-        { "id": "weapon", "name": "武器", "stats": ["attack", "defense"], "entries": [] }
-      ]
-    },
-    {
-      "id": "red",
-      "name": "红色",
-      "order": 5,
-      "pools": [
-        { "id": "pill", "name": "丹药", "stats": ["attack", "wisdom", "defense"], "entries": [] },
-        { "id": "weapon", "name": "武器", "stats": ["attack", "defense"], "entries": [] }
       ]
     }
   ]

@@ -1,7 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://src/world/mob.gd" id="1_mob"]
-[ext_resource type="Texture2D" path="res://assets/characters/mob_disciple.png" id="2_tex"]
+[ext_resource type="Texture2D" path="res://assets/characters/mob_disciple_clear.png" id="2_tex"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_mob"]
 radius = 8.0
@@ -13,8 +13,23 @@ motion_mode = 1
 script = ExtResource("1_mob")
 
 [node name="Visual" type="Sprite2D" parent="."]
-scale = Vector2(0.05, 0.05)
+texture_filter = 1
+scale = Vector2(0.14, 0.14)
 texture = ExtResource("2_tex")
+
+[node name="HpBarBg" type="ColorRect" parent="."]
+offset_left = -12.0
+offset_top = -28.0
+offset_right = 12.0
+offset_bottom = -25.0
+color = Color(0.1, 0.1, 0.1, 0.7)
+
+[node name="HpBar" type="ColorRect" parent="."]
+offset_left = -12.0
+offset_top = -28.0
+offset_right = 12.0
+offset_bottom = -25.0
+color = Color(0.9, 0.35, 0.3, 0.95)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_mob")

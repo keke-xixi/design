@@ -1,23 +1,43 @@
 {
-  "_doc": "关卡层级：宗门→国家→星球→星系→世界→宇宙。结构在这里，刷怪间隔/人数/击杀目标等数字在 balance.json 的 combat，可被本表字段覆盖。",
+  "_doc": "关卡层级。waves 按 at_kills 切换；boss_id + boss_at_kill 触发守关 Boss。map.obstacles/zones 为地图元素。",
   "stages": [
     {
       "id": "sect",
       "name": "宗门",
-      "description": "外门试炼 · 外门弟子与灵兔",
+      "description": "灵脉山门 · 外门弟子与灵兔",
+      "lore": "外门试炼场。击败同门与灵兽，证明你有资格踏入通玄之路。",
       "order": 1,
       "next_id": "country",
       "kill_target": 20,
       "spawn_interval": 0.85,
       "max_alive": 14,
+      "boss_id": "sect_elder",
+      "boss_at_kill": 16,
+      "accent": "#6ecf8a",
+      "waves": [
+        { "at_kills": 0, "hint": "第一波 · 外门试炼", "spawn_interval_mult": 1.0, "max_alive_bonus": 0 },
+        { "at_kills": 8, "hint": "灵潮涌动 · 刷怪加速", "spawn_interval_mult": 0.88, "max_alive_bonus": 2 },
+        { "at_kills": 14, "hint": "守关长老将至", "spawn_interval_mult": 0.8, "max_alive_bonus": 1 }
+      ],
       "map": {
         "pattern": "yard",
-        "width": 64,
-        "height": 40,
+        "width": 48,
+        "height": 30,
+        "background": "stage_sect.png",
         "ground": "#3a6b38",
         "ground_alt": "#2f582e",
         "path": "#8d7044",
-        "border": "#6a6e76"
+        "border": "#6a6e76",
+        "tile_opacity": 0.35,
+        "zones": [
+          { "cx": 0.5, "cy": 0.52, "r": 0.1, "color": "#6ecf8a22" },
+          { "cx": 0.5, "cy": 0.35, "r": 0.07, "color": "#ffd08033" }
+        ],
+        "obstacles": [
+          { "x": 8, "y": 10, "w": 3, "h": 2, "color": "#5a5040" },
+          { "x": 36, "y": 12, "w": 2, "h": 3, "color": "#5a5040" },
+          { "x": 22, "y": 20, "w": 4, "h": 1, "color": "#6a6050" }
+        ]
       },
       "spawns": [
         { "enemy_id": "outer_disciple", "weight": 70 },
@@ -26,21 +46,41 @@
     },
     {
       "id": "country",
-      "name": "国家",
-      "description": "巡城与江湖 · 巡城卫与刀客",
+      "name": "王朝",
+      "description": "人间疆场 · 巡城卫与刀客",
+      "lore": "王朝铁骑巡城，江湖刀客横行。杀伐之中，气运与修为并进。",
       "order": 2,
       "next_id": "planet",
       "kill_target": 28,
       "spawn_interval": 0.75,
       "max_alive": 16,
+      "boss_id": "dynasty_general",
+      "boss_at_kill": 22,
+      "accent": "#d4b06a",
+      "waves": [
+        { "at_kills": 0, "hint": "第一波 · 巡城卫出动", "spawn_interval_mult": 1.0, "max_alive_bonus": 0 },
+        { "at_kills": 12, "hint": "刀客混入阵中", "spawn_interval_mult": 0.9, "max_alive_bonus": 2, "spawns": [
+          { "enemy_id": "patrol_guard", "weight": 50 },
+          { "enemy_id": "bandit", "weight": 50 }
+        ]},
+        { "at_kills": 20, "hint": "镇国将军驾临", "spawn_interval_mult": 0.82, "max_alive_bonus": 1 }
+      ],
       "map": {
         "pattern": "city",
-        "width": 64,
-        "height": 40,
+        "width": 48,
+        "height": 30,
+        "background": "stage_country.png",
         "ground": "#5a5346",
         "ground_alt": "#4a4438",
         "path": "#9a8a6a",
-        "border": "#7a7568"
+        "border": "#7a7568",
+        "tile_opacity": 0.32,
+        "zones": [{ "cx": 0.5, "cy": 0.5, "r": 0.11, "color": "#d4b06a22" }],
+        "obstacles": [
+          { "x": 6, "y": 8, "w": 2, "h": 4, "color": "#4a4038" },
+          { "x": 38, "y": 7, "w": 3, "h": 3, "color": "#4a4038" },
+          { "x": 20, "y": 14, "w": 8, "h": 1, "color": "#5a5048" }
+        ]
       },
       "spawns": [
         { "enemy_id": "patrol_guard", "weight": 65 },
@@ -49,21 +89,38 @@
     },
     {
       "id": "planet",
-      "name": "星球",
-      "description": "荒星猎场 · 星兽与尘沙虫",
+      "name": "荒星",
+      "description": "星陆猎场 · 星兽与尘沙虫",
+      "lore": "坠落在王朝之上的古老星陆。星兽咆哮，沙虫破土，是通玄之下的极限试炼。",
       "order": 3,
       "next_id": "galaxy",
       "kill_target": 36,
       "spawn_interval": 0.7,
       "max_alive": 18,
+      "boss_id": "star_tyrant",
+      "boss_at_kill": 28,
+      "accent": "#e08a4a",
+      "waves": [
+        { "at_kills": 0, "hint": "星陆猎场开启", "spawn_interval_mult": 1.0 },
+        { "at_kills": 15, "hint": "沙虫破土", "spawn_interval_mult": 0.88, "max_alive_bonus": 3 },
+        { "at_kills": 26, "hint": "星陆霸主苏醒", "spawn_interval_mult": 0.78, "max_alive_bonus": 2 }
+      ],
       "map": {
         "pattern": "crater",
-        "width": 72,
-        "height": 44,
+        "width": 52,
+        "height": 32,
+        "background": "stage_planet.png",
         "ground": "#5c4336",
         "ground_alt": "#4a342a",
         "path": "#8a6a52",
-        "border": "#3a3030"
+        "border": "#3a3030",
+        "tile_opacity": 0.3,
+        "zones": [{ "cx": 0.5, "cy": 0.48, "r": 0.12, "color": "#e08a4a22" }],
+        "obstacles": [
+          { "x": 10, "y": 11, "w": 3, "h": 3, "color": "#3a2820" },
+          { "x": 38, "y": 18, "w": 4, "h": 2, "color": "#3a2820" },
+          { "x": 24, "y": 8, "w": 2, "h": 5, "color": "#4a3830" }
+        ]
       },
       "spawns": [
         { "enemy_id": "star_beast", "weight": 60 },
@@ -72,21 +129,37 @@
     },
     {
       "id": "galaxy",
-      "name": "星系",
-      "description": "星域乱流 · 空冥蛾与陨星灵",
+      "name": "星域",
+      "description": "天河乱流 · 空冥蛾与陨星灵",
+      "lore": "星河之间的航路。空冥蛾蔽日，陨星灵坠空，凡人不可久留。",
       "order": 4,
       "next_id": "world",
       "kill_target": 44,
       "spawn_interval": 0.65,
       "max_alive": 20,
+      "boss_id": "void_matriarch",
+      "boss_at_kill": 34,
+      "accent": "#9a7cff",
+      "waves": [
+        { "at_kills": 0, "hint": "进入天河乱流", "spawn_interval_mult": 1.0 },
+        { "at_kills": 18, "hint": "陨星坠落", "spawn_interval_mult": 0.85, "max_alive_bonus": 3 },
+        { "at_kills": 32, "hint": "空冥母神降临", "spawn_interval_mult": 0.75, "max_alive_bonus": 2 }
+      ],
       "map": {
         "pattern": "nebula",
-        "width": 72,
-        "height": 44,
+        "width": 52,
+        "height": 32,
+        "background": "stage_galaxy.png",
         "ground": "#2a2450",
         "ground_alt": "#1e1a3c",
         "path": "#5a4a88",
-        "border": "#14102a"
+        "border": "#14102a",
+        "tile_opacity": 0.28,
+        "zones": [{ "cx": 0.5, "cy": 0.45, "r": 0.1, "color": "#9a7cff22" }],
+        "obstacles": [
+          { "x": 14, "y": 9, "w": 2, "h": 6, "color": "#1a1438" },
+          { "x": 34, "y": 16, "w": 5, "h": 2, "color": "#1a1438" }
+        ]
       },
       "spawns": [
         { "enemy_id": "void_moth", "weight": 60 },
@@ -95,21 +168,38 @@
     },
     {
       "id": "world",
-      "name": "世界",
-      "description": "界隙战场 · 界影与古战卒",
+      "name": "界域",
+      "description": "裂隙战场 · 界影与古战卒",
+      "lore": "世界壁垒碎裂之处。界影游荡，古战卒不灭，是踏入通玄之上的前夜。",
       "order": 5,
       "next_id": "universe",
       "kill_target": 52,
       "spawn_interval": 0.6,
       "max_alive": 22,
+      "boss_id": "rift_lord",
+      "boss_at_kill": 40,
+      "accent": "#e06070",
+      "waves": [
+        { "at_kills": 0, "hint": "裂隙战场", "spawn_interval_mult": 1.0 },
+        { "at_kills": 22, "hint": "古战卒复苏", "spawn_interval_mult": 0.82, "max_alive_bonus": 4 },
+        { "at_kills": 38, "hint": "裂隙领主现身", "spawn_interval_mult": 0.72, "max_alive_bonus": 2 }
+      ],
       "map": {
         "pattern": "rift",
-        "width": 80,
-        "height": 48,
+        "width": 56,
+        "height": 34,
+        "background": "stage_world.png",
         "ground": "#4a1e22",
         "ground_alt": "#381418",
         "path": "#8a3a3a",
-        "border": "#2a1012"
+        "border": "#2a1012",
+        "tile_opacity": 0.28,
+        "zones": [{ "cx": 0.5, "cy": 0.42, "r": 0.09, "color": "#e0607022" }],
+        "obstacles": [
+          { "x": 12, "y": 12, "w": 3, "h": 4, "color": "#2a1012" },
+          { "x": 40, "y": 10, "w": 4, "h": 3, "color": "#2a1012" },
+          { "x": 26, "y": 22, "w": 6, "h": 1, "color": "#3a1820" }
+        ]
       },
       "spawns": [
         { "enemy_id": "world_shade", "weight": 55 },
@@ -118,21 +208,38 @@
     },
     {
       "id": "universe",
-      "name": "宇宙",
-      "description": "混沌终局 · 星骸与混沌种",
+      "name": "混沌星海",
+      "description": "终局 · 星骸与混沌种",
+      "lore": "宇宙本源。星骸沉眠，混沌种萌发——通玄之上的尽头，亦是一切的起点。",
       "order": 6,
       "next_id": "",
       "kill_target": 66,
       "spawn_interval": 0.55,
       "max_alive": 24,
+      "boss_id": "chaos_overlord",
+      "boss_at_kill": 50,
+      "accent": "#70c8ff",
+      "waves": [
+        { "at_kills": 0, "hint": "踏入混沌星海", "spawn_interval_mult": 1.0 },
+        { "at_kills": 25, "hint": "星骸苏醒", "spawn_interval_mult": 0.8, "max_alive_bonus": 4 },
+        { "at_kills": 45, "hint": "混沌主宰降临", "spawn_interval_mult": 0.68, "max_alive_bonus": 3 }
+      ],
       "map": {
         "pattern": "void",
-        "width": 80,
-        "height": 48,
+        "width": 56,
+        "height": 34,
+        "background": "stage_universe.png",
         "ground": "#0c1020",
         "ground_alt": "#080c18",
         "path": "#3a5088",
-        "border": "#04060c"
+        "border": "#04060c",
+        "tile_opacity": 0.25,
+        "zones": [{ "cx": 0.5, "cy": 0.4, "r": 0.11, "color": "#70c8ff22" }],
+        "obstacles": [
+          { "x": 8, "y": 14, "w": 2, "h": 5, "color": "#080810" },
+          { "x": 44, "y": 12, "w": 3, "h": 4, "color": "#080810" },
+          { "x": 24, "y": 24, "w": 8, "h": 2, "color": "#0a1028" }
+        ]
       },
       "spawns": [
         { "enemy_id": "star_wraith", "weight": 55 },

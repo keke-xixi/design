@@ -1,0 +1,142 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://src/ui/equipment.gd" id="1_equip"]
+[ext_resource type="Texture2D" path="res://assets/backgrounds/select_bg.png" id="2_bg"]
+
+[node name="Equipment" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_equip")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Dim" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.04, 0.05, 0.08, 0.55)
+
+[node name="Panel" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -280.0
+offset_top = -165.0
+offset_right = 280.0
+offset_bottom = 165.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="HBoxContainer" parent="Panel"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Panel/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.96, 0.92, 0.78, 1)
+theme_override_font_sizes/font_size = 22
+text = "装备 · 穿戴加成"
+
+[node name="BackButton" type="Button" parent="Panel/Header"]
+layout_mode = 2
+text = "返回广场"
+
+[node name="Slots" type="HBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Weapon" type="VBoxContainer" parent="Panel/Slots"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="Panel/Slots/Weapon"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "武器"
+
+[node name="Value" type="Label" parent="Panel/Slots/Weapon"]
+layout_mode = 2
+text = "（空）"
+
+[node name="Unequip" type="Button" parent="Panel/Slots/Weapon"]
+layout_mode = 2
+text = "卸下"
+
+[node name="Armor" type="VBoxContainer" parent="Panel/Slots"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="Panel/Slots/Armor"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "防具"
+
+[node name="Value" type="Label" parent="Panel/Slots/Armor"]
+layout_mode = 2
+text = "（空）"
+
+[node name="Unequip" type="Button" parent="Panel/Slots/Armor"]
+layout_mode = 2
+text = "卸下"
+
+[node name="Accessory" type="VBoxContainer" parent="Panel/Slots"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="Panel/Slots/Accessory"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "饰品"
+
+[node name="Value" type="Label" parent="Panel/Slots/Accessory"]
+layout_mode = 2
+text = "（空）"
+
+[node name="Unequip" type="Button" parent="Panel/Slots/Accessory"]
+layout_mode = 2
+text = "卸下"
+
+[node name="Bonus" type="Label" parent="Panel"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.88, 0.78, 1)
+theme_override_font_sizes/font_size = 12
+text = "加成"
+
+[node name="BagScroll" type="ScrollContainer" parent="Panel"]
+layout_mode = 2
+size_flags_vertical = 3
+custom_minimum_size = Vector2(0, 120)
+
+[node name="BagList" type="VBoxContainer" parent="Panel/BagScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Status" type="Label" parent="Panel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = ""
+
+[connection signal="pressed" from="Panel/Header/BackButton" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="Panel/Slots/Weapon/Unequip" to="." method="_on_unequip_weapon"]
+[connection signal="pressed" from="Panel/Slots/Armor/Unequip" to="." method="_on_unequip_armor"]
+[connection signal="pressed" from="Panel/Slots/Accessory/Unequip" to="." method="_on_unequip_accessory"]

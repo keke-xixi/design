@@ -1,0 +1,10 @@
+{
+  "_doc": "交易市场 NPC 挂单。玩家挂单存 user://market_listings.json。",
+  "npc_listings": [
+    { "id": "npc_1", "seller": "丹阁掌柜", "item_id": "white_pill", "qty": 2, "price": 60 },
+    { "id": "npc_2", "seller": "行脚商", "item_id": "spirit_grass", "qty": 5, "price": 18 },
+    { "id": "npc_3", "seller": "星域猎户", "item_id": "star_shard", "qty": 1, "price": 180 },
+    { "id": "npc_4", "seller": "界域散修", "item_id": "void_silk", "qty": 1, "price": 220 },
+    { "id": "npc_5", "seller": "神秘人", "item_id": "ancient_manual", "qty": 1, "price": 650 }
+  ]
+}

@@ -14,6 +14,7 @@ var color: String = "#888888"
 var sprite: String = "mob_disciple.png"
 var sprite_scale: float = 0.05
 var xp_attack: int = 1
+var is_boss: bool = false
 var loot: Array = []
 
 
@@ -30,6 +31,7 @@ static func from_dict(data: Dictionary) -> EnemyDef:
 	row.sprite = str(data.get("sprite", "mob_disciple.png"))
 	row.sprite_scale = float(data.get("sprite_scale", 0.05))
 	row.xp_attack = int(data.get("xp_attack", 1))
+	row.is_boss = bool(data.get("is_boss", false))
 	var raw_loot: Variant = data.get("loot", [])
 	row.loot = raw_loot if typeof(raw_loot) == TYPE_ARRAY else []
 	return row

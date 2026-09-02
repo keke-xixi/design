@@ -10,8 +10,8 @@ config_version=5
 
 [application]
 
-config/name="长生"
-config/description="A 2D cultivation RPG built for Steam."
+config/name="通玄之上"
+config/description="凡躯登仙路，一剑破通玄。2D 修仙 RPG，Steam 目标平台。"
 config/version="0.1.0"
 run/main_scene="res://scenes/world/hub.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
@@ -24,6 +24,10 @@ ContentDB="*res://src/data/content_db.gd"
 GameState="*res://src/data/game_state.gd"
 SteamService="*res://src/steam/steam_service.gd"
 SceneManager="*res://src/core/scene_manager.gd"
+SaveService="*res://src/data/save_service.gd"
+FloatTextManager="*res://src/ui/float_text_manager.gd"
+LootService="*res://src/core/loot_service.gd"
+AlchemyService="*res://src/data/alchemy_service.gd"
 
 [display]
 
@@ -51,8 +55,5 @@ locale/fallback="zh_CN"
 
 [rendering]
 
-textures/canvas_textures/default_texture_filter=0
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
-2d/snap/snap_2d_transforms_to_pixel=true
-2d/snap/snap_2d_vertices_to_pixel=true
