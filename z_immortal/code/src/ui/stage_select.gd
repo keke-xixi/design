@@ -2,11 +2,9 @@ extends Control
 
 @onready var _list: VBoxContainer = $Panel/Scroll/List
 
-
 func _ready() -> void:
 	_build_list()
 	_refresh_header()
-
 
 func _refresh_header() -> void:
 	var hint := $Panel/Hint
@@ -21,7 +19,6 @@ func _refresh_header() -> void:
 		GameState.unlocked_order,
 	]
 
-
 func _build_list() -> void:
 	while _list.get_child_count() > 0:
 		var child := _list.get_child(0)
@@ -29,7 +26,6 @@ func _build_list() -> void:
 		child.free()
 	for stage in ContentDB.stages.all_stages():
 		_list.add_child(_make_card(stage))
-
 
 func _make_card(stage: StageDef) -> Control:
 	var unlocked := GameState.can_enter(stage)
@@ -108,7 +104,6 @@ func _make_card(stage: StageDef) -> Control:
 		btn.disabled = true
 	row.add_child(btn)
 	return card
-
 
 func _on_back_pressed() -> void:
 	SceneManager.go_hub()

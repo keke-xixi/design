@@ -9,7 +9,6 @@ var weapon: String = ""
 var armor: String = ""
 var accessory: String = ""
 
-
 func get_slot(slot: String) -> String:
 	match slot:
 		"weapon": return weapon
@@ -17,27 +16,22 @@ func get_slot(slot: String) -> String:
 		"accessory": return accessory
 	return ""
 
-
 func set_slot(slot: String, item_id: String) -> void:
 	match slot:
 		"weapon": weapon = item_id
 		"armor": armor = item_id
 		"accessory": accessory = item_id
 
-
 func all_equipped() -> Dictionary:
 	return { "weapon": weapon, "armor": armor, "accessory": accessory }
-
 
 func from_dict(data: Dictionary) -> void:
 	weapon = str(data.get("weapon", ""))
 	armor = str(data.get("armor", ""))
 	accessory = str(data.get("accessory", ""))
 
-
 func to_dict() -> Dictionary:
 	return all_equipped()
-
 
 func bonus_stats() -> Dictionary:
 	var atk := 0

@@ -17,7 +17,6 @@ var bonus_hp: int = 0
 var bonus_speed_pct: float = 0.0
 var description: String = ""
 
-
 static func from_dict(data: Dictionary) -> ItemDef:
 	var row := ItemDef.new()
 	row.id = str(data.get("id", ""))

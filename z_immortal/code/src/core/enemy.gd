@@ -17,7 +17,6 @@ var xp_attack: int = 1
 var is_boss: bool = false
 var loot: Array = []
 
-
 static func from_dict(data: Dictionary) -> EnemyDef:
 	var row := EnemyDef.new()
 	row.id = str(data.get("id", ""))

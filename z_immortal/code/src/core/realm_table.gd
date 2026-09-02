@@ -6,7 +6,6 @@ extends RefCounted
 var _by_id: Dictionary = {}
 var _ordered: Array[RealmDef] = []
 
-
 func load_from_array(rows: Array) -> void:
 	_by_id.clear()
 	_ordered.clear()
@@ -14,7 +13,7 @@ func load_from_array(rows: Array) -> void:
 		if typeof(raw) != TYPE_DICTIONARY:
 			push_error("RealmTable: skip non-object row")
 			continue
-		var row := RealmDef.from_dict(raw)
+		var row: RealmDef = RealmDef.from_dict(raw)
 		if row.id.is_empty():
 			push_error("RealmTable: skip realm with empty id")
 			continue
@@ -25,10 +24,8 @@ func load_from_array(rows: Array) -> void:
 		_ordered.append(row)
 	_ordered.sort_custom(func(a: RealmDef, b: RealmDef) -> bool: return a.order < b.order)
 
-
 func get_realm(id: String) -> RealmDef:
 	return _by_id.get(id) as RealmDef
-
 
 func get_by_order(order: int) -> RealmDef:
 	for row in _ordered:
@@ -36,13 +33,11 @@ func get_by_order(order: int) -> RealmDef:
 			return row
 	return null
 
-
 func get_next(id: String) -> RealmDef:
 	var current := get_realm(id)
 	if current == null:
 		return null
 	return get_by_order(current.order + 1)
-
 
 func all_realms() -> Array[RealmDef]:
 	return _ordered.duplicate()

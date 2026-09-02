@@ -4,13 +4,11 @@ extends Node
 
 const PATH := "user://save.json"
 
-
 func _ready() -> void:
 	if has_save():
 		load_game()
 	else:
 		_grant_starters()
-
 
 func _grant_starters() -> void:
 	var raw: Variant = ContentDB.section("start").get("starter_inventory", {})
@@ -27,14 +25,12 @@ func _grant_starters() -> void:
 		GameState.equip_item("sect_robe")
 	save_game()
 
-
 func save_game() -> void:
 	var data := GameState.to_save_dict()
 	var json := JSON.stringify(data, "\t")
 	var file := FileAccess.open(PATH, FileAccess.WRITE)
 	if file:
 		file.store_string(json)
-
 
 func load_game() -> bool:
 	if not FileAccess.file_exists(PATH):
@@ -47,7 +43,6 @@ func load_game() -> bool:
 		return false
 	GameState.from_save_dict(parsed)
 	return true
-
 
 func has_save() -> bool:
 	return FileAccess.file_exists(PATH)

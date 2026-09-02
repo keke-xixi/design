@@ -1,176 +1,352 @@
-[gd_scene format=3]
-
-[ext_resource type="Script" path="res://src/world/hub.gd" id="1_hub"]
-[ext_resource type="Texture2D" path="res://assets/backgrounds/hub_bg.png" id="2_bg"]
-[ext_resource type="Texture2D" path="res://assets/portraits/player.png" id="3_portrait"]
-[ext_resource type="Texture2D" path="res://assets/characters/player_clear.png" id="4_sprite"]
-
-[node name="Hub" type="Control"]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("1_hub")
-
-[node name="Background" type="TextureRect" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("2_bg")
-expand_mode = 1
-stretch_mode = 6
-
-[node name="DimLeft" type="ColorRect" parent="."]
-layout_mode = 0
-offset_right = 280.0
-offset_bottom = 360.0
-color = Color(0.04, 0.06, 0.1, 0.55)
-
-[node name="Brand" type="Label" parent="."]
-layout_mode = 0
-offset_left = 24.0
-offset_top = 20.0
-offset_right = 260.0
-offset_bottom = 68.0
-theme_override_colors/font_color = Color(0.98, 0.93, 0.78, 1)
-theme_override_colors/font_shadow_color = Color(0.05, 0.07, 0.05, 0.9)
-theme_override_constants/shadow_offset_x = 2
-theme_override_constants/shadow_offset_y = 2
-theme_override_font_sizes/font_size = 38
-text = "通玄之上"
-
-[node name="Tagline" type="Label" parent="."]
-layout_mode = 0
-offset_left = 26.0
-offset_top = 66.0
-offset_right = 280.0
-offset_bottom = 88.0
-theme_override_colors/font_color = Color(0.78, 0.88, 0.95, 1)
-theme_override_font_sizes/font_size = 12
-text = "凡躯登仙路，一剑破通玄"
-
-[node name="StatusPanel" type="PanelContainer" parent="."]
-layout_mode = 0
-offset_left = 22.0
-offset_top = 96.0
-offset_right = 268.0
-offset_bottom = 178.0
-
-[node name="Status" type="Label" parent="StatusPanel"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.88, 0.9, 0.94, 1)
-theme_override_font_sizes/font_size = 12
-text = "通玄之下"
-
-[node name="EquipHint" type="Label" parent="."]
-layout_mode = 0
-offset_left = 22.0
-offset_top = 184.0
-offset_right = 280.0
-offset_bottom = 200.0
-theme_override_colors/font_color = Color(0.72, 0.78, 0.85, 1)
-theme_override_font_sizes/font_size = 10
-text = "装备"
-
-[node name="ChallengeButton" type="Button" parent="."]
-layout_mode = 0
-offset_left = 24.0
-offset_top = 206.0
-offset_right = 210.0
-offset_bottom = 242.0
-theme_override_font_sizes/font_size = 16
-text = "挑战关卡"
-
-[node name="EquipmentButton" type="Button" parent="."]
-layout_mode = 0
-offset_left = 24.0
-offset_top = 248.0
-offset_right = 145.0
-offset_bottom = 278.0
-theme_override_font_sizes/font_size = 12
-text = "装备"
-
-[node name="AlchemyButton" type="Button" parent="."]
-layout_mode = 0
-offset_left = 152.0
-offset_top = 248.0
-offset_right = 210.0
-offset_bottom = 278.0
-theme_override_font_sizes/font_size = 12
-text = "炼丹"
-
-[node name="MarketButton" type="Button" parent="."]
-layout_mode = 0
-offset_left = 24.0
-offset_top = 284.0
-offset_right = 210.0
-offset_bottom = 314.0
-theme_override_font_sizes/font_size = 12
-text = "通玄坊 · 交易"
-
-[node name="QuitButton" type="Button" parent="."]
-layout_mode = 0
-offset_left = 24.0
-offset_top = 320.0
-offset_right = 210.0
-offset_bottom = 350.0
-text = "退出游戏"
-
-[node name="BagHint" type="Label" parent="."]
-layout_mode = 0
-offset_left = 22.0
-offset_top = 352.0
-offset_right = 280.0
-offset_bottom = 360.0
-theme_override_colors/font_color = Color(0.7, 0.75, 0.82, 1)
-theme_override_font_sizes/font_size = 9
-autowrap_mode = 3
-text = "背包：空"
-
-[node name="HeroSprite" type="TextureRect" parent="."]
-layout_mode = 0
-offset_left = 290.0
-offset_top = 70.0
-offset_right = 450.0
-offset_bottom = 310.0
-texture = ExtResource("4_sprite")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="PortraitFrame" type="PanelContainer" parent="."]
-layout_mode = 0
-offset_left = 470.0
-offset_top = 140.0
-offset_right = 620.0
-offset_bottom = 330.0
-
-[node name="Portrait" type="TextureRect" parent="PortraitFrame"]
-layout_mode = 2
-texture = ExtResource("3_portrait")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="LorePanel" type="PanelContainer" parent="."]
-layout_mode = 0
-offset_left = 290.0
-offset_top = 300.0
-offset_right = 620.0
-offset_bottom = 350.0
-
-[node name="Lore" type="Label" parent="LorePanel"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.75, 0.78, 0.82, 1)
-theme_override_font_sizes/font_size = 10
-autowrap_mode = 3
-text = "世界观简介"
-
-[connection signal="pressed" from="ChallengeButton" to="." method="_on_challenge_pressed"]
-[connection signal="pressed" from="EquipmentButton" to="." method="_on_equipment_pressed"]
-[connection signal="pressed" from="AlchemyButton" to="." method="_on_alchemy_pressed"]
-[connection signal="pressed" from="MarketButton" to="." method="_on_market_pressed"]
-[connection signal="pressed" from="QuitButton" to="." method="_on_quit_pressed"]
+[gd_scene format=3]
+
+
+
+[ext_resource type="Script" path="res://src/world/hub.gd" id="1_hub"]
+
+[ext_resource type="Texture2D" path="res://assets/backgrounds/hub_bg.png" id="2_bg"]
+
+[ext_resource type="Texture2D" path="res://assets/portraits/player.png" id="3_portrait"]
+
+[ext_resource type="Texture2D" path="res://assets/characters/player_clear.png" id="4_sprite"]
+
+
+
+[node name="Hub" type="Control"]
+
+layout_mode = 3
+
+anchors_preset = 15
+
+anchor_right = 1.0
+
+anchor_bottom = 1.0
+
+grow_horizontal = 2
+
+grow_vertical = 2
+
+script = ExtResource("1_hub")
+
+
+
+[node name="Background" type="TextureRect" parent="."]
+
+layout_mode = 1
+
+anchors_preset = 15
+
+anchor_right = 1.0
+
+anchor_bottom = 1.0
+
+grow_horizontal = 2
+
+grow_vertical = 2
+
+texture = ExtResource("2_bg")
+
+expand_mode = 1
+
+stretch_mode = 6
+
+
+
+[node name="DimLeft" type="ColorRect" parent="."]
+
+layout_mode = 0
+
+offset_right = 280.0
+
+offset_bottom = 360.0
+
+color = Color(0.04, 0.06, 0.1, 0.55)
+
+
+
+[node name="Brand" type="Label" parent="."]
+
+layout_mode = 0
+
+offset_left = 24.0
+
+offset_top = 20.0
+
+offset_right = 260.0
+
+offset_bottom = 68.0
+
+theme_override_colors/font_color = Color(0.98, 0.93, 0.78, 1)
+
+theme_override_colors/font_shadow_color = Color(0.05, 0.07, 0.05, 0.9)
+
+theme_override_constants/shadow_offset_x = 2
+
+theme_override_constants/shadow_offset_y = 2
+
+theme_override_font_sizes/font_size = 38
+
+text = "通玄之上"
+
+
+
+[node name="Tagline" type="Label" parent="."]
+
+layout_mode = 0
+
+offset_left = 26.0
+
+offset_top = 66.0
+
+offset_right = 280.0
+
+offset_bottom = 88.0
+
+theme_override_colors/font_color = Color(0.78, 0.88, 0.95, 1)
+
+theme_override_font_sizes/font_size = 12
+
+text = "凡躯登仙路，一剑破通玄"
+
+
+
+[node name="StatusPanel" type="PanelContainer" parent="."]
+
+layout_mode = 0
+
+offset_left = 22.0
+
+offset_top = 96.0
+
+offset_right = 268.0
+
+offset_bottom = 178.0
+
+
+
+[node name="Status" type="Label" parent="StatusPanel"]
+
+layout_mode = 2
+
+theme_override_colors/font_color = Color(0.88, 0.9, 0.94, 1)
+
+theme_override_font_sizes/font_size = 12
+
+text = "通玄之下"
+
+
+
+[node name="EquipHint" type="Label" parent="."]
+
+layout_mode = 0
+
+offset_left = 22.0
+
+offset_top = 184.0
+
+offset_right = 280.0
+
+offset_bottom = 200.0
+
+theme_override_colors/font_color = Color(0.72, 0.78, 0.85, 1)
+
+theme_override_font_sizes/font_size = 10
+
+text = "装备"
+
+
+
+[node name="ChallengeButton" type="Button" parent="."]
+
+layout_mode = 0
+
+offset_left = 24.0
+
+offset_top = 206.0
+
+offset_right = 210.0
+
+offset_bottom = 242.0
+
+theme_override_font_sizes/font_size = 16
+
+text = "挑战关卡"
+
+
+
+[node name="EquipmentButton" type="Button" parent="."]
+
+layout_mode = 0
+
+offset_left = 24.0
+
+offset_top = 248.0
+
+offset_right = 145.0
+
+offset_bottom = 278.0
+
+theme_override_font_sizes/font_size = 12
+
+text = "装备"
+
+
+
+[node name="AlchemyButton" type="Button" parent="."]
+
+layout_mode = 0
+
+offset_left = 152.0
+
+offset_top = 248.0
+
+offset_right = 210.0
+
+offset_bottom = 278.0
+
+theme_override_font_sizes/font_size = 12
+
+text = "炼丹"
+
+
+
+[node name="MarketButton" type="Button" parent="."]
+
+layout_mode = 0
+
+offset_left = 24.0
+
+offset_top = 284.0
+
+offset_right = 210.0
+
+offset_bottom = 314.0
+
+theme_override_font_sizes/font_size = 12
+
+text = "通玄坊 · 交易"
+
+
+
+[node name="QuitButton" type="Button" parent="."]
+
+layout_mode = 0
+
+offset_left = 24.0
+
+offset_top = 320.0
+
+offset_right = 210.0
+
+offset_bottom = 350.0
+
+text = "退出游戏"
+
+
+
+[node name="BagHint" type="Label" parent="."]
+
+layout_mode = 0
+
+offset_left = 22.0
+
+offset_top = 352.0
+
+offset_right = 280.0
+
+offset_bottom = 360.0
+
+theme_override_colors/font_color = Color(0.7, 0.75, 0.82, 1)
+
+theme_override_font_sizes/font_size = 9
+
+autowrap_mode = 3
+
+text = "背包：空"
+
+
+
+[node name="HeroSprite" type="TextureRect" parent="."]
+
+layout_mode = 0
+
+offset_left = 290.0
+
+offset_top = 70.0
+
+offset_right = 450.0
+
+offset_bottom = 310.0
+
+texture = ExtResource("4_sprite")
+
+expand_mode = 1
+
+stretch_mode = 5
+
+
+
+[node name="PortraitFrame" type="PanelContainer" parent="."]
+
+layout_mode = 0
+
+offset_left = 470.0
+
+offset_top = 140.0
+
+offset_right = 620.0
+
+offset_bottom = 330.0
+
+
+
+[node name="Portrait" type="TextureRect" parent="PortraitFrame"]
+
+layout_mode = 2
+
+texture = ExtResource("3_portrait")
+
+expand_mode = 1
+
+stretch_mode = 5
+
+
+
+[node name="LorePanel" type="PanelContainer" parent="."]
+
+layout_mode = 0
+
+offset_left = 290.0
+
+offset_top = 300.0
+
+offset_right = 620.0
+
+offset_bottom = 350.0
+
+
+
+[node name="Lore" type="Label" parent="LorePanel"]
+
+layout_mode = 2
+
+theme_override_colors/font_color = Color(0.75, 0.78, 0.82, 1)
+
+theme_override_font_sizes/font_size = 10
+
+autowrap_mode = 3
+
+text = "世界观简介"
+
+
+
+[connection signal="pressed" from="ChallengeButton" to="." method="_on_challenge_pressed"]
+
+[connection signal="pressed" from="EquipmentButton" to="." method="_on_equipment_pressed"]
+
+[connection signal="pressed" from="AlchemyButton" to="." method="_on_alchemy_pressed"]
+
+[connection signal="pressed" from="MarketButton" to="." method="_on_market_pressed"]
+
+[connection signal="pressed" from="QuitButton" to="." method="_on_quit_pressed"]
+

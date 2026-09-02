@@ -3,7 +3,6 @@ extends RefCounted
 
 ## Maps a defense value to 凡 / 灵 / 绝 / 玄 using balance.json bands.
 
-
 static func name_for(defense: int, bands: Variant) -> String:
 	if typeof(bands) != TYPE_ARRAY:
 		return ""

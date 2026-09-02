@@ -2,7 +2,6 @@ extends Node
 
 ## Crafting and gacha pulls. Recipes in content/alchemy.json.
 
-
 func craft(recipe_id: String) -> Dictionary:
 	var recipe := _find_recipe(recipe_id)
 	if recipe.is_empty():
@@ -32,7 +31,6 @@ func craft(recipe_id: String) -> Dictionary:
 		return { "ok": true, "item_id": item_id, "qty": qty }
 	return { "ok": false, "reason": "bad_output" }
 
-
 func gacha_pull(pool_config_id: String) -> Dictionary:
 	var pool := _find_gacha_pool(pool_config_id)
 	if pool.is_empty():
@@ -60,13 +58,11 @@ func gacha_pull(pool_config_id: String) -> Dictionary:
 	EventBus.gacha_rolled.emit(pool_config_id, item_id, qty)
 	return { "ok": true, "item_id": item_id, "qty": qty, "entry_id": entry_id }
 
-
 func _find_recipe(recipe_id: String) -> Dictionary:
 	for raw in ContentDB.alchemy_recipes():
 		if typeof(raw) == TYPE_DICTIONARY and str(raw.get("id", "")) == recipe_id:
 			return raw
 	return {}
-
 
 func _find_gacha_pool(pool_id: String) -> Dictionary:
 	for raw in ContentDB.alchemy_gacha_pools():

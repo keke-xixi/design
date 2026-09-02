@@ -14,7 +14,6 @@ var stage_name: String = ""
 var order: int = 0
 var is_hidden: bool = false
 
-
 static func from_dict(data: Dictionary) -> RealmDef:
 	var row := RealmDef.new()
 	row.id = str(data.get("id", ""))

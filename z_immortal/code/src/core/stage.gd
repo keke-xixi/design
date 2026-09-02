@@ -19,7 +19,6 @@ var waves: Array = []
 var map: Dictionary = {}
 var spawns: Array = []
 
-
 static func from_dict(data: Dictionary) -> StageDef:
 	var row := StageDef.new()
 	row.id = str(data.get("id", ""))
@@ -42,17 +41,14 @@ static func from_dict(data: Dictionary) -> StageDef:
 	row.spawns = raw_spawns if typeof(raw_spawns) == TYPE_ARRAY else []
 	return row
 
-
 func background_path() -> String:
 	var file_name := str(map.get("background", ""))
 	if file_name.is_empty():
 		return ""
 	return "res://assets/backgrounds/%s" % file_name
 
-
 func pick_enemy_id() -> String:
 	return _pick_from_spawns(spawns)
-
 
 func current_wave(kills: int) -> Dictionary:
 	if waves.is_empty():
@@ -65,22 +61,18 @@ func current_wave(kills: int) -> Dictionary:
 			current = raw
 	return current
 
-
 func spawn_interval_for(kills: int) -> float:
 	var wave := current_wave(kills)
 	var mult := float(wave.get("spawn_interval_mult", 1.0))
 	return spawn_interval * mult
 
-
 func max_alive_for(kills: int) -> int:
 	var wave := current_wave(kills)
 	return max_alive + int(wave.get("max_alive_bonus", 0))
 
-
 func wave_hint(kills: int) -> String:
 	var wave := current_wave(kills)
 	return str(wave.get("hint", ""))
-
 
 func _pick_from_spawns(pool: Array) -> String:
 	var total := 0

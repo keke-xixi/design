@@ -8,12 +8,10 @@ var attack: int = 1
 var wisdom_rank: int = 1
 var defense: int = 1
 
-
 func cultivate_attack(gain: int, lo: int, hi: int) -> int:
 	var before := attack
 	attack = clampi(attack + max(gain, 0), lo, hi)
 	return attack - before
-
 
 func try_breakthrough(table: RealmTable, costs: Dictionary, mystic_resets: bool, mystic_start: int) -> Dictionary:
 	var current := table.get_realm(attack_realm_id)
@@ -34,7 +32,6 @@ func try_breakthrough(table: RealmTable, costs: Dictionary, mystic_resets: bool,
 	if crossed_to_mystic and mystic_resets:
 		attack = mystic_start
 	return { "ok": true, "realm_id": next_realm.id, "realm": next_realm, "reset_attack": crossed_to_mystic and mystic_resets }
-
 
 func attack_cap(mortal_max: int, mystic_max: int, table: RealmTable) -> int:
 	var realm := table.get_realm(attack_realm_id)

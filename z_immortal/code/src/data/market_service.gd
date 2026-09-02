@@ -7,15 +7,12 @@ const LISTING_PATH := "user://market_listings.json"
 var npc_listings: Array = []
 var player_listings: Array = []
 
-
 func _ready() -> void:
 	npc_listings = ContentDB.market_npc_listings()
 	_load_player_listings()
 
-
 func refresh_npc_listings() -> void:
 	npc_listings = ContentDB.market_npc_listings()
-
 
 func _load_player_listings() -> void:
 	if not FileAccess.file_exists(LISTING_PATH):
@@ -27,12 +24,10 @@ func _load_player_listings() -> void:
 	var parsed: Variant = JSON.parse_string(file.get_as_text())
 	player_listings = parsed if typeof(parsed) == TYPE_ARRAY else []
 
-
 func save_player_listings() -> void:
 	var file := FileAccess.open(LISTING_PATH, FileAccess.WRITE)
 	if file:
 		file.store_string(JSON.stringify(player_listings, "\t"))
-
 
 func all_listings() -> Array:
 	var out: Array = []
@@ -40,12 +35,12 @@ func all_listings() -> Array:
 		if typeof(raw) == TYPE_DICTIONARY:
 			out.append(raw.duplicate())
 	for raw in player_listings:
-		if typeof(raw) == TYPE_DICTIONARY:
-			var row := raw.duplicate()
-			row["seller"] = "你"
-			out.append(row)
+		if typeof(raw) != TYPE_DICTIONARY:
+			continue
+		var row: Dictionary = raw.duplicate()
+		row["seller"] = "你"
+		out.append(row)
 	return out
-
 
 func buy_listing(listing_id: String) -> Dictionary:
 	for i in npc_listings.size():
@@ -54,12 +49,11 @@ func buy_listing(listing_id: String) -> Dictionary:
 			continue
 		return _complete_buy(row, true, i)
 	for i in player_listings.size():
-		var row: Dictionary = player_listings[i]
-		if str(row.get("id", "")) != listing_id:
+		var row2: Dictionary = player_listings[i]
+		if str(row2.get("id", "")) != listing_id:
 			continue
-		return _complete_buy(row, false, i)
+		return _complete_buy(row2, false, i)
 	return { "ok": false, "reason": "not_found" }
-
 
 func _complete_buy(row: Dictionary, is_npc: bool, index: int) -> Dictionary:
 	var price := int(row.get("price", 0))
@@ -79,7 +73,6 @@ func _complete_buy(row: Dictionary, is_npc: bool, index: int) -> Dictionary:
 	SaveService.save_game()
 	EventBus.market_trade.emit("buy", item_id, qty, price)
 	return { "ok": true, "item_id": item_id, "qty": qty, "price": price }
-
 
 func list_item(item_id: String, qty: int, price: int) -> Dictionary:
 	if qty <= 0 or price <= 0:
@@ -102,7 +95,6 @@ func list_item(item_id: String, qty: int, price: int) -> Dictionary:
 	SaveService.save_game()
 	EventBus.market_trade.emit("list", item_id, qty, price)
 	return { "ok": true, "listing_id": listing["id"] }
-
 
 func sell_to_npc(item_id: String, qty: int) -> Dictionary:
 	if qty <= 0:

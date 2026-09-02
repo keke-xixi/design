@@ -15,10 +15,8 @@ var alchemy: Dictionary = {}
 var skills: Array = []
 var stages := StageTable.new()
 
-
 func _ready() -> void:
 	reload()
-
 
 func reload() -> void:
 	balance = _load_json("res://content/balance.json")
@@ -52,66 +50,52 @@ func reload() -> void:
 	if stages.get_stage(start_stage) == null:
 		push_error("ContentDB: missing start stage '%s'" % start_stage)
 
-
 func section(name: String) -> Dictionary:
 	var raw: Variant = balance.get(name, {})
 	return raw if typeof(raw) == TYPE_DICTIONARY else {}
 
-
 func breakthrough_costs() -> Dictionary:
 	return section("breakthrough_attack")
-
 
 func get_art(id: String) -> ArtDef:
 	return arts.get(id) as ArtDef
 
-
 func get_item(id: String) -> ItemDef:
 	return items.get(id) as ItemDef
-
 
 func get_enemy(id: String) -> EnemyDef:
 	return enemies.get(id) as EnemyDef
 
-
 func get_stage(id: String) -> StageDef:
 	return stages.get_stage(id)
-
 
 func lore_tagline() -> String:
 	return str(lore.get("tagline", ""))
 
-
 func lore_intro() -> String:
 	return str(lore.get("intro", ""))
-
 
 func market_npc_listings() -> Array:
 	var rows: Variant = market.get("npc_listings", [])
 	return rows if typeof(rows) == TYPE_ARRAY else []
 
-
 func alchemy_recipes() -> Array:
 	var rows: Variant = alchemy.get("recipes", [])
 	return rows if typeof(rows) == TYPE_ARRAY else []
-
 
 func alchemy_gacha_pools() -> Array:
 	var rows: Variant = alchemy.get("gacha_pools", [])
 	return rows if typeof(rows) == TYPE_ARRAY else []
 
-
 func gacha_reward(entry_id: String) -> Dictionary:
 	var raw: Variant = alchemy.get("gacha_rewards", {}).get(entry_id, {})
 	return raw if typeof(raw) == TYPE_DICTIONARY else {}
-
 
 func get_skill(id: String) -> Dictionary:
 	for raw in skills:
 		if typeof(raw) == TYPE_DICTIONARY and str(raw.get("id", "")) == id:
 			return raw
 	return {}
-
 
 func gacha_pool_entries(rarity_id: String, pool_id: String) -> Array:
 	for raw in gacha.get("rarities", []):
@@ -122,7 +106,6 @@ func gacha_pool_entries(rarity_id: String, pool_id: String) -> Array:
 				var entries: Variant = pool.get("entries", [])
 				return entries if typeof(entries) == TYPE_ARRAY else []
 	return []
-
 
 func _index_rows(path: String, key: String, mapper: Callable) -> Dictionary:
 	var data: Dictionary = _load_json(path)
@@ -144,7 +127,6 @@ func _index_rows(path: String, key: String, mapper: Callable) -> Dictionary:
 			continue
 		indexed[id] = row
 	return indexed
-
 
 func _load_json(path: String) -> Dictionary:
 	if not FileAccess.file_exists(path):

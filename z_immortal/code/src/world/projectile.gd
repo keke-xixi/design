@@ -5,14 +5,12 @@ var _life := 0.85
 var _speed := 240.0
 var _damage_mult := 1.0
 
-
 func _ready() -> void:
 	collision_layer = 16
 	collision_mask = 8
 	monitoring = true
 	monitorable = false
 	body_entered.connect(_on_body_entered)
-
 
 func launch(from: Vector2, dir: Vector2, damage_mult: float = 1.0) -> void:
 	global_position = from
@@ -23,13 +21,11 @@ func launch(from: Vector2, dir: Vector2, damage_mult: float = 1.0) -> void:
 	_speed = float(cbt.get("projectile_speed", 240))
 	_life = float(cbt.get("projectile_lifetime", 0.85))
 
-
 func _physics_process(delta: float) -> void:
 	position += _dir * _speed * delta
 	_life -= delta
 	if _life <= 0.0:
 		queue_free()
-
 
 func _on_body_entered(body: Node) -> void:
 	if not body.is_in_group("mobs"):

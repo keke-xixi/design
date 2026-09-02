@@ -9,35 +9,33 @@ const MARKET := "res://scenes/world/market.tscn"
 const EQUIPMENT := "res://scenes/world/equipment.tscn"
 const ALCHEMY := "res://scenes/world/alchemy.tscn"
 
-
 func go_hub() -> void:
 	SaveService.save_game()
-	get_tree().change_scene_to_file(HUB)
-
+	_change(HUB)
 
 func go_stage_select() -> void:
 	SaveService.save_game()
-	get_tree().change_scene_to_file(STAGE_SELECT)
-
+	_change(STAGE_SELECT)
 
 func go_combat(stage_id: String) -> void:
 	if not GameState.enter_stage(stage_id):
 		push_warning("Cannot enter stage %s" % stage_id)
 		return
 	SaveService.save_game()
-	get_tree().change_scene_to_file(COMBAT)
-
+	_change(COMBAT)
 
 func go_market() -> void:
 	SaveService.save_game()
-	get_tree().change_scene_to_file(MARKET)
-
+	_change(MARKET)
 
 func go_equipment() -> void:
 	SaveService.save_game()
-	get_tree().change_scene_to_file(EQUIPMENT)
-
+	_change(EQUIPMENT)
 
 func go_alchemy() -> void:
 	SaveService.save_game()
-	get_tree().change_scene_to_file(ALCHEMY)
+	_change(ALCHEMY)
+
+func _change(path: String) -> void:
+	# Deferred so callers (e.g. input handlers) finish before the current scene is freed.
+	get_tree().call_deferred("change_scene_to_file", path)

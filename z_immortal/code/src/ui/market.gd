@@ -1,13 +1,12 @@
 extends Control
 
 @onready var _stones: Label = $Panel/Header/Stones
-@onready var _list: VBoxContainer = $Panel/Scroll/List
+@onready var _list: VBoxContainer = $Panel/Body/Scroll/List
 @onready var _bag: VBoxContainer = $Panel/Body/BagPanel/BagVBox/BagList
 @onready var _status: Label = $Panel/Status
 @onready var _sell_item: OptionButton = $Panel/SellRow/SellItem
 @onready var _sell_qty: SpinBox = $Panel/SellRow/SellQty
 @onready var _sell_price: SpinBox = $Panel/SellRow/SellPrice
-
 
 func _ready() -> void:
 	MarketService.refresh_npc_listings()
@@ -18,17 +17,14 @@ func _ready() -> void:
 	EventBus.market_trade.connect(func(_a, _i, _q, _p): _refresh_all())
 	EventBus.item_gained.connect(func(_i, _a, _r): _refresh_all())
 
-
 func _refresh_all() -> void:
 	_refresh_header()
 	_build_listings()
 	_build_bag()
 	_populate_sell_items()
 
-
 func _refresh_header() -> void:
 	_stones.text = "灵石 %d" % GameState.spirit_stones
-
 
 func _build_listings() -> void:
 	while _list.get_child_count() > 0:
@@ -39,7 +35,6 @@ func _build_listings() -> void:
 		if typeof(raw) != TYPE_DICTIONARY:
 			continue
 		_list.add_child(_make_listing_row(raw))
-
 
 func _make_listing_row(row: Dictionary) -> Control:
 	var item_id := str(row.get("item_id", ""))
@@ -67,7 +62,6 @@ func _make_listing_row(row: Dictionary) -> Control:
 	h.add_child(btn)
 	return panel
 
-
 func _on_buy(listing_id: String) -> void:
 	var result := MarketService.buy_listing(listing_id)
 	if bool(result.get("ok", false)):
@@ -78,7 +72,6 @@ func _on_buy(listing_id: String) -> void:
 			_status.text = "灵石不足，需要 %d" % int(result.get("need", 0))
 		else:
 			_status.text = "购买失败"
-
 
 func _build_bag() -> void:
 	while _bag.get_child_count() > 0:
@@ -108,7 +101,6 @@ func _build_bag() -> void:
 			row.add_child(sell_btn)
 		_bag.add_child(row)
 
-
 func _populate_sell_items() -> void:
 	_sell_item.clear()
 	for item_id in GameState.inventory.all_counts().keys():
@@ -122,7 +114,6 @@ func _populate_sell_items() -> void:
 	_sell_price.max_value = 99999
 	_sell_price.value = 50
 
-
 func _on_quick_sell(item_id: String, qty: int) -> void:
 	var result := MarketService.sell_to_npc(item_id, qty)
 	if bool(result.get("ok", false)):
@@ -130,7 +121,6 @@ func _on_quick_sell(item_id: String, qty: int) -> void:
 		_refresh_all()
 	else:
 		_status.text = "无法回收"
-
 
 func _on_list_pressed() -> void:
 	if _sell_item.item_count <= 0:
@@ -146,7 +136,6 @@ func _on_list_pressed() -> void:
 		_refresh_all()
 	else:
 		_status.text = "上架失败"
-
 
 func _on_back_pressed() -> void:
 	SceneManager.go_hub()

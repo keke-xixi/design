@@ -17,7 +17,6 @@ var combo: int = 0
 var _boss_spawned_this_run: bool = false
 var _last_kill_time: float = -999.0
 
-
 func _ready() -> void:
 	cultivation = CultivationState.new()
 	inventory = Inventory.new()
@@ -34,22 +33,17 @@ func _ready() -> void:
 		unlocked_order = stage.order
 	refill_hp()
 
-
 func equipment_bonus() -> Dictionary:
 	return equipment.bonus_stats()
-
 
 func effective_attack() -> int:
 	return cultivation.attack + int(equipment_bonus().get("attack", 0))
 
-
 func effective_defense() -> int:
 	return cultivation.defense + int(equipment_bonus().get("defense", 0))
 
-
 func effective_speed_mult() -> float:
 	return 1.0 + float(equipment_bonus().get("speed_pct", 0.0))
-
 
 func equip_item(item_id: String) -> bool:
 	var item := ContentDB.get_item(item_id)
@@ -66,7 +60,6 @@ func equip_item(item_id: String) -> bool:
 	SaveService.save_game()
 	return true
 
-
 func unequip_slot(slot: String) -> bool:
 	if not slot in EquipmentLoadout.SLOTS:
 		return false
@@ -78,7 +71,6 @@ func unequip_slot(slot: String) -> bool:
 	EventBus.equipment_changed.emit()
 	SaveService.save_game()
 	return true
-
 
 func to_save_dict() -> Dictionary:
 	return {
@@ -93,7 +85,6 @@ func to_save_dict() -> Dictionary:
 		"inventory": inventory.all_counts(),
 		"equipment": equipment.to_dict(),
 	}
-
 
 func from_save_dict(data: Dictionary) -> void:
 	cultivation.attack = int(data.get("attack", cultivation.attack))
@@ -116,7 +107,6 @@ func from_save_dict(data: Dictionary) -> void:
 		equipment.from_dict(raw_eq)
 	refill_hp()
 
-
 func grant_item(item_id: String, amount: int = 1, emit_event: bool = true) -> void:
 	if item_id.is_empty() or amount <= 0:
 		return
@@ -127,13 +117,11 @@ func grant_item(item_id: String, amount: int = 1, emit_event: bool = true) -> vo
 		EventBus.item_gained.emit(item_id, amount, rarity)
 		SaveService.save_game()
 
-
 func add_spirit_stones(amount: int) -> void:
 	if amount <= 0:
 		return
 	spirit_stones += amount
 	SaveService.save_game()
-
 
 func heal_amount(amount: int) -> int:
 	if dead:
@@ -142,7 +130,6 @@ func heal_amount(amount: int) -> int:
 	hp = mini(hp + maxi(amount, 0), max_hp)
 	EventBus.player_hp_changed.emit(hp, max_hp)
 	return hp - before
-
 
 func use_pill_from_inventory(priority: Array) -> Dictionary:
 	for raw in priority:
@@ -158,21 +145,17 @@ func use_pill_from_inventory(priority: Array) -> Dictionary:
 		return { "ok": true, "item_id": item_id, "healed": healed }
 	return { "ok": false, "reason": "no_pill" }
 
-
 func realm_band_name() -> String:
 	var realm := ContentDB.realms.get_realm(cultivation.attack_realm_id)
 	if realm == null:
 		return "未知"
 	return "通玄之上" if realm.band == "mystic" else "通玄之下"
 
-
 func current_stage() -> StageDef:
 	return ContentDB.get_stage(stage_id)
 
-
 func stage_kills() -> int:
 	return int(kills.get(stage_id, 0))
-
 
 func is_stage_cleared(id: String = "") -> bool:
 	var sid := id if not id.is_empty() else stage_id
@@ -181,10 +164,8 @@ func is_stage_cleared(id: String = "") -> bool:
 		return false
 	return int(kills.get(sid, 0)) >= stage.kill_target
 
-
 func can_enter(stage: StageDef) -> bool:
 	return stage != null and stage.order <= unlocked_order
-
 
 func enter_stage(id: String) -> bool:
 	var stage := ContentDB.get_stage(id)
@@ -200,7 +181,6 @@ func enter_stage(id: String) -> bool:
 	EventBus.stage_changed.emit(stage_id)
 	return true
 
-
 func try_next_stage() -> bool:
 	var stage := current_stage()
 	if stage == null or stage.next_id.is_empty():
@@ -208,7 +188,6 @@ func try_next_stage() -> bool:
 	if not is_stage_cleared():
 		return false
 	return enter_stage(stage.next_id)
-
 
 func cycle_stage(delta_order: int) -> bool:
 	var stage := current_stage()
@@ -218,7 +197,6 @@ func cycle_stage(delta_order: int) -> bool:
 	if not can_enter(next):
 		return false
 	return enter_stage(next.id)
-
 
 func register_kill(enemy_id: String) -> void:
 	kills[stage_id] = stage_kills() + 1
@@ -244,13 +222,11 @@ func register_kill(enemy_id: String) -> void:
 		EventBus.stage_cleared.emit(stage_id)
 	SaveService.save_game()
 
-
 func _grant_stage_clear_reward(stage: StageDef) -> void:
 	var g := ContentDB.section("growth")
 	var stones := int(g.get("stage_clear_stones_base", 15)) + stage.order * int(g.get("stage_clear_stones_per_order", 8))
 	add_spirit_stones(stones)
 	EventBus.stage_reward.emit(stones)
-
 
 func _update_combo() -> void:
 	var window := float(ContentDB.section("combat").get("combo_window", 3.0))
@@ -261,7 +237,6 @@ func _update_combo() -> void:
 	_last_kill_time = run_time
 	if combo >= 5 and combo % 5 == 0:
 		EventBus.combo_milestone.emit(combo)
-
 
 func _apply_kill_growth() -> void:
 	var g := ContentDB.section("growth")
@@ -281,7 +256,6 @@ func _apply_kill_growth() -> void:
 		EventBus.player_hp_changed.emit(hp, max_hp)
 		SaveService.save_game()
 
-
 func apply_hurt(amount: int) -> void:
 	if dead:
 		return
@@ -291,13 +265,11 @@ func apply_hurt(amount: int) -> void:
 		dead = true
 		EventBus.player_died.emit()
 
-
 func revive() -> void:
 	dead = false
 	run_time = 0.0
 	refill_hp()
 	EventBus.stage_changed.emit(stage_id)
-
 
 func recompute_max_hp() -> void:
 	var cbt := ContentDB.section("combat")
@@ -308,16 +280,13 @@ func recompute_max_hp() -> void:
 		int(cbt.get("hp_per_defense", 18)),
 	) + int(bonus.get("hp", 0))
 
-
 func refill_hp() -> void:
 	recompute_max_hp()
 	hp = max_hp
 	EventBus.player_hp_changed.emit(hp, max_hp)
 
-
 func cultivate_attack() -> int:
 	return cultivate_attack_amount(int(ContentDB.section("attack").get("cultivate_gain", 0)))
-
 
 func cultivate_attack_amount(gain: int) -> int:
 	var atk := ContentDB.section("attack")
@@ -326,7 +295,6 @@ func cultivate_attack_amount(gain: int) -> int:
 	if gained > 0:
 		EventBus.attack_gained.emit(gained, cultivation.attack)
 	return gained
-
 
 func try_breakthrough() -> Dictionary:
 	var atk := ContentDB.section("attack")
@@ -342,7 +310,6 @@ func try_breakthrough() -> Dictionary:
 		EventBus.cultivation_broke_through.emit(str(result.get("realm_id", "")))
 		SaveService.save_game()
 	return result
-
 
 func projectile_damage_against(enemy_def: int, mult: float = 1.0) -> int:
 	var cbt := ContentDB.section("combat")

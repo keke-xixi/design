@@ -25,7 +25,6 @@ const _DefenseBands := preload("res://src/core/defense_bands.gd")
 const _SKILL_IDS := ["dash", "ring_slash", "use_pill", "spirit_burst"]
 const _SKILL_LABELS := ["L闪避", "U环斩", "I服丹", "O灵爆"]
 
-
 func _ready() -> void:
 	EventBus.cultivation_broke_through.connect(_on_broke)
 	EventBus.mystic_crossed.connect(_on_mystic)
@@ -48,16 +47,14 @@ func _ready() -> void:
 	_clear.visible = false
 	_refresh()
 
-
 func _process(_delta: float) -> void:
 	_update_skill_bar()
-
 
 func _update_skill_bar() -> void:
 	var player := get_tree().get_first_node_in_group("player")
 	var labels := [_skill_l, _skill_u, _skill_i, _skill_o]
 	for i in _SKILL_IDS.size():
-		var base := _SKILL_LABELS[i] if i < _SKILL_LABELS.size() else _SKILL_IDS[i]
+		var base: String = _SKILL_LABELS[i] if i < _SKILL_LABELS.size() else _SKILL_IDS[i]
 		var cd_left := 0.0
 		if player and player.has_method("get_skill_cooldown"):
 			cd_left = player.get_skill_cooldown(_SKILL_IDS[i])
@@ -68,10 +65,8 @@ func _update_skill_bar() -> void:
 			labels[i].text = base
 			labels[i].modulate = Color(0.85, 0.92, 0.98)
 
-
 func _on_equipment() -> void:
 	_refresh()
-
 
 func show_clear(custom: String = "") -> void:
 	_clear.text = custom if not custom.is_empty() else "本层已破 · 通玄之路更进一步"
@@ -82,32 +77,25 @@ func show_clear(custom: String = "") -> void:
 	tw.tween_property(_clear, "modulate:a", 0.0, 0.8)
 	tw.tween_callback(func() -> void: _clear.visible = false)
 
-
 func _on_mystic() -> void:
 	_clear.text = "踏入通玄之上！"
 	show_clear()
 	_refresh()
 
-
 func _on_broke(_new_realm_id: String) -> void:
 	_refresh()
-
 
 func _on_attack(_amount: int, _total: int) -> void:
 	_refresh()
 
-
 func _on_kill(_enemy_id: String, _stage_id: String) -> void:
 	_refresh()
-
 
 func _on_hp(_hp: int, _max_hp: int) -> void:
 	_refresh()
 
-
 func _on_any_noargs() -> void:
 	_refresh()
-
 
 func _on_stage(_stage_id: String) -> void:
 	_clear.visible = false
@@ -115,10 +103,8 @@ func _on_stage(_stage_id: String) -> void:
 	_boss_bar.visible = false
 	_refresh()
 
-
 func _on_wave(hint: String) -> void:
 	_wave_label.text = hint
-
 
 func _on_boss_hp(name: String, hp: int, max_hp: int) -> void:
 	_boss_bar.visible = true
@@ -126,10 +112,8 @@ func _on_boss_hp(name: String, hp: int, max_hp: int) -> void:
 	var ratio := 0.0 if max_hp <= 0 else clampf(float(hp) / float(max_hp), 0.0, 1.0)
 	_boss_hp_fill.size.x = 240.0 * ratio
 
-
 func _on_boss_hp_cleared() -> void:
 	_boss_bar.visible = false
-
 
 func _on_boss(enemy_id: String) -> void:
 	var enemy := ContentDB.get_enemy(enemy_id)
@@ -137,19 +121,15 @@ func _on_boss(enemy_id: String) -> void:
 	_wave_label.text = "Boss · %s" % name
 	show_clear("%s 降临！" % name)
 
-
 func _on_item(_item_id: String, _amount: int, _rarity: String) -> void:
 	_refresh()
-
 
 func _on_cleared(_stage_id: String) -> void:
 	show_clear()
 	_refresh()
 
-
 func _on_stage_reward(stones: int) -> void:
 	show_clear("通关奖励 · %d 灵石" % stones)
-
 
 func _refresh() -> void:
 	var c := GameState.cultivation
@@ -187,10 +167,8 @@ func _refresh() -> void:
 	else:
 		_defense_label.text = "防  %d(+%d)（%s）" % [eff_def, eff_def - c.defense, def_name]
 	_stones_label.text = "灵石  %d" % GameState.spirit_stones
-	if _wave_label.text.is_empty():
-		var stage := GameState.current_stage()
-		if stage:
-			_wave_label.text = stage.wave_hint(GameState.stage_kills())
+	if _wave_label.text.is_empty() and stage:
+		_wave_label.text = stage.wave_hint(GameState.stage_kills())
 	if GameState.dead:
 		_hint_label.text = "已阵亡  R 重生   Esc 返回选关"
 	elif GameState.is_stage_cleared():

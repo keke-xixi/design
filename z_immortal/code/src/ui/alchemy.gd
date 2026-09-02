@@ -5,19 +5,16 @@ extends Control
 @onready var _gacha: VBoxContainer = $Panel/Body/GachaCol/GachaList
 @onready var _status: Label = $Panel/Status
 
-
 func _ready() -> void:
 	_refresh()
 	EventBus.alchemy_crafted.connect(func(_r, _i, _q): _refresh())
 	EventBus.gacha_rolled.connect(func(_p, _i, _q): _refresh())
 	EventBus.item_gained.connect(func(_i, _a, _r): _refresh())
 
-
 func _refresh() -> void:
 	_stones.text = "灵石 %d" % GameState.spirit_stones
 	_build_recipes()
 	_build_gacha()
-
 
 func _build_recipes() -> void:
 	while _recipes.get_child_count() > 0:
@@ -27,9 +24,8 @@ func _build_recipes() -> void:
 	for raw in ContentDB.alchemy_recipes():
 		if typeof(raw) != TYPE_DICTIONARY:
 			continue
-		var row := _make_recipe_row(raw)
+		var row: Control = _make_recipe_row(raw as Dictionary)
 		_recipes.add_child(row)
-
 
 func _make_recipe_row(recipe: Dictionary) -> Control:
 	var id := str(recipe.get("id", ""))
@@ -41,8 +37,11 @@ func _make_recipe_row(recipe: Dictionary) -> Control:
 			var item := ContentDB.get_item(str(raw.get("item_id", "")))
 			var n := item.display_name if item else str(raw.get("item_id", ""))
 			inputs.append("%s×%d" % [n, int(raw.get("qty", 1))])
-	var out: Variant = recipe.get("output", {})
-	var out_item := ContentDB.get_item(str(out.get("item_id", "")))
+	var out_raw: Variant = recipe.get("output", {})
+	if typeof(out_raw) != TYPE_DICTIONARY:
+		out_raw = {}
+	var out: Dictionary = out_raw
+	var out_item: ItemDef = ContentDB.get_item(str(out.get("item_id", "")))
 	var out_name := out_item.display_name if out_item else str(out.get("item_id", ""))
 
 	var panel := PanelContainer.new()
@@ -60,7 +59,6 @@ func _make_recipe_row(recipe: Dictionary) -> Control:
 	btn.pressed.connect(func() -> void: _craft(id))
 	v.add_child(btn)
 	return panel
-
 
 func _build_gacha() -> void:
 	while _gacha.get_child_count() > 0:
@@ -86,7 +84,6 @@ func _build_gacha() -> void:
 		h.add_child(btn)
 		_gacha.add_child(panel)
 
-
 func _craft(recipe_id: String) -> void:
 	var result := AlchemyService.craft(recipe_id)
 	if bool(result.get("ok", false)):
@@ -94,7 +91,6 @@ func _craft(recipe_id: String) -> void:
 	else:
 		_status.text = _fail_text(result)
 	_refresh()
-
 
 func _pull(pool_id: String) -> void:
 	var result := AlchemyService.gacha_pull(pool_id)
@@ -104,7 +100,6 @@ func _pull(pool_id: String) -> void:
 		_status.text = _fail_text(result)
 	_refresh()
 
-
 func _fail_text(result: Dictionary) -> String:
 	match str(result.get("reason", "")):
 		"no_money":
@@ -113,7 +108,6 @@ func _fail_text(result: Dictionary) -> String:
 			return "材料不足"
 		_:
 			return "失败"
-
 
 func _on_back_pressed() -> void:
 	SceneManager.go_hub()

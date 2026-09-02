@@ -3,11 +3,9 @@ extends Area2D
 var _opened := false
 var _loot: Array = []
 
-
 func setup(pos: Vector2, loot: Array) -> void:
 	global_position = pos
 	_loot = loot if typeof(loot) == TYPE_ARRAY else []
-
 
 func _ready() -> void:
 	add_to_group("chests")
@@ -16,7 +14,6 @@ func _ready() -> void:
 	monitoring = true
 	monitorable = false
 	$Visual.color = Color(0.85, 0.72, 0.35, 0.95)
-
 
 func _physics_process(delta: float) -> void:
 	if _opened:
@@ -28,11 +25,9 @@ func _physics_process(delta: float) -> void:
 	if global_position.distance_to(player.global_position) < 28.0:
 		_open(player)
 
-
 func _pulse_visual(delta: float) -> void:
 	var s := 1.0 + sin(Time.get_ticks_msec() * 0.005) * 0.06
 	$Visual.scale = Vector2(s, s)
-
 
 func _open(_player: Node2D) -> void:
 	if _opened:
@@ -45,15 +40,17 @@ func _open(_player: Node2D) -> void:
 			continue
 		var item_id := str(raw.get("item_id", ""))
 		var amount := int(raw.get("amount", 1))
-		if item_id.is_empty():
+		if item_id.is_empty() or amount <= 0:
 			continue
-		if amount > 0 and parent:
+		if item_id == "spirit_stones":
+			continue
+		if parent:
 			var pickup := preload("res://scenes/world/item_pickup.tscn").instantiate()
+			parent.add_child(pickup)
 			pickup.global_position = global_position + Vector2(i * 8 - 4, -6)
 			if pickup.has_method("setup"):
 				pickup.setup(item_id, amount)
-			parent.add_child(pickup)
-		elif amount > 0:
+		else:
 			GameState.grant_item(item_id, amount)
 	var stones := int(_loot_stones())
 	if stones > 0:
@@ -63,7 +60,6 @@ func _open(_player: Node2D) -> void:
 	var tw := create_tween()
 	tw.tween_property(self, "modulate:a", 0.0, 0.25)
 	tw.tween_callback(queue_free)
-
 
 func _loot_stones() -> int:
 	for raw in _loot:

@@ -3,7 +3,6 @@ extends RefCounted
 
 ## Weighted roll. Weights come from balance.json via weight_key on each entry.
 
-
 static func roll(entries: Array, weights: Dictionary) -> Dictionary:
 	var total := 0
 	var prepared: Array = []

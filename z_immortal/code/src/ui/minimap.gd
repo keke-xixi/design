@@ -5,22 +5,18 @@ extends Control
 var _map_size := Vector2(768, 480)
 var _obstacles: Array = []
 
-
 func _ready() -> void:
 	custom_minimum_size = Vector2(108, 68)
 	EventBus.map_layout_updated.connect(_on_map_layout)
 	EventBus.stage_changed.connect(func(_id): queue_redraw())
-
 
 func _on_map_layout(map_size: Vector2, obstacles: Array) -> void:
 	_map_size = map_size
 	_obstacles = obstacles
 	queue_redraw()
 
-
 func _process(_delta: float) -> void:
 	queue_redraw()
-
 
 func _draw() -> void:
 	var pad := 4.0
@@ -61,7 +57,6 @@ func _draw() -> void:
 			continue
 		var cp := _world_to_mini((node as Node2D).global_position, inner, sx, sy)
 		draw_rect(Rect2(cp.x - 2, cp.y - 2, 4, 4), Color(0.95, 0.82, 0.35))
-
 
 func _world_to_mini(pos: Vector2, inner: Rect2, sx: float, sy: float) -> Vector2:
 	return Vector2(inner.position.x + pos.x * sx, inner.position.y + pos.y * sy)

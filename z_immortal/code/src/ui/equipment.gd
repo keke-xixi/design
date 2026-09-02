@@ -7,11 +7,9 @@ extends Control
 @onready var _bag: VBoxContainer = $Panel/BagScroll/BagList
 @onready var _status: Label = $Panel/Status
 
-
 func _ready() -> void:
 	_refresh()
 	EventBus.equipment_changed.connect(_refresh)
-
 
 func _refresh() -> void:
 	_weapon.text = _slot_text("weapon")
@@ -26,14 +24,12 @@ func _refresh() -> void:
 	]
 	_build_bag()
 
-
 func _slot_text(slot: String) -> String:
 	var item_id := GameState.equipment.get_slot(slot)
 	if item_id.is_empty():
 		return "（空）"
 	var item := ContentDB.get_item(item_id)
 	return item.display_name if item else item_id
-
 
 func _build_bag() -> void:
 	while _bag.get_child_count() > 0:
@@ -56,7 +52,6 @@ func _build_bag() -> void:
 		row.add_child(btn)
 		_bag.add_child(row)
 
-
 func _equip(item_id: String) -> void:
 	if GameState.equip_item(item_id):
 		_status.text = "已装备 %s" % item_id
@@ -64,24 +59,19 @@ func _equip(item_id: String) -> void:
 	else:
 		_status.text = "无法装备"
 
-
 func _on_unequip_weapon() -> void:
 	_unequip("weapon")
-
 
 func _on_unequip_armor() -> void:
 	_unequip("armor")
 
-
 func _on_unequip_accessory() -> void:
 	_unequip("accessory")
-
 
 func _unequip(slot: String) -> void:
 	GameState.unequip_slot(slot)
 	_status.text = "已卸下"
 	_refresh()
-
 
 func _on_back_pressed() -> void:
 	SceneManager.go_hub()

@@ -9,7 +9,6 @@ var realm_req: String = ""
 var qi_per_tick: int = 0
 var description: String = ""
 
-
 static func from_dict(data: Dictionary) -> ArtDef:
 	var row := ArtDef.new()
 	row.id = str(data.get("id", ""))

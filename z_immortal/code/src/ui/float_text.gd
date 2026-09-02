@@ -2,7 +2,6 @@ extends Node2D
 
 @onready var _label: Label = $Label
 
-
 func setup(pos: Vector2, text: String, color: Color) -> void:
 	global_position = pos
 	_label.text = text

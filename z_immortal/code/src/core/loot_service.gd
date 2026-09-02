@@ -10,7 +10,6 @@ const RARITY_COLORS := {
 	"legendary": Color(1.0, 0.82, 0.35),
 }
 
-
 func roll_enemy_loot(enemy: EnemyDef, stage_id: String) -> Array:
 	if enemy == null:
 		return []
@@ -34,10 +33,10 @@ func roll_enemy_loot(enemy: EnemyDef, stage_id: String) -> Array:
 		drops.append(bonus)
 	return drops
 
-
 func rarity_color(rarity: String) -> Color:
-	return RARITY_COLORS.get(rarity, RARITY_COLORS["common"])
-
+	if RARITY_COLORS.has(rarity):
+		return RARITY_COLORS[rarity]
+	return RARITY_COLORS["common"]
 
 func _roll_stage_bonus(stage_id: String, is_boss: bool) -> Dictionary:
 	var cfg := ContentDB.section("loot")
@@ -46,14 +45,21 @@ func _roll_stage_bonus(stage_id: String, is_boss: bool) -> Dictionary:
 		base += float(cfg.get("boss_bonus_chance", 0.25))
 	if randf() > base:
 		return {}
-	var pool: Variant = cfg.get("stage_bonus_pool", {})
-	var rows: Variant = pool.get(stage_id, pool.get("default", []))
-	if typeof(rows) != TYPE_ARRAY or rows.is_empty():
+	var pool_raw: Variant = cfg.get("stage_bonus_pool", {})
+	if typeof(pool_raw) != TYPE_DICTIONARY:
 		return {}
-	var pick := rows[randi() % rows.size()]
+	var pool: Dictionary = pool_raw
+	var rows_raw: Variant = pool.get(stage_id, pool.get("default", []))
+	if typeof(rows_raw) != TYPE_ARRAY:
+		return {}
+	var rows: Array = rows_raw
+	if rows.is_empty():
+		return {}
+	var pick: Variant = rows[randi() % rows.size()]
 	if typeof(pick) != TYPE_DICTIONARY:
 		return {}
-	var item_id := str(pick.get("item_id", ""))
+	var pick_dict: Dictionary = pick
+	var item_id := str(pick_dict.get("item_id", ""))
 	if item_id.is_empty():
 		return {}
-	return { "item_id": item_id, "amount": int(pick.get("amount", 1)) }
+	return { "item_id": item_id, "amount": int(pick_dict.get("amount", 1)) }
