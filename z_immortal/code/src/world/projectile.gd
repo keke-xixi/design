@@ -4,6 +4,8 @@ var _dir := Vector2.RIGHT
 var _life := 0.85
 var _speed := 240.0
 var _damage_mult := 1.0
+var _hostile := false
+var _flat_damage := 0
 
 func _ready() -> void:
 	collision_layer = 16
@@ -13,6 +15,7 @@ func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 
 func launch(from: Vector2, dir: Vector2, damage_mult: float = 1.0) -> void:
+	_hostile = false
 	global_position = from
 	_dir = dir.normalized()
 	_damage_mult = damage_mult
@@ -20,6 +23,19 @@ func launch(from: Vector2, dir: Vector2, damage_mult: float = 1.0) -> void:
 	var cbt := ContentDB.section("combat")
 	_speed = float(cbt.get("projectile_speed", 240))
 	_life = float(cbt.get("projectile_lifetime", 0.85))
+	collision_mask = 8
+
+func launch_hostile(from: Vector2, dir: Vector2, flat_damage: int) -> void:
+	_hostile = true
+	_flat_damage = flat_damage
+	global_position = from
+	_dir = dir.normalized()
+	rotation = _dir.angle()
+	var cbt := ContentDB.section("combat")
+	_speed = float(cbt.get("projectile_speed", 240)) * 0.85
+	_life = float(cbt.get("projectile_lifetime", 0.85)) * 1.2
+	collision_mask = 2
+	modulate = Color(1.0, 0.45, 0.55)
 
 func _physics_process(delta: float) -> void:
 	position += _dir * _speed * delta
@@ -28,6 +44,11 @@ func _physics_process(delta: float) -> void:
 		queue_free()
 
 func _on_body_entered(body: Node) -> void:
+	if _hostile:
+		if body.is_in_group("player") and body.has_method("take_hit"):
+			body.take_hit(_flat_damage)
+			queue_free()
+		return
 	if not body.is_in_group("mobs"):
 		return
 	if body.has_method("take_damage"):

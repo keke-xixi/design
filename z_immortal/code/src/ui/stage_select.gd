@@ -1,19 +1,35 @@
 extends Control
 
-@onready var _list: VBoxContainer = $Panel/Scroll/List
+## Map-select UI for 640x360: list + detail, enter always on-screen.
+
+@onready var _list: VBoxContainer = $Root/Panel/Body/MapList/Scroll/List
+@onready var _detail_title: Label = $Root/Panel/Body/Detail/Title
+@onready var _detail_lore: Label = $Root/Panel/Body/Detail/Lore
+@onready var _detail_stats: Label = $Root/Panel/Body/Detail/Stats
+@onready var _detail_mobs: Label = $Root/Panel/Body/Detail/Mobs
+@onready var _thumb: TextureRect = $Root/Panel/Body/Detail/Thumb
+@onready var _enter_btn: Button = $Root/Panel/Body/Detail/EnterButton
+@onready var _hint: Label = $Root/Panel/Hint
+
+var _selected_id: String = ""
 
 func _ready() -> void:
+	_enter_btn.pressed.connect(_on_enter)
 	_build_list()
 	_refresh_header()
+	var stages := ContentDB.stages.all_stages()
+	for stage in stages:
+		if GameState.can_enter(stage):
+			_select_stage(stage.id)
+			break
+	if _selected_id.is_empty() and not stages.is_empty():
+		_select_stage(stages[0].id)
 
 func _refresh_header() -> void:
-	var hint := $Panel/Hint
-	if hint == null:
-		return
 	var c := GameState.cultivation
 	var realm := ContentDB.realms.get_realm(c.attack_realm_id)
 	var realm_name := realm.display_name if realm else c.attack_realm_id
-	hint.text = "宗门 → 王朝 → 荒星 → 星域 → 界域 → 混沌星海\n当前 %s · %s · 已解锁第 %d 层" % [
+	_hint.text = "%s · %s · 解锁至第 %d 层" % [
 		GameState.realm_band_name(),
 		realm_name,
 		GameState.unlocked_order,
@@ -23,87 +39,90 @@ func _build_list() -> void:
 	while _list.get_child_count() > 0:
 		var child := _list.get_child(0)
 		_list.remove_child(child)
-		child.free()
+		child.queue_free()
 	for stage in ContentDB.stages.all_stages():
-		_list.add_child(_make_card(stage))
+		_list.add_child(_make_map_button(stage))
 
-func _make_card(stage: StageDef) -> Control:
+func _make_map_button(stage: StageDef) -> Control:
+	var unlocked := GameState.can_enter(stage)
+	var cleared := GameState.is_stage_cleared(stage.id)
+	var btn := Button.new()
+	btn.custom_minimum_size = Vector2(0, 28)
+	btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	var mark := "◆" if cleared else ("○" if unlocked else "·")
+	btn.text = "%s %s" % [mark, stage.display_name]
+	btn.disabled = not unlocked
+	if unlocked:
+		btn.modulate = Color.from_string(stage.accent, Color(0.92, 0.88, 0.75))
+	else:
+		btn.modulate = Color(0.5, 0.5, 0.52)
+	var sid := stage.id
+	btn.pressed.connect(func() -> void: _select_stage(sid))
+	return btn
+
+func _select_stage(stage_id: String) -> void:
+	_selected_id = stage_id
+	var stage := ContentDB.get_stage(stage_id)
+	if stage == null:
+		return
 	var unlocked := GameState.can_enter(stage)
 	var cleared := GameState.is_stage_cleared(stage.id)
 	var kills := int(GameState.kills.get(stage.id, 0))
-
-	var card := PanelContainer.new()
-	card.custom_minimum_size = Vector2(0, 78)
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.08, 0.1, 0.14, 0.82)
-	style.border_color = Color.from_string(stage.accent, Color(0.83, 0.69, 0.22))
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(6)
-	style.content_margin_left = 10
-	style.content_margin_right = 10
-	style.content_margin_top = 8
-	style.content_margin_bottom = 8
-	if not unlocked:
-		style.bg_color = Color(0.06, 0.06, 0.08, 0.75)
-		style.border_color = Color(0.3, 0.3, 0.32)
-	card.add_theme_stylebox_override("panel", style)
-
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 10)
-	card.add_child(row)
-
-	var thumb := TextureRect.new()
-	thumb.custom_minimum_size = Vector2(72, 42)
-	thumb.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	thumb.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	_detail_title.text = "%d. %s" % [stage.order, stage.display_name]
+	_detail_title.add_theme_color_override("font_color", Color.from_string(stage.accent, Color(0.95, 0.9, 0.7)))
+	var lore := stage.lore if not stage.lore.is_empty() else stage.description
+	if lore.length() > 70:
+		lore = lore.substr(0, 70) + "…"
+	_detail_lore.text = lore
+	var boss_name := "—"
+	if not stage.boss_id.is_empty():
+		var boss := ContentDB.get_enemy(stage.boss_id)
+		boss_name = boss.display_name if boss else stage.boss_id
+	_detail_stats.text = "目标 %d 杀  ·  进度 %d/%d\n间隔 %.2fs  ·  同屏 %d\nBoss %s @%d" % [
+		stage.kill_target, kills, stage.kill_target,
+		stage.spawn_interval, stage.max_alive,
+		boss_name, stage.boss_at_kill,
+	]
+	_detail_mobs.text = _format_mobs(stage)
 	var bg_path := stage.background_path()
 	if not bg_path.is_empty() and ResourceLoader.exists(bg_path):
-		thumb.texture = load(bg_path)
+		_thumb.texture = load(bg_path)
+		_thumb.modulate = Color.WHITE if unlocked else Color(0.35, 0.35, 0.38)
 	else:
-		thumb.modulate = Color.from_string(stage.accent, Color.GRAY)
-	if not unlocked:
-		thumb.modulate = Color(0.4, 0.4, 0.4)
-	row.add_child(thumb)
+		_thumb.texture = null
+		_thumb.modulate = Color.from_string(stage.accent, Color.GRAY)
+	if unlocked:
+		_enter_btn.disabled = false
+		_enter_btn.text = "再次挑战" if cleared else "进入战场"
+	else:
+		_enter_btn.disabled = true
+		_enter_btn.text = "未解锁"
 
-	var texts := VBoxContainer.new()
-	texts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(texts)
-
-	var title := Label.new()
-	var boss_hint := ""
+func _format_mobs(stage: StageDef) -> String:
+	var parts: PackedStringArray = []
+	var seen: Dictionary = {}
+	for raw in stage.spawns:
+		if typeof(raw) != TYPE_DICTIONARY:
+			continue
+		var eid := str(raw.get("enemy_id", ""))
+		if eid.is_empty() or seen.has(eid):
+			continue
+		seen[eid] = true
+		var enemy := ContentDB.get_enemy(eid)
+		parts.append(enemy.display_name if enemy else eid)
 	if not stage.boss_id.is_empty():
 		var boss := ContentDB.get_enemy(stage.boss_id)
 		if boss:
-			boss_hint = " · Boss:%s" % boss.display_name
-	title.text = "%d. %s%s" % [stage.order, stage.display_name, boss_hint if unlocked else ""]
-	title.add_theme_font_size_override("font_size", 16)
-	title.add_theme_color_override("font_color", Color(0.95, 0.92, 0.82) if unlocked else Color(0.55, 0.55, 0.55))
-	texts.add_child(title)
+			parts.append("Boss·" + boss.display_name)
+	return "出没：" + "、".join(parts)
 
-	var info := Label.new()
-	if not unlocked:
-		info.text = "未解锁 · 先通关上一关"
-	elif cleared:
-		info.text = "%s\n已通关 %d/%d" % [stage.lore if not stage.lore.is_empty() else stage.description, kills, stage.kill_target]
-	elif not stage.lore.is_empty():
-		info.text = "%s\n进度 %d/%d" % [stage.lore, kills, stage.kill_target]
-	else:
-		info.text = "%s · 进度 %d/%d" % [stage.description, kills, stage.kill_target]
-	info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	info.add_theme_font_size_override("font_size", 11)
-	info.add_theme_color_override("font_color", Color(0.75, 0.8, 0.85))
-	texts.add_child(info)
-
-	var btn := Button.new()
-	btn.custom_minimum_size = Vector2(72, 0)
-	if unlocked:
-		btn.text = "进入"
-		btn.pressed.connect(func() -> void: SceneManager.go_combat(stage.id))
-	else:
-		btn.text = "锁定"
-		btn.disabled = true
-	row.add_child(btn)
-	return card
+func _on_enter() -> void:
+	if _selected_id.is_empty():
+		return
+	var stage := ContentDB.get_stage(_selected_id)
+	if stage == null or not GameState.can_enter(stage):
+		return
+	SceneManager.go_combat(_selected_id)
 
 func _on_back_pressed() -> void:
 	SceneManager.go_hub()

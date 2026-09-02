@@ -18,6 +18,7 @@ var boss_at_kill: int = 0
 var waves: Array = []
 var map: Dictionary = {}
 var spawns: Array = []
+var nodes: Array = []
 
 static func from_dict(data: Dictionary) -> StageDef:
 	var row := StageDef.new()
@@ -39,7 +40,12 @@ static func from_dict(data: Dictionary) -> StageDef:
 	row.map = raw_map if typeof(raw_map) == TYPE_DICTIONARY else {}
 	var raw_spawns: Variant = data.get("spawns", [])
 	row.spawns = raw_spawns if typeof(raw_spawns) == TYPE_ARRAY else []
+	var raw_nodes: Variant = data.get("nodes", [])
+	row.nodes = raw_nodes if typeof(raw_nodes) == TYPE_ARRAY else []
 	return row
+
+func has_nodes() -> bool:
+	return not nodes.is_empty()
 
 func background_path() -> String:
 	var file_name := str(map.get("background", ""))

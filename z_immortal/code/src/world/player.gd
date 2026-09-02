@@ -38,11 +38,15 @@ func _physics_process(delta: float) -> void:
 		_dash_iframe -= delta
 	var cbt := ContentDB.section("combat")
 	var speed := float(cbt.get("player_speed", 96)) * GameState.effective_speed_mult()
+	var zone_mult := 1.0
+	var world := get_tree().get_first_node_in_group("game_world")
+	if world and world.has_method("zone_mods_at"):
+		zone_mult = float(world.zone_mods_at(global_position).get("speed_mult", 1.0))
 	var direction := _move_axis()
 	if direction != Vector2.ZERO:
 		_facing = direction
 		_visual.flip_h = direction.x < 0.0
-	velocity = direction * speed
+	velocity = direction * speed * zone_mult
 	move_and_slide()
 	position.x = clampf(position.x, bounds.position.x, bounds.end.x)
 	position.y = clampf(position.y, bounds.position.y, bounds.end.y)

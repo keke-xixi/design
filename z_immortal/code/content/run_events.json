@@ -1,0 +1,50 @@
+{
+  "_doc": "局内奇遇。choices.effect 支持 heal_pct / stones / temp_atk / temp_damage / temp_speed / spawn_ambush。",
+  "events": {
+    "spirit_vein": {
+      "title": "灵脉异动",
+      "desc": "地面裂开一缕灵气，如何取用？",
+      "choices": [
+        { "id": "absorb", "label": "吞纳灵气", "hint": "回血并暂加攻", "effect": { "heal_pct": 0.3, "temp_atk": 2 } },
+        { "id": "bottle", "label": "封入玉瓶", "hint": "+8 灵石", "effect": { "stones": 8 } },
+        { "id": "pass", "label": "匆匆路过", "hint": "无事发生", "effect": {} }
+      ]
+    },
+    "wandering_trader": {
+      "title": "游方散修",
+      "desc": "对方愿以薄利换你片刻停留。",
+      "choices": [
+        { "id": "buy_pill", "label": "换一枚白玉丹", "hint": "白玉丹×1，-6 灵石", "effect": { "stones": -6, "item_id": "white_pill", "item_amount": 1 } },
+        { "id": "ask_dao", "label": "请教心法", "hint": "伤害暂升", "effect": { "temp_damage": 0.12 } },
+        { "id": "refuse", "label": "婉拒离开", "hint": "无事", "effect": {} }
+      ]
+    },
+    "ambush": {
+      "title": "伏击杀机",
+      "desc": "草丛异响——是祸是机？",
+      "choices": [
+        { "id": "charge", "label": "主动杀出", "hint": "立刻再战一小波", "effect": { "spawn_ambush": 5 } },
+        { "id": "trap", "label": "布下陷阱", "hint": "暂加攻速感（移速）", "effect": { "temp_speed": 0.15 } },
+        { "id": "flee", "label": "绕道而行", "hint": "小损气血", "effect": { "heal_pct": -0.12 } }
+      ]
+    },
+    "ancient_stele": {
+      "title": "残碑悟道",
+      "desc": "古碑上刻着模糊心法。",
+      "choices": [
+        { "id": "meditate", "label": "打坐悟道", "hint": "回血+暂加伤害", "effect": { "heal_pct": 0.2, "temp_damage": 0.1 } },
+        { "id": "copy", "label": "拓印带走", "hint": "+12 灵石", "effect": { "stones": 12 } },
+        { "id": "smash", "label": "砸开寻宝", "hint": "随机材料", "effect": { "item_id": "spirit_grass", "item_amount": 3 } }
+      ]
+    },
+    "rift_whisper": {
+      "title": "裂隙低语",
+      "desc": "虚空中有声音许诺力量。",
+      "choices": [
+        { "id": "accept", "label": "承接力量", "hint": "大伤换大攻", "effect": { "heal_pct": -0.2, "temp_atk": 4, "temp_damage": 0.15 } },
+        { "id": "seal", "label": "封禁裂隙", "hint": "稳健回血", "effect": { "heal_pct": 0.35 } },
+        { "id": "listen", "label": "只听不答", "hint": "+10 灵石", "effect": { "stones": 10 } }
+      ]
+    }
+  }
+}

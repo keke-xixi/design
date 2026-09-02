@@ -23,58 +23,124 @@ texture = ExtResource("2_bg")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="Dim" type="ColorRect" parent="."]
+[node name="Vignette" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.04, 0.05, 0.08, 0.45)
+mouse_filter = 2
+color = Color(0.03, 0.05, 0.08, 0.42)
 
-[node name="Panel" type="VBoxContainer" parent="."]
+[node name="Root" type="MarginContainer" parent="."]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -300.0
-offset_top = -160.0
-offset_right = 300.0
-offset_bottom = 160.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 10
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 8
 
-[node name="Header" type="HBoxContainer" parent="Panel"]
+[node name="Panel" type="VBoxContainer" parent="Root"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Header" type="HBoxContainer" parent="Root/Panel"]
 layout_mode = 2
 
-[node name="Title" type="Label" parent="Panel/Header"]
+[node name="Title" type="Label" parent="Root/Panel/Header"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.96, 0.92, 0.78, 1)
-theme_override_font_sizes/font_size = 24
-text = "通玄之路 · 选关"
+theme_override_font_sizes/font_size = 18
+text = "通玄之路 · 选图"
 
-[node name="BackButton" type="Button" parent="Panel/Header"]
+[node name="BackButton" type="Button" parent="Root/Panel/Header"]
+custom_minimum_size = Vector2(72, 0)
 layout_mode = 2
-text = "返回广场"
-
-[node name="Hint" type="Label" parent="Panel"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.78, 0.82, 0.88, 1)
 theme_override_font_sizes/font_size = 12
+text = "返回"
+
+[node name="Hint" type="Label" parent="Root/Panel"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.8, 0.86, 1)
+theme_override_font_sizes/font_size = 10
 text = "宗门 → 王朝 → 荒星 → 星域 → 界域 → 混沌星海"
 
-[node name="Scroll" type="ScrollContainer" parent="Panel"]
+[node name="Body" type="HBoxContainer" parent="Root/Panel"]
 layout_mode = 2
 size_flags_vertical = 3
-custom_minimum_size = Vector2(0, 240)
-
-[node name="List" type="VBoxContainer" parent="Panel/Scroll"]
-layout_mode = 2
-size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[connection signal="pressed" from="Panel/Header/BackButton" to="." method="_on_back_pressed"]
+[node name="MapList" type="VBoxContainer" parent="Root/Panel/Body"]
+custom_minimum_size = Vector2(168, 0)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ListTitle" type="Label" parent="Root/Panel/Body/MapList"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.8, 0.65, 1)
+theme_override_font_sizes/font_size = 11
+text = "地图"
+
+[node name="Scroll" type="ScrollContainer" parent="Root/Panel/Body/MapList"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="List" type="VBoxContainer" parent="Root/Panel/Body/MapList/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="Detail" type="VBoxContainer" parent="Root/Panel/Body"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 4
+
+[node name="Thumb" type="TextureRect" parent="Root/Panel/Body/Detail"]
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Title" type="Label" parent="Root/Panel/Body/Detail"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.96, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 16
+text = "关卡"
+
+[node name="Lore" type="Label" parent="Root/Panel/Body/Detail"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.78, 0.84, 0.9, 1)
+theme_override_font_sizes/font_size = 10
+autowrap_mode = 3
+text = "说明"
+
+[node name="Stats" type="Label" parent="Root/Panel/Body/Detail"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.82, 0.62, 1)
+theme_override_font_sizes/font_size = 10
+autowrap_mode = 3
+text = "数值"
+
+[node name="Mobs" type="Label" parent="Root/Panel/Body/Detail"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.75, 0.8, 0.86, 1)
+theme_override_font_sizes/font_size = 10
+autowrap_mode = 3
+text = "怪物"
+
+[node name="EnterButton" type="Button" parent="Root/Panel/Body/Detail"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "进入战场"
+
+[connection signal="pressed" from="Root/Panel/Header/BackButton" to="." method="_on_back_pressed"]

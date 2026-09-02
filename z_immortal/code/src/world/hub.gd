@@ -15,7 +15,10 @@ func _ready() -> void:
 	if hero:
 		_hero.texture = hero
 	_tagline.text = ContentDB.lore_tagline()
-	_lore.text = ContentDB.lore_intro()
+	var intro := ContentDB.lore_intro()
+	if intro.length() > 90:
+		intro = intro.substr(0, 90) + "…"
+	_lore.text = intro
 	_refresh_status()
 	EventBus.cultivation_broke_through.connect(func(_id): _refresh_status())
 	EventBus.attack_gained.connect(func(_a, _t): _refresh_status())

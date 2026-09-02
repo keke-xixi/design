@@ -19,19 +19,28 @@ var _map_size := Vector2i(48, 30)
 var _spawn_acc := 0.0
 var _bounds := Rect2()
 var _obstacle_rects: Array[Rect2] = []
+var _zone_defs: Array[Dictionary] = []
 var _last_wave_hint := ""
+var _zone_tick := 0.0
+var _overlay: CanvasLayer
+var _cleared_stop := false
 
 func _ready() -> void:
 	_pickups.add_to_group("pickups")
 	EventBus.stage_changed.connect(_on_stage_changed)
 	EventBus.stage_cleared.connect(_on_stage_cleared)
 	EventBus.boss_spawned.connect(_on_boss_spawned)
+	_overlay = preload("res://src/ui/run_overlay.gd").new()
+	add_child(_overlay)
 	_apply_stage(GameState.stage_id)
 
 func _process(delta: float) -> void:
 	if GameState.dead:
 		return
 	GameState.run_time += delta
+	_apply_zone_effects(delta)
+	if _cleared_stop:
+		return
 	var stage := GameState.current_stage()
 	if stage == null:
 		return
@@ -47,31 +56,76 @@ func _process(delta: float) -> void:
 		_spawn_acc = 0.0
 		_spawn_one(stage)
 
+func _apply_zone_effects(delta: float) -> void:
+	if _player == null or GameState.dead:
+		return
+	_zone_tick += delta
+	if _zone_tick < 0.25:
+		return
+	_zone_tick = 0.0
+	var mods := zone_mods_at(_player.global_position)
+	var dps := float(mods.get("dps", 0.0))
+	var hps := float(mods.get("hps", 0.0))
+	if dps > 0.0:
+		_player.take_hit(maxi(int(dps * 0.25), 1))
+	if hps > 0.0:
+		GameState.heal_amount(maxi(int(hps * 0.25), 1))
+
+func zone_mods_at(pos: Vector2) -> Dictionary:
+	var speed_mult := 1.0
+	var dps := 0.0
+	var hps := 0.0
+	for z in _zone_defs:
+		var c: Vector2 = z["center"]
+		var r: float = z["radius"]
+		if pos.distance_to(c) > r:
+			continue
+		match str(z.get("effect", "")):
+			"slow":
+				speed_mult = minf(speed_mult, float(z.get("speed_mult", 0.75)))
+			"damage":
+				dps = maxf(dps, float(z.get("dps", 4.0)))
+			"heal":
+				hps = maxf(hps, float(z.get("hps", 2.0)))
+	return { "speed_mult": speed_mult, "dps": dps, "hps": hps }
+
 func _on_stage_changed(stage_id: String) -> void:
 	_apply_stage(stage_id)
 
 func _on_stage_cleared(_stage_id: String) -> void:
+	_cleared_stop = true
 	var banner := get_node_or_null("HUD")
 	if banner and banner.has_method("show_clear"):
 		banner.show_clear()
 
 func _on_boss_spawned(boss_id: String) -> void:
-	var enemy := ContentDB.get_enemy(boss_id)
+	spawn_enemy_at(boss_id, _boss_spawn_pos(), true)
+
+func _boss_spawn_pos() -> Vector2:
+	var pixel := Vector2(_map_size) * float(TILE)
+	return pixel * 0.5 + Vector2(0, -80)
+
+func spawn_enemy_at(enemy_id: String, pos: Vector2, as_boss_scale: bool = false) -> void:
+	var enemy := ContentDB.get_enemy(enemy_id)
 	if enemy == null:
-		push_warning("Missing boss %s" % boss_id)
+		push_warning("Missing enemy %s" % enemy_id)
 		return
 	var mob := preload("res://scenes/world/mob.tscn").instantiate()
 	_mobs.add_child(mob)
 	mob.setup(enemy)
-	mob.scale = Vector2(1.5, 1.5)
-	var pixel := Vector2(_map_size) * float(TILE)
-	mob.global_position = pixel * 0.5 + Vector2(0, -80)
+	if as_boss_scale or enemy.is_boss:
+		mob.scale = Vector2(1.5, 1.5)
+	mob.global_position = pos
+
+func on_boss_defeated(_boss_id: String) -> void:
+	pass
 
 func _apply_stage(stage_id: String) -> void:
 	var stage := ContentDB.get_stage(stage_id)
 	if stage == null:
 		push_error("Unknown stage %s" % stage_id)
 		return
+	_cleared_stop = false
 	_clear_group_children(_mobs)
 	_clear_group_children(_projectiles)
 	_clear_group_children(_pickups)
@@ -81,6 +135,7 @@ func _apply_stage(stage_id: String) -> void:
 	_spawn_acc = 0.0
 	_last_wave_hint = ""
 	_obstacle_rects.clear()
+	_zone_defs.clear()
 	var map: Dictionary = stage.map
 	_map_size = Vector2i(int(map.get("width", 48)), int(map.get("height", 30)))
 	var pixel := Vector2(_map_size) * float(TILE)
@@ -201,6 +256,14 @@ func _build_zones(map: Dictionary, pixel: Vector2) -> void:
 		ring.color = Color.from_string(str(raw.get("color", "#ffffff22")), Color(1, 1, 1, 0.12))
 		ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_zones.add_child(ring)
+		_zone_defs.append({
+			"center": Vector2(cx, cy),
+			"radius": r,
+			"effect": str(raw.get("effect", "")),
+			"speed_mult": float(raw.get("speed_mult", 0.75)),
+			"dps": float(raw.get("dps", 0.0)),
+			"hps": float(raw.get("hps", 0.0)),
+		})
 
 func _build_chests(map: Dictionary, pixel: Vector2) -> void:
 	var rows: Variant = map.get("chests", [])

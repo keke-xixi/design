@@ -1,6 +1,7 @@
 extends Node
 
 const _Combat := preload("res://src/core/combat.gd")
+const _StageRunScript := preload("res://src/core/stage_run.gd")
 
 var cultivation: CultivationState
 var inventory: Inventory
@@ -14,6 +15,7 @@ var kills: Dictionary = {}
 var run_time: float = 0.0
 var spirit_stones: int = 0
 var combo: int = 0
+var run = _StageRunScript.new()
 var _boss_spawned_this_run: bool = false
 var _last_kill_time: float = -999.0
 
@@ -37,13 +39,13 @@ func equipment_bonus() -> Dictionary:
 	return equipment.bonus_stats()
 
 func effective_attack() -> int:
-	return cultivation.attack + int(equipment_bonus().get("attack", 0))
+	return cultivation.attack + int(equipment_bonus().get("attack", 0)) + run.atk_bonus()
 
 func effective_defense() -> int:
 	return cultivation.defense + int(equipment_bonus().get("defense", 0))
 
 func effective_speed_mult() -> float:
-	return 1.0 + float(equipment_bonus().get("speed_pct", 0.0))
+	return (1.0 + float(equipment_bonus().get("speed_pct", 0.0))) * run.speed_mult()
 
 func equip_item(item_id: String) -> bool:
 	var item := ContentDB.get_item(item_id)
@@ -177,6 +179,7 @@ func enter_stage(id: String) -> bool:
 	_boss_spawned_this_run = false
 	combo = 0
 	_last_kill_time = -999.0
+	run.reset(id)
 	refill_hp()
 	EventBus.stage_changed.emit(stage_id)
 	return true
@@ -215,11 +218,22 @@ func register_kill(enemy_id: String) -> void:
 				_boss_spawned_this_run = true
 				EventBus.boss_spawned.emit(stage.boss_id)
 	if stage and stage_kills() == stage.kill_target:
-		var nxt := ContentDB.get_stage(stage.next_id)
-		if nxt:
-			unlocked_order = maxi(unlocked_order, nxt.order)
-		_grant_stage_clear_reward(stage)
-		EventBus.stage_cleared.emit(stage_id)
+		_complete_stage_unlock(stage)
+	SaveService.save_game()
+
+func _complete_stage_unlock(stage: StageDef) -> void:
+	var nxt := ContentDB.get_stage(stage.next_id)
+	if nxt:
+		unlocked_order = maxi(unlocked_order, nxt.order)
+	_grant_stage_clear_reward(stage)
+	run.cleared_stage = true
+	EventBus.stage_cleared.emit(stage_id)
+
+func complete_run_stage() -> void:
+	var stage := current_stage()
+	if stage == null or run.cleared_stage:
+		return
+	_complete_stage_unlock(stage)
 	SaveService.save_game()
 
 func _grant_stage_clear_reward(stage: StageDef) -> void:
@@ -240,16 +254,16 @@ func _update_combo() -> void:
 
 func _apply_kill_growth() -> void:
 	var g := ContentDB.section("growth")
-	var kills := stage_kills()
+	var kill_n := stage_kills()
 	var w_every := int(g.get("kills_per_wisdom", 8))
 	var d_every := int(g.get("kills_per_defense", 10))
 	var w_max := int(ContentDB.section("wisdom").get("max_rank", 100))
 	var d_max := int(ContentDB.section("defense").get("max", 100))
-	if w_every > 0 and kills % w_every == 0 and cultivation.wisdom_rank < w_max:
+	if w_every > 0 and kill_n % w_every == 0 and cultivation.wisdom_rank < w_max:
 		cultivation.wisdom_rank += 1
 		EventBus.cultivation_stat_gained.emit("wisdom", cultivation.wisdom_rank)
 		SaveService.save_game()
-	if d_every > 0 and kills % d_every == 0 and cultivation.defense < d_max:
+	if d_every > 0 and kill_n % d_every == 0 and cultivation.defense < d_max:
 		cultivation.defense += 1
 		recompute_max_hp()
 		EventBus.cultivation_stat_gained.emit("defense", cultivation.defense)
@@ -259,7 +273,8 @@ func _apply_kill_growth() -> void:
 func apply_hurt(amount: int) -> void:
 	if dead:
 		return
-	hp = maxi(hp - maxi(amount, 0), 0)
+	var reduced := maxi(amount - run.hurt_reduce(), 1) if amount > 0 else 0
+	hp = maxi(hp - reduced, 0)
 	EventBus.player_hp_changed.emit(hp, max_hp)
 	if hp <= 0:
 		dead = true
@@ -268,6 +283,7 @@ func apply_hurt(amount: int) -> void:
 func revive() -> void:
 	dead = false
 	run_time = 0.0
+	run.reset(stage_id)
 	refill_hp()
 	EventBus.stage_changed.emit(stage_id)
 
@@ -319,4 +335,4 @@ func projectile_damage_against(enemy_def: int, mult: float = 1.0) -> int:
 		int(cbt.get("damage_flat", 8)),
 		float(cbt.get("damage_per_attack", 1)),
 	)
-	return maxi(int(float(base) * mult), 1)
+	return maxi(int(float(base) * mult * run.damage_mult()), 1)

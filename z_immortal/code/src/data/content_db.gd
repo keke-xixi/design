@@ -14,6 +14,8 @@ var market: Dictionary = {}
 var alchemy: Dictionary = {}
 var skills: Array = []
 var stages := StageTable.new()
+var run_events: Dictionary = {}
+var run_rewards: Array = []
 
 func _ready() -> void:
 	reload()
@@ -43,12 +45,30 @@ func reload() -> void:
 		stages.load_from_array(stage_rows)
 	else:
 		push_error("ContentDB: 'stages' must be an array")
+	var ev := _load_json("res://content/run_events.json")
+	var ev_map: Variant = ev.get("events", {})
+	run_events = ev_map if typeof(ev_map) == TYPE_DICTIONARY else {}
+	var rw := _load_json("res://content/run_rewards.json")
+	var rw_rows: Variant = rw.get("rewards", [])
+	run_rewards = rw_rows if typeof(rw_rows) == TYPE_ARRAY else []
 	var start_id := str(section("start").get("attack_realm_id", "ninglu_chu"))
 	if realms.get_realm(start_id) == null:
 		push_error("ContentDB: missing start realm '%s'" % start_id)
 	var start_stage := str(section("start").get("stage_id", "sect"))
 	if stages.get_stage(start_stage) == null:
 		push_error("ContentDB: missing start stage '%s'" % start_stage)
+
+func get_run_event(event_id: String) -> Dictionary:
+	var raw: Variant = run_events.get(event_id, {})
+	return raw if typeof(raw) == TYPE_DICTIONARY else {}
+
+func pick_run_rewards(count: int = 3) -> Array:
+	var pool: Array = run_rewards.duplicate()
+	pool.shuffle()
+	var out: Array = []
+	for i in mini(count, pool.size()):
+		out.append(pool[i])
+	return out
 
 func section(name: String) -> Dictionary:
 	var raw: Variant = balance.get(name, {})

@@ -1,0 +1,11 @@
+{
+  "_doc": "试炼清场后的三选一强化。effect 叠到本局 run_buffs。",
+  "rewards": [
+    { "id": "atk_seal", "label": "攻势符箓", "hint": "本局伤害 +15%", "effect": { "temp_damage": 0.15 } },
+    { "id": "swift_seal", "label": "疾行符箓", "hint": "本局移速 +12%", "effect": { "temp_speed": 0.12 } },
+    { "id": "heal_pill", "label": "回春丹香", "hint": "立即回复 35% 气血", "effect": { "heal_pct": 0.35 } },
+    { "id": "stone_bag", "label": "灵石锦囊", "hint": "+10 灵石", "effect": { "stones": 10 } },
+    { "id": "iron_body", "label": "铁骨诀", "hint": "本局接触伤 -2（至少 1）", "effect": { "hurt_reduce": 2 } },
+    { "id": "sharp_mind", "label": "灵台一闪", "hint": "本局攻 +3", "effect": { "temp_atk": 3 } }
+  ]
+}
