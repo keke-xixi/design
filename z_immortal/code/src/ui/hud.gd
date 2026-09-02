@@ -13,6 +13,10 @@ const _DefenseBands := preload("res://src/core/defense_bands.gd")
 @onready var _portrait: TextureRect = $Root/Portrait
 @onready var _clear: Label = $Root/ClearBanner
 @onready var _stones_label: Label = $Root/TopBar/Panel/StonesLabel
+@onready var _wave_label: Label = $Root/TopBar/Panel/WaveLabel
+@onready var _boss_bar: PanelContainer = $Root/BossBar
+@onready var _boss_name: Label = $Root/BossBar/VBox/BossName
+@onready var _boss_hp_fill: ColorRect = $Root/BossBar/VBox/BossHpBg/BossHpFill
 @onready var _skill_l: Label = $Root/SkillBar/SkillL
 @onready var _skill_u: Label = $Root/SkillBar/SkillU
 @onready var _skill_i: Label = $Root/SkillBar/SkillI
@@ -35,6 +39,9 @@ func _ready() -> void:
 	EventBus.boss_spawned.connect(_on_boss)
 	EventBus.item_gained.connect(_on_item)
 	EventBus.equipment_changed.connect(_on_equipment)
+	EventBus.boss_hp_changed.connect(_on_boss_hp)
+	EventBus.boss_hp_cleared.connect(_on_boss_hp_cleared)
+	EventBus.stage_reward.connect(_on_stage_reward)
 	var tex := load("res://assets/portraits/player.png")
 	if tex and _portrait:
 		_portrait.texture = tex
@@ -105,11 +112,23 @@ func _on_any_noargs() -> void:
 func _on_stage(_stage_id: String) -> void:
 	_clear.visible = false
 	_wave_label.text = ""
+	_boss_bar.visible = false
 	_refresh()
 
 
 func _on_wave(hint: String) -> void:
 	_wave_label.text = hint
+
+
+func _on_boss_hp(name: String, hp: int, max_hp: int) -> void:
+	_boss_bar.visible = true
+	_boss_name.text = name
+	var ratio := 0.0 if max_hp <= 0 else clampf(float(hp) / float(max_hp), 0.0, 1.0)
+	_boss_hp_fill.size.x = 240.0 * ratio
+
+
+func _on_boss_hp_cleared() -> void:
+	_boss_bar.visible = false
 
 
 func _on_boss(enemy_id: String) -> void:
@@ -126,6 +145,10 @@ func _on_item(_item_id: String, _amount: int, _rarity: String) -> void:
 func _on_cleared(_stage_id: String) -> void:
 	show_clear()
 	_refresh()
+
+
+func _on_stage_reward(stones: int) -> void:
+	show_clear("通关奖励 · %d 灵石" % stones)
 
 
 func _refresh() -> void:
@@ -173,4 +196,4 @@ func _refresh() -> void:
 	elif GameState.is_stage_cleared():
 		_hint_label.text = "本关已通  Esc 返回选关继续下一层"
 	else:
-		_hint_label.text = "WASD 移动  L闪避 U环斩 I服丹 O灵爆  J吐纳 K突破"
+		_hint_label.text = "WASD 移动  靠近开宝箱  L/U/I/O 技能  J吐纳 K突破"

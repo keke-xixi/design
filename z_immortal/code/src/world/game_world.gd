@@ -25,7 +25,7 @@ const SOURCE_ID := 0
 @onready var _projectiles: Node2D = $Projectiles
 
 @onready var _pickups: Node2D = $Pickups
-
+@onready var _chests: Node2D = $Chests
 @onready var _obstacles: Node2D = $Obstacles
 
 @onready var _zones: Node2D = $Zones
@@ -166,6 +166,8 @@ func _apply_stage(stage_id: String) -> void:
 
 	_clear_group_children(_pickups)
 
+	_clear_group_children(_chests)
+
 	_clear_group_children(_obstacles)
 
 	_clear_group_children(_zones)
@@ -195,6 +197,8 @@ func _apply_stage(stage_id: String) -> void:
 	_build_obstacles(map)
 
 	_build_zones(map, pixel)
+
+	_build_chests(map, pixel)
 
 	_player.position = pixel * 0.5
 
@@ -273,6 +277,10 @@ func _spawn_one(stage: StageDef) -> void:
 	if enemy.is_boss:
 
 		mob.scale = Vector2(1.35, 1.35)
+
+	elif randf() < float(ContentDB.section("combat").get("elite_spawn_chance", 0.1)):
+
+		mob.make_elite()
 
 	mob.global_position = _spawn_point()
 
@@ -417,7 +425,20 @@ func _build_zones(map: Dictionary, pixel: Vector2) -> void:
 		_zones.add_child(ring)
 
 
-
+func _build_chests(map: Dictionary, pixel: Vector2) -> void:
+	var rows: Variant = map.get("chests", [])
+	if typeof(rows) != TYPE_ARRAY:
+		return
+	for raw in rows:
+		if typeof(raw) != TYPE_DICTIONARY:
+			continue
+		var cx := float(raw.get("cx", 0.5)) * pixel.x
+		var cy := float(raw.get("cy", 0.5)) * pixel.y
+		var loot: Variant = raw.get("loot", [])
+		var chest := preload("res://scenes/world/chest.tscn").instantiate()
+		_chests.add_child(chest)
+		if chest.has_method("setup"):
+			chest.setup(Vector2(cx, cy), loot if typeof(loot) == TYPE_ARRAY else [])
 
 
 func _clear_group_children(node: Node) -> void:

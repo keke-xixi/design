@@ -37,6 +37,10 @@
           { "x": 8, "y": 10, "w": 3, "h": 2, "color": "#5a5040" },
           { "x": 36, "y": 12, "w": 2, "h": 3, "color": "#5a5040" },
           { "x": 22, "y": 20, "w": 4, "h": 1, "color": "#6a6050" }
+        ],
+        "chests": [
+          { "cx": 0.25, "cy": 0.4, "loot": [{ "item_id": "spirit_grass", "amount": 3 }] },
+          { "cx": 0.72, "cy": 0.55, "loot": [{ "item_id": "qi_pill_low", "amount": 2 }, { "item_id": "spirit_stones", "amount": 8 }] }
         ]
       },
       "spawns": [
@@ -80,6 +84,10 @@
           { "x": 6, "y": 8, "w": 2, "h": 4, "color": "#4a4038" },
           { "x": 38, "y": 7, "w": 3, "h": 3, "color": "#4a4038" },
           { "x": 20, "y": 14, "w": 8, "h": 1, "color": "#5a5048" }
+        ],
+        "chests": [
+          { "cx": 0.3, "cy": 0.45, "loot": [{ "item_id": "white_pill", "amount": 1 }] },
+          { "cx": 0.68, "cy": 0.38, "loot": [{ "item_id": "spirit_stones", "amount": 12 }] }
         ]
       },
       "spawns": [
@@ -120,6 +128,9 @@
           { "x": 10, "y": 11, "w": 3, "h": 3, "color": "#3a2820" },
           { "x": 38, "y": 18, "w": 4, "h": 2, "color": "#3a2820" },
           { "x": 24, "y": 8, "w": 2, "h": 5, "color": "#4a3830" }
+        ],
+        "chests": [
+          { "cx": 0.22, "cy": 0.5, "loot": [{ "item_id": "star_shard", "amount": 1 }] }
         ]
       },
       "spawns": [
@@ -159,6 +170,9 @@
         "obstacles": [
           { "x": 14, "y": 9, "w": 2, "h": 6, "color": "#1a1438" },
           { "x": 34, "y": 16, "w": 5, "h": 2, "color": "#1a1438" }
+        ],
+        "chests": [
+          { "cx": 0.75, "cy": 0.42, "loot": [{ "item_id": "void_silk", "amount": 1 }] }
         ]
       },
       "spawns": [
@@ -199,6 +213,9 @@
           { "x": 12, "y": 12, "w": 3, "h": 4, "color": "#2a1012" },
           { "x": 40, "y": 10, "w": 4, "h": 3, "color": "#2a1012" },
           { "x": 26, "y": 22, "w": 6, "h": 1, "color": "#3a1820" }
+        ],
+        "chests": [
+          { "cx": 0.5, "cy": 0.35, "loot": [{ "item_id": "rift_core", "amount": 1 }] }
         ]
       },
       "spawns": [
@@ -239,6 +256,9 @@
           { "x": 8, "y": 14, "w": 2, "h": 5, "color": "#080810" },
           { "x": 44, "y": 12, "w": 3, "h": 4, "color": "#080810" },
           { "x": 24, "y": 24, "w": 8, "h": 2, "color": "#0a1028" }
+        ],
+        "chests": [
+          { "cx": 0.55, "cy": 0.3, "loot": [{ "item_id": "spirit_stones", "amount": 25 }, { "item_id": "chaos_fragment", "amount": 1 }] }
         ]
       },
       "spawns": [

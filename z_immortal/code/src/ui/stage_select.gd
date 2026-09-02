@@ -74,7 +74,12 @@ func _make_card(stage: StageDef) -> Control:
 	row.add_child(texts)
 
 	var title := Label.new()
-	title.text = "%d. %s" % [stage.order, stage.display_name]
+	var boss_hint := ""
+	if not stage.boss_id.is_empty():
+		var boss := ContentDB.get_enemy(stage.boss_id)
+		if boss:
+			boss_hint = " · Boss:%s" % boss.display_name
+	title.text = "%d. %s%s" % [stage.order, stage.display_name, boss_hint if unlocked else ""]
 	title.add_theme_font_size_override("font_size", 16)
 	title.add_theme_color_override("font_color", Color(0.95, 0.92, 0.82) if unlocked else Color(0.55, 0.55, 0.55))
 	texts.add_child(title)

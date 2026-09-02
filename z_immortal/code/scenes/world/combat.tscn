@@ -58,6 +58,8 @@ position_smoothing_speed = 8.0
 
 [node name="Pickups" type="Node2D" parent="."]
 
+[node name="Chests" type="Node2D" parent="."]
+
 [node name="Obstacles" type="Node2D" parent="."]
 
 [node name="Zones" type="Node2D" parent="."]

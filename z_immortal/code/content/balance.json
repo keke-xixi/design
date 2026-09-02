@@ -79,7 +79,19 @@
     "spawn_min_radius": 140,
     "spawn_max_radius": 220,
     "essence_magnet": 64,
-    "item_magnet": 72
+    "item_magnet": 72,
+    "elite_spawn_chance": 0.1,
+    "elite_hp_mult": 1.55,
+    "elite_loot_chance_bonus": 0.15,
+    "combo_window": 3.0
+  },
+
+  "growth": {
+    "_doc": "击杀成长。每 kills_per_tick 杀触发一次。",
+    "kills_per_wisdom": 8,
+    "kills_per_defense": 10,
+    "stage_clear_stones_base": 15,
+    "stage_clear_stones_per_order": 8
   },
 
   "breakthrough_attack": {

@@ -15,6 +15,8 @@ func _ready() -> void:
 	EventBus.attack_gained.connect(_on_attack)
 	EventBus.cultivation_broke_through.connect(_on_breakthrough)
 	EventBus.mystic_crossed.connect(_on_mystic)
+	EventBus.cultivation_stat_gained.connect(_on_stat_gained)
+	EventBus.combo_milestone.connect(_on_combo)
 	EventBus.item_gained.connect(_on_item_gained)
 
 
@@ -35,6 +37,20 @@ func _on_mystic() -> void:
 	var player := get_tree().get_first_node_in_group("player") as Node2D
 	if player:
 		_spawn(player.global_position + Vector2(0, -48), "踏入通玄之上", Color(0.65, 0.85, 1.0))
+
+
+func _on_stat_gained(stat: String, value: int) -> void:
+	var player := get_tree().get_first_node_in_group("player") as Node2D
+	if player == null:
+		return
+	var label := "智 %d阶" % value if stat == "wisdom" else "防 %d" % value
+	_spawn(player.global_position + Vector2(0, -32), label, Color(0.75, 0.88, 1.0))
+
+
+func _on_combo(count: int) -> void:
+	var player := get_tree().get_first_node_in_group("player") as Node2D
+	if player:
+		_spawn(player.global_position + Vector2(0, -40), "%d 连斩!" % count, Color(1.0, 0.82, 0.45))
 
 
 func _on_damage(pos: Vector2, amount: int, is_player: bool) -> void:

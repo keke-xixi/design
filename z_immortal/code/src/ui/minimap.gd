@@ -56,6 +56,11 @@ func _draw() -> void:
 			if enemy_def != null:
 				is_boss = bool(enemy_def.is_boss)
 		draw_circle(mp, 2.0 if not is_boss else 3.5, Color(1.0, 0.45, 0.4) if is_boss else Color(0.95, 0.55, 0.45))
+	for node in get_tree().get_nodes_in_group("chests"):
+		if not is_instance_valid(node) or not (node is Node2D):
+			continue
+		var cp := _world_to_mini((node as Node2D).global_position, inner, sx, sy)
+		draw_rect(Rect2(cp.x - 2, cp.y - 2, 4, 4), Color(0.95, 0.82, 0.35))
 
 
 func _world_to_mini(pos: Vector2, inner: Rect2, sx: float, sy: float) -> Vector2:

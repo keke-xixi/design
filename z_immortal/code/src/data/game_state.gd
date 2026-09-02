@@ -13,7 +13,9 @@ var unlocked_order: int = 1
 var kills: Dictionary = {}
 var run_time: float = 0.0
 var spirit_stones: int = 0
+var combo: int = 0
 var _boss_spawned_this_run: bool = false
+var _last_kill_time: float = -999.0
 
 
 func _ready() -> void:
@@ -192,6 +194,8 @@ func enter_stage(id: String) -> bool:
 	dead = false
 	run_time = 0.0
 	_boss_spawned_this_run = false
+	combo = 0
+	_last_kill_time = -999.0
 	refill_hp()
 	EventBus.stage_changed.emit(stage_id)
 	return true
@@ -218,6 +222,8 @@ func cycle_stage(delta_order: int) -> bool:
 
 func register_kill(enemy_id: String) -> void:
 	kills[stage_id] = stage_kills() + 1
+	_update_combo()
+	_apply_kill_growth()
 	EventBus.enemy_killed.emit(enemy_id, stage_id)
 	var stage := current_stage()
 	if stage:
@@ -234,8 +240,46 @@ func register_kill(enemy_id: String) -> void:
 		var nxt := ContentDB.get_stage(stage.next_id)
 		if nxt:
 			unlocked_order = maxi(unlocked_order, nxt.order)
+		_grant_stage_clear_reward(stage)
 		EventBus.stage_cleared.emit(stage_id)
 	SaveService.save_game()
+
+
+func _grant_stage_clear_reward(stage: StageDef) -> void:
+	var g := ContentDB.section("growth")
+	var stones := int(g.get("stage_clear_stones_base", 15)) + stage.order * int(g.get("stage_clear_stones_per_order", 8))
+	add_spirit_stones(stones)
+	EventBus.stage_reward.emit(stones)
+
+
+func _update_combo() -> void:
+	var window := float(ContentDB.section("combat").get("combo_window", 3.0))
+	if run_time - _last_kill_time <= window:
+		combo += 1
+	else:
+		combo = 1
+	_last_kill_time = run_time
+	if combo >= 5 and combo % 5 == 0:
+		EventBus.combo_milestone.emit(combo)
+
+
+func _apply_kill_growth() -> void:
+	var g := ContentDB.section("growth")
+	var kills := stage_kills()
+	var w_every := int(g.get("kills_per_wisdom", 8))
+	var d_every := int(g.get("kills_per_defense", 10))
+	var w_max := int(ContentDB.section("wisdom").get("max_rank", 100))
+	var d_max := int(ContentDB.section("defense").get("max", 100))
+	if w_every > 0 and kills % w_every == 0 and cultivation.wisdom_rank < w_max:
+		cultivation.wisdom_rank += 1
+		EventBus.cultivation_stat_gained.emit("wisdom", cultivation.wisdom_rank)
+		SaveService.save_game()
+	if d_every > 0 and kills % d_every == 0 and cultivation.defense < d_max:
+		cultivation.defense += 1
+		recompute_max_hp()
+		EventBus.cultivation_stat_gained.emit("defense", cultivation.defense)
+		EventBus.player_hp_changed.emit(hp, max_hp)
+		SaveService.save_game()
 
 
 func apply_hurt(amount: int) -> void:
