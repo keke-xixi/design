@@ -12,23 +12,29 @@ collision_mask = 1
 motion_mode = 1
 script = ExtResource("1_mob")
 
+[node name="Shadow" type="Polygon2D" parent="."]
+z_index = -1
+color = Color(0.04, 0.05, 0.07, 0.45)
+polygon = PackedVector2Array(-12, 12, 12, 12, 8, 17, -8, 17)
+
 [node name="Visual" type="Sprite2D" parent="."]
 texture_filter = 1
-scale = Vector2(0.14, 0.14)
+position = Vector2(0, -4)
+scale = Vector2(0.22, 0.22)
 texture = ExtResource("2_tex")
 
 [node name="HpBarBg" type="ColorRect" parent="."]
-offset_left = -12.0
-offset_top = -28.0
-offset_right = 12.0
-offset_bottom = -25.0
-color = Color(0.1, 0.1, 0.1, 0.7)
+offset_left = -14.0
+offset_top = -36.0
+offset_right = 14.0
+offset_bottom = -33.0
+color = Color(0.08, 0.08, 0.1, 0.75)
 
 [node name="HpBar" type="ColorRect" parent="."]
-offset_left = -12.0
-offset_top = -28.0
-offset_right = 12.0
-offset_bottom = -25.0
+offset_left = -14.0
+offset_top = -36.0
+offset_right = 14.0
+offset_bottom = -33.0
 color = Color(0.9, 0.35, 0.3, 0.95)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

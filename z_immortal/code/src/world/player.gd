@@ -9,13 +9,19 @@ var _facing := Vector2.DOWN
 var _projectiles: Node2D
 
 @onready var _visual: Sprite2D = $Visual
+@onready var _outline: Sprite2D = get_node_or_null("Outline")
 @onready var _hp_bar: ColorRect = $HpBar
+@onready var _aura: Polygon2D = get_node_or_null("Aura")
+var _bob := 0.0
 
 func _ready() -> void:
 	add_to_group("player")
 	collision_layer = 2
 	collision_mask = 1
 	_visual.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	if _outline:
+		_outline.texture = _visual.texture
+		_outline.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	EventBus.player_hp_changed.connect(_on_hp)
 	_on_hp(GameState.hp, GameState.max_hp)
 
@@ -25,13 +31,31 @@ func configure(projectiles: Node2D, map_rect: Rect2) -> void:
 
 func _on_hp(hp: int, max_hp: int) -> void:
 	var ratio := 0.0 if max_hp <= 0 else clampf(float(hp) / float(max_hp), 0.0, 1.0)
-	_hp_bar.size.x = 28.0 * ratio
-	_hp_bar.color = Color(0.35, 0.9, 0.45) if ratio > 0.35 else Color(0.95, 0.35, 0.3)
+	_hp_bar.size.x = 32.0 * ratio
+	if ratio > 0.55:
+		_hp_bar.color = Color(0.4, 0.92, 0.75)
+	elif ratio > 0.35:
+		_hp_bar.color = Color(0.95, 0.78, 0.35)
+	else:
+		_hp_bar.color = Color(0.95, 0.35, 0.3)
+	# Low HP crisis tint.
+	if ratio <= 0.3 and not GameState.dead:
+		modulate = Color(1.0, 0.82, 0.82)
+	elif _dash_iframe <= 0.0:
+		modulate = Color.WHITE
 
 func _physics_process(delta: float) -> void:
+	z_index = int(global_position.y)
 	if GameState.dead:
 		velocity = Vector2.ZERO
 		return
+	_bob += delta * 6.0
+	_visual.position.y = -8.0 + sin(_bob) * 1.6
+	if _outline:
+		_outline.position.y = _visual.position.y + 1.0
+		_outline.flip_h = _visual.flip_h
+	if _aura:
+		_aura.modulate.a = 0.35 + 0.2 * sin(_bob * 0.7)
 	for key in _skill_cd.keys():
 		_skill_cd[key] = maxf(float(_skill_cd[key]) - delta, 0.0)
 	if _dash_iframe > 0.0:
@@ -46,6 +70,8 @@ func _physics_process(delta: float) -> void:
 	if direction != Vector2.ZERO:
 		_facing = direction
 		_visual.flip_h = direction.x < 0.0
+		if _outline:
+			_outline.flip_h = _visual.flip_h
 	velocity = direction * speed * zone_mult
 	move_and_slide()
 	position.x = clampf(position.x, bounds.position.x, bounds.end.x)
@@ -66,15 +92,12 @@ func take_hit(amount: int) -> void:
 	GameState.apply_hurt(amount)
 	EventBus.damage_dealt.emit(global_position, amount, true)
 	_hurt_cd = float(ContentDB.section("combat").get("hurt_iframes", 0.35))
+	if SfxService:
+		SfxService.play_hurt()
 	modulate = Color(1.0, 0.55, 0.55)
 	var tw := create_tween()
 	tw.tween_property(self, "modulate", Color.WHITE, 0.18)
-	var cam := get_node_or_null("Camera2D") as Camera2D
-	if cam:
-		var shake := create_tween()
-		shake.tween_property(cam, "offset", Vector2(4, -3), 0.04)
-		shake.tween_property(cam, "offset", Vector2(-3, 2), 0.04)
-		shake.tween_property(cam, "offset", Vector2.ZERO, 0.06)
+	pulse_camera(0.1)
 
 func _try_fire(mult: float = 1.0) -> bool:
 	if _projectiles == null:
@@ -138,9 +161,9 @@ func _try_breakthrough() -> void:
 	if not bool(result.get("ok", false)):
 		var reason := str(result.get("reason", ""))
 		if reason == "not_enough_attack":
-			FloatTextManager.show_message(global_position + Vector2(0, -28), "攻不足 %d" % int(result.get("need", 0)), Color(0.95, 0.55, 0.45))
+			FloatTextManager.show_message(global_position + Vector2(0, -28), "攻不足", Color(0.95, 0.55, 0.45))
 		elif reason == "already_peak":
-			FloatTextManager.show_message(global_position + Vector2(0, -28), "已达巅峰", Color(0.75, 0.75, 0.8))
+			FloatTextManager.show_message(global_position + Vector2(0, -28), "巅峰", Color(0.75, 0.75, 0.8))
 
 func _use_skill(skill_id: String) -> void:
 	if GameState.dead:
@@ -164,22 +187,63 @@ func _use_skill(skill_id: String) -> void:
 	_skill_cd[skill_id] = cd
 	EventBus.skill_used.emit(skill_id, cd)
 
+func pulse_camera(strength: float = 0.08) -> void:
+	var cam := get_node_or_null("Camera2D") as Camera2D
+	if cam == null:
+		return
+	var amp := (3.0 + strength * 40.0) * (1.0 + minf(float(GameState.combo) * 0.025, 0.4))
+	var shake := create_tween()
+	shake.tween_property(cam, "offset", Vector2(amp, -amp * 0.7), 0.03)
+	shake.tween_property(cam, "offset", Vector2(-amp * 0.8, amp * 0.5), 0.04)
+	shake.tween_property(cam, "offset", Vector2.ZERO, 0.06)
+	if GameState.combo >= 12:
+		var z0 := cam.zoom
+		var ztw := create_tween()
+		ztw.tween_property(cam, "zoom", z0 * 1.03, 0.05)
+		ztw.tween_property(cam, "zoom", z0, 0.12)
+
 func _do_dash(cfg: Dictionary) -> void:
 	var dir := _move_axis()
 	if dir == Vector2.ZERO:
 		dir = _facing
 	var dist := float(cfg.get("dash_distance", 90))
+	_spawn_dash_ghost()
 	global_position += dir.normalized() * dist
 	global_position.x = clampf(global_position.x, bounds.position.x, bounds.end.x)
 	global_position.y = clampf(global_position.y, bounds.position.y, bounds.end.y)
 	_dash_iframe = float(cfg.get("iframe", 0.25))
+	if SfxService:
+		SfxService.play_skill()
 	modulate = Color(0.7, 0.9, 1.0)
 	var tw := create_tween()
 	tw.tween_property(self, "modulate", Color.WHITE, 0.12)
+	pulse_camera(0.06)
+
+func _spawn_dash_ghost() -> void:
+	if _visual == null or _visual.texture == null:
+		return
+	var parent := get_parent()
+	if parent == null:
+		return
+	for i in 2:
+		var ghost := Sprite2D.new()
+		ghost.texture = _visual.texture
+		ghost.scale = _visual.scale
+		ghost.flip_h = _visual.flip_h
+		ghost.modulate = Color(0.55, 0.85, 1.0, 0.4 - i * 0.12)
+		ghost.global_position = global_position + _visual.position - _facing.normalized() * float(i) * 10.0
+		ghost.z_index = -1
+		parent.add_child(ghost)
+		var tw := ghost.create_tween()
+		tw.tween_property(ghost, "modulate:a", 0.0, 0.16 + float(i) * 0.04)
+		tw.tween_callback(ghost.queue_free)
 
 func _do_ring_slash(cfg: Dictionary) -> void:
 	var radius := float(cfg.get("radius", 110))
 	var mult := float(cfg.get("damage_mult", 1.6))
+	if SfxService:
+		SfxService.play_skill()
+	_spawn_ring_fx(radius)
 	for node in get_tree().get_nodes_in_group("mobs"):
 		if not is_instance_valid(node) or not (node is Node2D):
 			continue
@@ -190,21 +254,75 @@ func _do_ring_slash(cfg: Dictionary) -> void:
 			var defense := 0
 			if mob.get("def") != null:
 				defense = int(mob.def.defense)
-			mob.take_damage(GameState.projectile_damage_against(defense, mult))
-	FloatTextManager.show_message(global_position + Vector2(0, -32), "环斩", Color(0.85, 0.95, 0.55))
+			var knock := (mob.global_position - global_position).normalized()
+			mob.call("take_damage", GameState.projectile_damage_against(defense, mult), knock)
+	FloatTextManager.show_message(global_position + Vector2(0, -32), "斩", Color(0.85, 0.95, 0.55))
+	pulse_camera(0.1)
+
+func _spawn_ring_fx(radius: float) -> void:
+	var ring := Polygon2D.new()
+	ring.z_index = 5
+	ring.color = Color(0.55, 0.92, 1.0, 0.35)
+	var pts: PackedVector2Array = []
+	for i in 28:
+		var a := TAU * float(i) / 28.0
+		pts.append(Vector2(cos(a), sin(a)) * 8.0)
+	ring.polygon = pts
+	var parent := get_parent()
+	if parent:
+		parent.add_child(ring)
+	ring.global_position = global_position
+	var tw := ring.create_tween()
+	tw.tween_property(ring, "scale", Vector2(radius / 8.0, radius / 8.0), 0.18)
+	tw.parallel().tween_property(ring, "modulate:a", 0.0, 0.18)
+	tw.tween_callback(ring.queue_free)
+	var rim := Line2D.new()
+	rim.width = 2.5
+	rim.default_color = Color(0.7, 0.95, 1.0, 0.8)
+	rim.z_index = 6
+	for i in 29:
+		var a2 := TAU * float(i) / 28.0
+		rim.add_point(Vector2(cos(a2), sin(a2)) * radius)
+	if parent:
+		parent.add_child(rim)
+	rim.global_position = global_position
+	var tw2 := rim.create_tween()
+	tw2.tween_property(rim, "modulate:a", 0.0, 0.22)
+	tw2.tween_callback(rim.queue_free)
 
 func _do_use_pill(cfg: Dictionary) -> bool:
 	var priority: Array = cfg.get("pill_priority", [])
 	var result := GameState.use_pill_from_inventory(priority)
 	if not bool(result.get("ok", false)):
-		FloatTextManager.show_message(global_position + Vector2(0, -28), "无丹可服", Color(0.75, 0.75, 0.8))
+		FloatTextManager.show_message(global_position + Vector2(0, -28), "无丹", Color(0.75, 0.75, 0.8))
 		return false
-	FloatTextManager.show_message(global_position + Vector2(0, -28), "+%d 气血" % int(result.get("healed", 0)), Color(0.55, 0.95, 0.65))
+	if SfxService:
+		SfxService.play_pickup()
+	FloatTextManager.show_message(global_position + Vector2(0, -28), "+%d" % int(result.get("healed", 0)), Color(0.55, 0.95, 0.65))
+	# Soft heal ring.
+	var ring := Line2D.new()
+	ring.width = 2.0
+	ring.default_color = Color(0.45, 0.95, 0.65, 0.75)
+	ring.z_index = 7
+	for i in 21:
+		var a := TAU * float(i) / 20.0
+		ring.add_point(Vector2(cos(a), sin(a)) * 14.0)
+	var parent := get_parent()
+	if parent:
+		parent.add_child(ring)
+	ring.global_position = global_position
+	var tw := ring.create_tween()
+	tw.tween_property(ring, "scale", Vector2(2.0, 2.0), 0.2)
+	tw.parallel().tween_property(ring, "modulate:a", 0.0, 0.2)
+	tw.tween_callback(ring.queue_free)
 	return true
 
 func _do_spirit_burst(cfg: Dictionary) -> void:
 	if _projectiles == null:
 		return
+	if SfxService:
+		SfxService.play_skill()
+	_spawn_spirit_burst_fx()
 	var count := int(cfg.get("projectiles", 8))
 	var mult := float(cfg.get("damage_mult", 0.85))
 	for i in count:
@@ -213,6 +331,25 @@ func _do_spirit_burst(cfg: Dictionary) -> void:
 		var bolt := preload("res://scenes/world/projectile.tscn").instantiate()
 		_projectiles.add_child(bolt)
 		bolt.launch(global_position + Vector2(0, -8), dir, mult)
+	pulse_camera(0.08)
+
+func _spawn_spirit_burst_fx() -> void:
+	var parent := get_parent()
+	if parent == null:
+		return
+	var ring := Line2D.new()
+	ring.width = 3.0
+	ring.default_color = Color(0.55, 0.9, 1.0, 0.85)
+	ring.z_index = 8
+	for i in 25:
+		var a := TAU * float(i) / 24.0
+		ring.add_point(Vector2(cos(a), sin(a)) * 16.0)
+	parent.add_child(ring)
+	ring.global_position = global_position
+	var tw := ring.create_tween()
+	tw.tween_property(ring, "scale", Vector2(3.2, 3.2), 0.22)
+	tw.parallel().tween_property(ring, "modulate:a", 0.0, 0.22)
+	tw.tween_callback(ring.queue_free)
 
 func get_skill_cooldown(skill_id: String) -> float:
 	return float(_skill_cd.get(skill_id, 0.0))

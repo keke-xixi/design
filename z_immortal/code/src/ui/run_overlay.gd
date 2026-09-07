@@ -1,8 +1,10 @@
 extends CanvasLayer
 
-## Compact ceremony UI for 640x360: start + clear result.
+## Slim combat ceremony: start + clear result only (no wave modal).
 
 enum Kind { NONE, START, RESULT }
+
+const _UiStyle := preload("res://src/ui/ui_style.gd")
 
 var _kind: int = Kind.NONE
 var _root: Control
@@ -13,6 +15,7 @@ var _buttons: VBoxContainer
 
 func _ready() -> void:
 	layer = 20
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	_build()
 	visible = false
 	EventBus.stage_cleared.connect(_on_stage_cleared)
@@ -33,40 +36,41 @@ func _build() -> void:
 	add_child(_root)
 	var dim := ColorRect.new()
 	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
-	dim.color = Color(0.02, 0.03, 0.06, 0.55)
+	dim.color = Color(0.02, 0.03, 0.06, 0.5)
 	dim.mouse_filter = Control.MOUSE_FILTER_STOP
 	dim.gui_input.connect(_on_dim_input)
 	_root.add_child(dim)
 	_panel = PanelContainer.new()
 	_panel.set_anchors_preset(Control.PRESET_CENTER)
-	_panel.offset_left = -170
-	_panel.offset_top = -90
-	_panel.offset_right = 170
-	_panel.offset_bottom = 90
+	_panel.offset_left = -150
+	_panel.offset_top = -78
+	_panel.offset_right = 150
+	_panel.offset_bottom = 78
+	_UiStyle.apply_panel(_panel, Color(0.55, 0.78, 0.88, 0.8))
 	_root.add_child(_panel)
 	var margin := MarginContainer.new()
-	margin.add_theme_constant_override("margin_left", 12)
-	margin.add_theme_constant_override("margin_right", 12)
-	margin.add_theme_constant_override("margin_top", 10)
-	margin.add_theme_constant_override("margin_bottom", 10)
+	margin.add_theme_constant_override("margin_left", 10)
+	margin.add_theme_constant_override("margin_right", 10)
+	margin.add_theme_constant_override("margin_top", 8)
+	margin.add_theme_constant_override("margin_bottom", 8)
 	_panel.add_child(margin)
 	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 8)
+	v.add_theme_constant_override("separation", 6)
 	margin.add_child(v)
 	_title = Label.new()
 	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_title.add_theme_font_size_override("font_size", 16)
-	_title.add_theme_color_override("font_color", Color(0.96, 0.9, 0.7))
+	_title.add_theme_font_size_override("font_size", 18)
+	_title.add_theme_color_override("font_color", Color(0.92, 0.97, 0.98))
 	v.add_child(_title)
 	_desc = Label.new()
 	_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_desc.custom_minimum_size = Vector2(300, 48)
+	_desc.custom_minimum_size = Vector2(250, 24)
 	_desc.add_theme_font_size_override("font_size", 11)
 	_desc.add_theme_color_override("font_color", Color(0.78, 0.84, 0.9))
 	v.add_child(_desc)
 	_buttons = VBoxContainer.new()
-	_buttons.add_theme_constant_override("separation", 6)
+	_buttons.add_theme_constant_override("separation", 4)
 	v.add_child(_buttons)
 
 func _on_dim_input(event: InputEvent) -> void:
@@ -86,15 +90,18 @@ func _show_start() -> void:
 	if stage == null:
 		return
 	_kind = Kind.START
-	var boss_line := ""
-	if not stage.boss_id.is_empty():
-		var boss := ContentDB.get_enemy(stage.boss_id)
-		if boss:
-			boss_line = "\n守关 %s · %d 杀后降临" % [boss.display_name, stage.boss_at_kill]
-	_open_panel(
-		"开战 · %s" % stage.display_name,
-		"击杀目标 %d%s\n点击或按确认进入" % [stage.kill_target, boss_line],
-		[["踏入战场", _close]]
+	var accent := Color.from_string(stage.accent, Color(0.55, 0.78, 0.88))
+	_UiStyle.apply_panel(_panel, Color(accent.r, accent.g, accent.b, 0.85))
+	_title.add_theme_color_override("font_color", accent.lightened(0.25))
+	_open_panel(stage.display_name, "击杀 %d" % stage.kill_target, [["开战", _close]])
+	# Soft panel pop.
+	_panel.scale = Vector2(0.94, 0.94)
+	_panel.pivot_offset = _panel.size * 0.5
+	var pop := create_tween()
+	pop.tween_property(_panel, "scale", Vector2.ONE, 0.14).set_trans(Tween.TRANS_BACK)
+	get_tree().create_timer(1.15, true).timeout.connect(func() -> void:
+		if _kind == Kind.START:
+			_close()
 	)
 
 func _show_result(stage_id: String, stones: int) -> void:
@@ -103,35 +110,35 @@ func _show_result(stage_id: String, stones: int) -> void:
 		return
 	var stage := ContentDB.get_stage(stage_id)
 	var name := stage.display_name if stage else stage_id
-	var stone_line := ""
+	var desc := ""
 	if stones >= 0:
-		stone_line = "灵石 +%d\n" % stones
-	var next_line := "可返回选关继续。"
+		desc = "+%d 灵石" % stones
+	_kind = Kind.RESULT
+	var actions: Array = [["选关", _leave]]
 	if stage and not stage.next_id.is_empty():
 		var nxt := ContentDB.get_stage(stage.next_id)
 		if nxt and GameState.can_enter(nxt):
-			next_line = "已解锁：%s" % nxt.display_name
-	_kind = Kind.RESULT
-	var actions: Array = [["返回选关", _leave]]
-	if stage and not stage.next_id.is_empty():
-		var nxt2 := ContentDB.get_stage(stage.next_id)
-		if nxt2 and GameState.can_enter(nxt2):
-			var nid := nxt2.id
-			actions.append(["挑战下一层", func() -> void: SceneManager.go_combat(nid)])
-	actions.append(["继续本关", _close])
-	_open_panel("%s · 已破" % name, "%s%s" % [stone_line, next_line], actions)
+			var nid := nxt.id
+			actions.append(["下一层", func() -> void: SceneManager.go_combat(nid)])
+	actions.append(["留下", _close])
+	_open_panel("%s" % name, ("通关 · " + desc) if not desc.is_empty() else "通关", actions)
 
 func _open_panel(title: String, desc: String, actions: Array) -> void:
 	visible = true
 	_title.text = title
 	_desc.text = desc
+	_desc.visible = not desc.is_empty()
 	_clear_buttons()
 	for raw in actions:
 		if typeof(raw) != TYPE_ARRAY or raw.size() < 2:
 			continue
 		var b := Button.new()
-		b.custom_minimum_size = Vector2(0, 28)
+		b.custom_minimum_size = Vector2(0, 26)
 		b.text = str(raw[0])
+		if str(raw[0]) in ["下一层", "开战"]:
+			_UiStyle.apply_primary_button(b)
+		else:
+			_UiStyle.apply_button(b)
 		var cb: Callable = raw[1]
 		b.pressed.connect(func() -> void:
 			_close()

@@ -26,7 +26,7 @@ func _n(name: String) -> Node:
 func _check_autoloads() -> int:
 	var names := [
 		"EventBus", "ContentDB", "GameState", "SteamService", "SceneManager",
-		"SaveService", "FloatTextManager", "LootService", "MarketService", "AlchemyService",
+		"SaveService", "FloatTextManager", "LootService", "MarketService", "AlchemyService", "SfxService",
 	]
 	var bad := 0
 	for n in names:

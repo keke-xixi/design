@@ -251,6 +251,7 @@ func _update_combo() -> void:
 	_last_kill_time = run_time
 	if combo >= 5 and combo % 5 == 0:
 		EventBus.combo_milestone.emit(combo)
+		heal_amount(maxi(int(float(max_hp) * 0.05), 1))
 
 func _apply_kill_growth() -> void:
 	var g := ContentDB.section("growth")
@@ -335,4 +336,12 @@ func projectile_damage_against(enemy_def: int, mult: float = 1.0) -> int:
 		int(cbt.get("damage_flat", 8)),
 		float(cbt.get("damage_per_attack", 1)),
 	)
-	return maxi(int(float(base) * mult * run.damage_mult()), 1)
+	var combo_bonus := 1.0 + float(mini(combo, 20)) * float(cbt.get("combo_damage_per_stack", 0.02))
+	var crisis := 1.0
+	if max_hp > 0 and float(hp) / float(max_hp) <= 0.3:
+		crisis = float(cbt.get("low_hp_damage_mult", 1.2))
+	return maxi(int(float(base) * mult * run.damage_mult() * combo_bonus * crisis), 1)
+
+func combo_mult() -> float:
+	var cbt := ContentDB.section("combat")
+	return 1.0 + float(mini(combo, 20)) * float(cbt.get("combo_damage_per_stack", 0.02))

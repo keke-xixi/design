@@ -1,22 +1,38 @@
 extends Control
 
-## Map-select UI for 640x360: list + detail, enter always on-screen.
+## Game-like stage select: left map list, right full preview + fight CTA.
 
-@onready var _list: VBoxContainer = $Root/Panel/Body/MapList/Scroll/List
-@onready var _detail_title: Label = $Root/Panel/Body/Detail/Title
-@onready var _detail_lore: Label = $Root/Panel/Body/Detail/Lore
-@onready var _detail_stats: Label = $Root/Panel/Body/Detail/Stats
-@onready var _detail_mobs: Label = $Root/Panel/Body/Detail/Mobs
-@onready var _thumb: TextureRect = $Root/Panel/Body/Detail/Thumb
-@onready var _enter_btn: Button = $Root/Panel/Body/Detail/EnterButton
-@onready var _hint: Label = $Root/Panel/Hint
+const _UiStyle := preload("res://src/ui/ui_style.gd")
+
+@onready var _list: VBoxContainer = $Root/LeftPanel/LeftVBox/Scroll/List
+@onready var _detail_title: Label = $Root/DetailTitle
+@onready var _detail_stats: Label = $Root/DetailStats
+@onready var _thumb: TextureRect = $Root/MapPreview
+@onready var _enter_btn: Button = $Root/EnterButton
+@onready var _hint: Label = $Root/LeftPanel/LeftVBox/Hint
+@onready var _left_panel: PanelContainer = $Root/LeftPanel
 
 var _selected_id: String = ""
 
+func _process(_delta: float) -> void:
+	if _enter_btn == null:
+		return
+	var t := Time.get_ticks_msec() * 0.002
+	if not _enter_btn.disabled:
+		var g := 1.0 + 0.04 * sin(t)
+		_enter_btn.modulate = Color(g, g * 0.96, g * 0.88)
+	else:
+		_enter_btn.modulate = Color(0.55, 0.55, 0.58)
+
 func _ready() -> void:
+	_UiStyle.apply_panel(_left_panel)
+	if has_node("Root/MapFrame"):
+		_UiStyle.apply_panel($Root/MapFrame, Color(0.55, 0.78, 0.88, 0.45))
+	_UiStyle.apply_primary_button(_enter_btn)
+	_UiStyle.apply_button($Root/LeftPanel/LeftVBox/Header/BackButton)
 	_enter_btn.pressed.connect(_on_enter)
 	_build_list()
-	_refresh_header()
+	_hint.text = "已开至第 %d 层" % GameState.unlocked_order
 	var stages := ContentDB.stages.all_stages()
 	for stage in stages:
 		if GameState.can_enter(stage):
@@ -24,16 +40,6 @@ func _ready() -> void:
 			break
 	if _selected_id.is_empty() and not stages.is_empty():
 		_select_stage(stages[0].id)
-
-func _refresh_header() -> void:
-	var c := GameState.cultivation
-	var realm := ContentDB.realms.get_realm(c.attack_realm_id)
-	var realm_name := realm.display_name if realm else c.attack_realm_id
-	_hint.text = "%s · %s · 解锁至第 %d 层" % [
-		GameState.realm_band_name(),
-		realm_name,
-		GameState.unlocked_order,
-	]
 
 func _build_list() -> void:
 	while _list.get_child_count() > 0:
@@ -47,15 +53,18 @@ func _make_map_button(stage: StageDef) -> Control:
 	var unlocked := GameState.can_enter(stage)
 	var cleared := GameState.is_stage_cleared(stage.id)
 	var btn := Button.new()
-	btn.custom_minimum_size = Vector2(0, 28)
+	btn.custom_minimum_size = Vector2(0, 34)
 	btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	var mark := "◆" if cleared else ("○" if unlocked else "·")
 	btn.text = "%s %s" % [mark, stage.display_name]
 	btn.disabled = not unlocked
+	btn.set_meta("stage_id", stage.id)
+	btn.set_meta("accent", stage.accent)
 	if unlocked:
+		_UiStyle.apply_button(btn)
 		btn.modulate = Color.from_string(stage.accent, Color(0.92, 0.88, 0.75))
 	else:
-		btn.modulate = Color(0.5, 0.5, 0.52)
+		btn.modulate = Color(0.45, 0.45, 0.48)
 	var sid := stage.id
 	btn.pressed.connect(func() -> void: _select_stage(sid))
 	return btn
@@ -65,25 +74,27 @@ func _select_stage(stage_id: String) -> void:
 	var stage := ContentDB.get_stage(stage_id)
 	if stage == null:
 		return
+	for child in _list.get_children():
+		if not (child is Button):
+			continue
+		var b := child as Button
+		var sid := str(b.get_meta("stage_id", ""))
+		var accent := str(b.get_meta("accent", "#c0c0c0"))
+		if b.disabled:
+			b.modulate = Color(0.45, 0.45, 0.48)
+		elif sid == stage_id:
+			b.modulate = Color(1.2, 1.15, 1.0)
+		else:
+			b.modulate = Color.from_string(accent, Color(0.9, 0.9, 0.9))
 	var unlocked := GameState.can_enter(stage)
 	var cleared := GameState.is_stage_cleared(stage.id)
-	var kills := int(GameState.kills.get(stage.id, 0))
-	_detail_title.text = "%d. %s" % [stage.order, stage.display_name]
+	_detail_title.text = stage.display_name
 	_detail_title.add_theme_color_override("font_color", Color.from_string(stage.accent, Color(0.95, 0.9, 0.7)))
-	var lore := stage.lore if not stage.lore.is_empty() else stage.description
-	if lore.length() > 70:
-		lore = lore.substr(0, 70) + "…"
-	_detail_lore.text = lore
 	var boss_name := "—"
 	if not stage.boss_id.is_empty():
 		var boss := ContentDB.get_enemy(stage.boss_id)
 		boss_name = boss.display_name if boss else stage.boss_id
-	_detail_stats.text = "目标 %d 杀  ·  进度 %d/%d\n间隔 %.2fs  ·  同屏 %d\nBoss %s @%d" % [
-		stage.kill_target, kills, stage.kill_target,
-		stage.spawn_interval, stage.max_alive,
-		boss_name, stage.boss_at_kill,
-	]
-	_detail_mobs.text = _format_mobs(stage)
+	_detail_stats.text = "目标 %d  ·  Boss %s" % [stage.kill_target, boss_name]
 	var bg_path := stage.background_path()
 	if not bg_path.is_empty() and ResourceLoader.exists(bg_path):
 		_thumb.texture = load(bg_path)
@@ -93,28 +104,10 @@ func _select_stage(stage_id: String) -> void:
 		_thumb.modulate = Color.from_string(stage.accent, Color.GRAY)
 	if unlocked:
 		_enter_btn.disabled = false
-		_enter_btn.text = "再次挑战" if cleared else "进入战场"
+		_enter_btn.text = "再战" if cleared else "开战"
 	else:
 		_enter_btn.disabled = true
-		_enter_btn.text = "未解锁"
-
-func _format_mobs(stage: StageDef) -> String:
-	var parts: PackedStringArray = []
-	var seen: Dictionary = {}
-	for raw in stage.spawns:
-		if typeof(raw) != TYPE_DICTIONARY:
-			continue
-		var eid := str(raw.get("enemy_id", ""))
-		if eid.is_empty() or seen.has(eid):
-			continue
-		seen[eid] = true
-		var enemy := ContentDB.get_enemy(eid)
-		parts.append(enemy.display_name if enemy else eid)
-	if not stage.boss_id.is_empty():
-		var boss := ContentDB.get_enemy(stage.boss_id)
-		if boss:
-			parts.append("Boss·" + boss.display_name)
-	return "出没：" + "、".join(parts)
+		_enter_btn.text = "锁定"
 
 func _on_enter() -> void:
 	if _selected_id.is_empty():

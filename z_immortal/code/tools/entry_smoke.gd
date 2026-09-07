@@ -29,7 +29,7 @@ func _initialize() -> void:
 	var sel = load("res://scenes/world/stage_select.tscn").instantiate()
 	root.add_child(sel)
 	await process_frame
-	var btn = sel.get_node_or_null("Root/Panel/Body/Detail/EnterButton")
+	var btn = sel.get_node_or_null("Root/EnterButton")
 	print("enter_btn=", btn, " disabled=", btn.disabled if btn else null)
 	print("btn_global=", btn.get_global_rect() if btn else null)
 	sel.queue_free()

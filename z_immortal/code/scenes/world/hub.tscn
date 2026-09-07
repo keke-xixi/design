@@ -2,8 +2,7 @@
 
 [ext_resource type="Script" path="res://src/world/hub.gd" id="1_hub"]
 [ext_resource type="Texture2D" path="res://assets/backgrounds/hub_bg.png" id="2_bg"]
-[ext_resource type="Texture2D" path="res://assets/portraits/player.png" id="3_portrait"]
-[ext_resource type="Texture2D" path="res://assets/characters/player_clear.png" id="4_sprite"]
+[ext_resource type="Texture2D" path="res://assets/characters/hub_hero.png" id="3_hero"]
 
 [node name="Hub" type="Control"]
 layout_mode = 3
@@ -33,155 +32,159 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+color = Color(0.02, 0.04, 0.08, 0.22)
+
+[node name="HeroBleed" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 250.0
+offset_top = -18.0
+offset_right = 680.0
+offset_bottom = 380.0
+mouse_filter = 2
+texture = ExtResource("3_hero")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="HeroGlow" type="ColorRect" parent="."]
+layout_mode = 0
+offset_left = 300.0
+offset_top = 250.0
+offset_right = 620.0
+offset_bottom = 340.0
+mouse_filter = 2
+color = Color(0.45, 0.75, 0.95, 0.12)
+
+[node name="HeroShadow" type="ColorRect" parent="."]
+layout_mode = 0
+offset_left = 360.0
+offset_top = 318.0
+offset_right = 560.0
+offset_bottom = 338.0
+mouse_filter = 2
 color = Color(0.02, 0.04, 0.07, 0.35)
 
 [node name="LeftWash" type="ColorRect" parent="."]
 layout_mode = 0
-offset_right = 250.0
+offset_right = 268.0
 offset_bottom = 360.0
 mouse_filter = 2
-color = Color(0.04, 0.07, 0.1, 0.62)
+color = Color(0.02, 0.04, 0.07, 0.62)
+
+[node name="MenuFrame" type="PanelContainer" parent="."]
+layout_mode = 0
+offset_left = 14.0
+offset_top = 16.0
+offset_right = 248.0
+offset_bottom = 300.0
+mouse_filter = 2
+
+[node name="MenuPad" type="Control" parent="MenuFrame"]
+layout_mode = 2
+custom_minimum_size = Vector2(220, 270)
 
 [node name="Brand" type="Label" parent="."]
 layout_mode = 0
-offset_left = 18.0
-offset_top = 14.0
-offset_right = 240.0
-offset_bottom = 52.0
-theme_override_colors/font_color = Color(0.98, 0.93, 0.78, 1)
-theme_override_colors/font_shadow_color = Color(0.05, 0.07, 0.05, 0.85)
+offset_left = 26.0
+offset_top = 28.0
+offset_right = 236.0
+offset_bottom = 82.0
+theme_override_colors/font_color = Color(0.92, 0.97, 0.98, 1)
+theme_override_colors/font_shadow_color = Color(0.05, 0.12, 0.18, 0.95)
 theme_override_constants/shadow_offset_x = 2
 theme_override_constants/shadow_offset_y = 2
-theme_override_font_sizes/font_size = 30
+theme_override_font_sizes/font_size = 40
 text = "通玄之上"
 
 [node name="Tagline" type="Label" parent="."]
 layout_mode = 0
-offset_left = 20.0
-offset_top = 50.0
-offset_right = 240.0
-offset_bottom = 68.0
-theme_override_colors/font_color = Color(0.78, 0.88, 0.95, 1)
+offset_left = 28.0
+offset_top = 84.0
+offset_right = 236.0
+offset_bottom = 106.0
+theme_override_colors/font_color = Color(0.78, 0.86, 0.92, 0.95)
+theme_override_font_sizes/font_size = 12
+text = "凡躯登仙"
+
+[node name="StatusStrip" type="Label" parent="."]
+layout_mode = 0
+offset_left = 28.0
+offset_top = 114.0
+offset_right = 236.0
+offset_bottom = 134.0
+theme_override_colors/font_color = Color(0.82, 0.92, 0.96, 1)
 theme_override_font_sizes/font_size = 11
-text = "凡躯登仙路，一剑破通玄"
+text = "凝露 · 攻0 · 石0"
 
-[node name="StatusPanel" type="PanelContainer" parent="."]
+[node name="ChallengeButton" type="Button" parent="."]
+custom_minimum_size = Vector2(200, 42)
 layout_mode = 0
-offset_left = 16.0
-offset_top = 76.0
-offset_right = 236.0
-offset_bottom = 148.0
+offset_left = 26.0
+offset_top = 156.0
+offset_right = 226.0
+offset_bottom = 198.0
+theme_override_font_sizes/font_size = 16
+text = "进入战场"
 
-[node name="Status" type="Label" parent="StatusPanel"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.88, 0.9, 0.94, 1)
-theme_override_font_sizes/font_size = 11
-text = "通玄之下"
-
-[node name="EquipHint" type="Label" parent="."]
+[node name="SubNav" type="HBoxContainer" parent="."]
 layout_mode = 0
-offset_left = 18.0
-offset_top = 152.0
+offset_left = 26.0
+offset_top = 214.0
 offset_right = 236.0
-offset_bottom = 168.0
-theme_override_colors/font_color = Color(0.72, 0.78, 0.85, 1)
-theme_override_font_sizes/font_size = 10
-text = "装备"
+offset_bottom = 250.0
+theme_override_constants/separation = 8
 
-[node name="Nav" type="VBoxContainer" parent="."]
-layout_mode = 0
-offset_left = 16.0
-offset_top = 176.0
-offset_right = 236.0
-offset_bottom = 300.0
-theme_override_constants/separation = 6
-
-[node name="ChallengeButton" type="Button" parent="Nav"]
-custom_minimum_size = Vector2(0, 34)
-layout_mode = 2
-theme_override_font_sizes/font_size = 15
-text = "挑战关卡"
-
-[node name="Row" type="HBoxContainer" parent="Nav"]
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="EquipmentButton" type="Button" parent="Nav/Row"]
-custom_minimum_size = Vector2(0, 28)
+[node name="EquipmentButton" type="Button" parent="SubNav"]
+custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 12
 text = "装备"
 
-[node name="AlchemyButton" type="Button" parent="Nav/Row"]
-custom_minimum_size = Vector2(0, 28)
+[node name="AlchemyButton" type="Button" parent="SubNav"]
+custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 12
 text = "炼丹"
 
-[node name="MarketButton" type="Button" parent="Nav"]
-custom_minimum_size = Vector2(0, 28)
+[node name="MarketButton" type="Button" parent="SubNav"]
+custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 12
-text = "通玄坊 · 交易"
+text = "坊市"
 
-[node name="QuitButton" type="Button" parent="Nav"]
-custom_minimum_size = Vector2(0, 26)
-layout_mode = 2
-theme_override_font_sizes/font_size = 11
-text = "退出游戏"
-
-[node name="BagHint" type="Label" parent="."]
+[node name="Footer" type="HBoxContainer" parent="."]
 layout_mode = 0
-offset_left = 18.0
-offset_top = 308.0
+offset_left = 26.0
+offset_top = 318.0
 offset_right = 236.0
 offset_bottom = 348.0
-theme_override_colors/font_color = Color(0.7, 0.75, 0.82, 1)
-theme_override_font_sizes/font_size = 9
-autowrap_mode = 3
-text = "背包：空"
+theme_override_constants/separation = 10
 
-[node name="HeroSprite" type="TextureRect" parent="."]
-layout_mode = 0
-offset_left = 280.0
-offset_top = 40.0
-offset_right = 430.0
-offset_bottom = 260.0
-texture = ExtResource("4_sprite")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="PortraitFrame" type="PanelContainer" parent="."]
-layout_mode = 0
-offset_left = 450.0
-offset_top = 70.0
-offset_right = 620.0
-offset_bottom = 250.0
-
-[node name="Portrait" type="TextureRect" parent="PortraitFrame"]
+[node name="EquipHint" type="Label" parent="Footer"]
 layout_mode = 2
-texture = ExtResource("3_portrait")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="LorePanel" type="PanelContainer" parent="."]
-layout_mode = 0
-offset_left = 280.0
-offset_top = 268.0
-offset_right = 620.0
-offset_bottom = 348.0
-
-[node name="Lore" type="Label" parent="LorePanel"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.78, 0.82, 0.86, 1)
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.7, 0.76, 0.82, 0.9)
 theme_override_font_sizes/font_size = 10
-autowrap_mode = 3
-text = "世界观简介"
+text = "—"
 
-[connection signal="pressed" from="Nav/ChallengeButton" to="." method="_on_challenge_pressed"]
-[connection signal="pressed" from="Nav/Row/EquipmentButton" to="." method="_on_equipment_pressed"]
-[connection signal="pressed" from="Nav/Row/AlchemyButton" to="." method="_on_alchemy_pressed"]
-[connection signal="pressed" from="Nav/MarketButton" to="." method="_on_market_pressed"]
-[connection signal="pressed" from="Nav/QuitButton" to="." method="_on_quit_pressed"]
+[node name="QuitButton" type="Button" parent="Footer"]
+custom_minimum_size = Vector2(56, 24)
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "退出"
+
+[node name="BottomMist" type="ColorRect" parent="."]
+layout_mode = 0
+offset_top = 300.0
+offset_right = 640.0
+offset_bottom = 360.0
+mouse_filter = 2
+color = Color(0.02, 0.04, 0.07, 0.35)
+
+[connection signal="pressed" from="ChallengeButton" to="." method="_on_challenge_pressed"]
+[connection signal="pressed" from="SubNav/EquipmentButton" to="." method="_on_equipment_pressed"]
+[connection signal="pressed" from="SubNav/AlchemyButton" to="." method="_on_alchemy_pressed"]
+[connection signal="pressed" from="SubNav/MarketButton" to="." method="_on_market_pressed"]
+[connection signal="pressed" from="Footer/QuitButton" to="." method="_on_quit_pressed"]

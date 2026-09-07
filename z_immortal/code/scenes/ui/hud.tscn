@@ -2,7 +2,6 @@
 
 [ext_resource type="Script" path="res://src/ui/hud.gd" id="1_hud"]
 [ext_resource type="Script" path="res://src/ui/minimap.gd" id="2_minimap"]
-[ext_resource type="Texture2D" path="res://assets/portraits/player.png" id="3_portrait"]
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_hud")
@@ -20,82 +19,85 @@ mouse_filter = 2
 layout_mode = 0
 offset_left = 8.0
 offset_top = 8.0
-offset_right = 280.0
-offset_bottom = 140.0
+offset_right = 200.0
+offset_bottom = 78.0
 
 [node name="Panel" type="VBoxContainer" parent="Root/TopBar"]
 layout_mode = 2
-theme_override_constants/separation = 1
+theme_override_constants/separation = 3
 
 [node name="StageLabel" type="Label" parent="Root/TopBar/Panel"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.96, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 13
 text = "关卡"
 
-[node name="HpLabel" type="Label" parent="Root/TopBar/Panel"]
+[node name="HpRow" type="HBoxContainer" parent="Root/TopBar/Panel"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.55, 0.9, 0.55, 1)
-theme_override_font_sizes/font_size = 13
-text = "气血"
+theme_override_constants/separation = 4
+
+[node name="HpBarBg" type="ColorRect" parent="Root/TopBar/Panel/HpRow"]
+custom_minimum_size = Vector2(152, 8)
+layout_mode = 2
+size_flags_vertical = 4
+color = Color(0.08, 0.1, 0.12, 0.95)
+
+[node name="HpBarFill" type="ColorRect" parent="Root/TopBar/Panel/HpRow/HpBarBg"]
+layout_mode = 0
+offset_right = 152.0
+offset_bottom = 8.0
+color = Color(0.35, 0.82, 0.48, 1)
 
 [node name="KillLabel" type="Label" parent="Root/TopBar/Panel"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.78, 0.55, 1)
-theme_override_font_sizes/font_size = 13
-text = "杀敌"
+theme_override_colors/font_color = Color(0.88, 0.8, 0.58, 1)
+theme_override_font_sizes/font_size = 10
+text = "0/16"
 
-[node name="RealmLabel" type="Label" parent="Root/TopBar/Panel"]
+[node name="KillBarBg" type="ColorRect" parent="Root/TopBar/Panel"]
+custom_minimum_size = Vector2(152, 5)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.93, 0.86, 0.62, 1)
-theme_override_font_sizes/font_size = 13
-text = "攻境"
+color = Color(0.1, 0.12, 0.14, 0.9)
 
-[node name="AttackLabel" type="Label" parent="Root/TopBar/Panel"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.78, 0.9, 0.82, 1)
-theme_override_font_sizes/font_size = 12
-text = "攻"
+[node name="KillBarFill" type="ColorRect" parent="Root/TopBar/Panel/KillBarBg"]
+layout_mode = 0
+offset_right = 152.0
+offset_bottom = 5.0
+color = Color(0.9, 0.75, 0.4, 1)
 
-[node name="WisdomLabel" type="Label" parent="Root/TopBar/Panel"]
+[node name="StoneLabel" type="Label" parent="Root/TopBar/Panel"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.78, 0.86, 0.92, 1)
-theme_override_font_sizes/font_size = 12
-text = "智"
+theme_override_colors/font_color = Color(0.75, 0.88, 0.95, 0.9)
+theme_override_font_sizes/font_size = 9
+text = "石 0"
 
-[node name="DefenseLabel" type="Label" parent="Root/TopBar/Panel"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.86, 0.82, 0.78, 1)
-theme_override_font_sizes/font_size = 12
-text = "防"
-
-[node name="StonesLabel" type="Label" parent="Root/TopBar/Panel"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.82, 0.45, 1)
-theme_override_font_sizes/font_size = 12
-text = "灵石"
-
-[node name="WaveLabel" type="Label" parent="Root/TopBar/Panel"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.78, 0.88, 0.95, 1)
-theme_override_font_sizes/font_size = 11
+[node name="ComboLabel" type="Label" parent="Root"]
+visible = false
+layout_mode = 0
+offset_left = 250.0
+offset_top = 40.0
+offset_right = 390.0
+offset_bottom = 68.0
+theme_override_colors/font_color = Color(1, 0.82, 0.4, 1)
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 1
 text = ""
 
 [node name="Minimap" type="Control" parent="Root"]
 layout_mode = 0
-offset_left = 520.0
+offset_left = 540.0
 offset_top = 8.0
 offset_right = 632.0
-offset_bottom = 84.0
+offset_bottom = 72.0
 script = ExtResource("2_minimap")
 
 [node name="BossBar" type="PanelContainer" parent="Root"]
 visible = false
 layout_mode = 0
 offset_left = 200.0
-offset_top = 88.0
+offset_top = 8.0
 offset_right = 440.0
-offset_bottom = 118.0
+offset_bottom = 36.0
 
 [node name="VBox" type="VBoxContainer" parent="Root/BossBar"]
 layout_mode = 2
@@ -103,87 +105,103 @@ layout_mode = 2
 [node name="BossName" type="Label" parent="Root/BossBar/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.75, 0.45, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 11
 horizontal_alignment = 1
 text = "Boss"
 
 [node name="BossHpBg" type="ColorRect" parent="Root/BossBar/VBox"]
-custom_minimum_size = Vector2(0, 8)
+custom_minimum_size = Vector2(0, 7)
 layout_mode = 2
 color = Color(0.12, 0.1, 0.1, 0.85)
 
 [node name="BossHpFill" type="ColorRect" parent="Root/BossBar/VBox/BossHpBg"]
 layout_mode = 0
-offset_right = 240.0
-offset_bottom = 8.0
+offset_right = 230.0
+offset_bottom = 7.0
 color = Color(1, 0.45, 0.3, 1)
 
-[node name="SkillBar" type="HBoxContainer" parent="Root"]
+[node name="SkillDock" type="PanelContainer" parent="Root"]
 layout_mode = 0
-offset_left = 180.0
-offset_top = 308.0
-offset_right = 460.0
-offset_bottom = 332.0
-theme_override_constants/separation = 6
+offset_left = 176.0
+offset_top = 312.0
+offset_right = 464.0
+offset_bottom = 354.0
 
-[node name="SkillL" type="Label" parent="Root/SkillBar"]
+[node name="SkillBar" type="HBoxContainer" parent="Root/SkillDock"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.85, 0.9, 0.95, 1)
-theme_override_font_sizes/font_size = 11
-text = "L闪避"
+theme_override_constants/separation = 10
+alignment = 1
 
-[node name="SkillU" type="Label" parent="Root/SkillBar"]
+[node name="KeyL" type="PanelContainer" parent="Root/SkillDock/SkillBar"]
+custom_minimum_size = Vector2(48, 28)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.85, 0.9, 0.95, 1)
-theme_override_font_sizes/font_size = 11
-text = "U环斩"
 
-[node name="SkillI" type="Label" parent="Root/SkillBar"]
+[node name="SkillL" type="Label" parent="Root/SkillDock/SkillBar/KeyL"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.85, 0.9, 0.95, 1)
-theme_override_font_sizes/font_size = 11
-text = "I服丹"
+theme_override_colors/font_color = Color(0.95, 0.93, 0.86, 1)
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "L"
 
-[node name="SkillO" type="Label" parent="Root/SkillBar"]
+[node name="KeyU" type="PanelContainer" parent="Root/SkillDock/SkillBar"]
+custom_minimum_size = Vector2(48, 28)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.85, 0.9, 0.95, 1)
-theme_override_font_sizes/font_size = 11
-text = "O灵爆"
+
+[node name="SkillU" type="Label" parent="Root/SkillDock/SkillBar/KeyU"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.93, 0.86, 1)
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "U"
+
+[node name="KeyI" type="PanelContainer" parent="Root/SkillDock/SkillBar"]
+custom_minimum_size = Vector2(48, 28)
+layout_mode = 2
+
+[node name="SkillI" type="Label" parent="Root/SkillDock/SkillBar/KeyI"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.93, 0.86, 1)
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "I"
+
+[node name="KeyO" type="PanelContainer" parent="Root/SkillDock/SkillBar"]
+custom_minimum_size = Vector2(48, 28)
+layout_mode = 2
+
+[node name="SkillO" type="Label" parent="Root/SkillDock/SkillBar/KeyO"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.93, 0.86, 1)
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "O"
 
 [node name="HintLabel" type="Label" parent="Root"]
+visible = false
 layout_mode = 0
-offset_left = 10.0
-offset_top = 330.0
-offset_right = 520.0
-offset_bottom = 352.0
-theme_override_colors/font_color = Color(0.8, 0.82, 0.78, 1)
-theme_override_colors/font_shadow_color = Color(0.05, 0.07, 0.05, 0.85)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
+offset_left = 8.0
+offset_top = 338.0
+offset_right = 220.0
+offset_bottom = 356.0
+theme_override_colors/font_color = Color(0.9, 0.55, 0.5, 1)
 theme_override_font_sizes/font_size = 10
-text = "WASD 移动  J吐纳  K突破  Esc选关"
-
-[node name="Portrait" type="TextureRect" parent="Root"]
-layout_mode = 0
-offset_left = 520.0
-offset_top = 210.0
-offset_right = 630.0
-offset_bottom = 350.0
-texture = ExtResource("3_portrait")
-expand_mode = 1
-stretch_mode = 5
+text = ""
 
 [node name="ClearBanner" type="Label" parent="Root"]
 visible = false
 layout_mode = 0
-offset_left = 180.0
-offset_top = 140.0
-offset_right = 460.0
-offset_bottom = 180.0
+offset_left = 140.0
+offset_top = 120.0
+offset_right = 500.0
+offset_bottom = 156.0
 theme_override_colors/font_color = Color(1, 0.92, 0.55, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
 theme_override_constants/shadow_offset_x = 2
 theme_override_constants/shadow_offset_y = 2
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 18
 horizontal_alignment = 1
-text = "本层已破 · 通玄之路更进一步"
+text = ""

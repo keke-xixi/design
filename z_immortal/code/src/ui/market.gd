@@ -1,5 +1,7 @@
 extends Control
 
+const _UiStyle := preload("res://src/ui/ui_style.gd")
+
 @onready var _stones: Label = $Panel/Header/Stones
 @onready var _list: VBoxContainer = $Panel/Body/Scroll/List
 @onready var _bag: VBoxContainer = $Panel/Body/BagPanel/BagVBox/BagList
@@ -9,6 +11,10 @@ extends Control
 @onready var _sell_price: SpinBox = $Panel/SellRow/SellPrice
 
 func _ready() -> void:
+	_UiStyle.apply_button($Panel/Header/BackButton)
+	_UiStyle.apply_button($Panel/SellRow/ListButton)
+	if has_node("Panel/Body/BagPanel"):
+		_UiStyle.apply_panel($Panel/Body/BagPanel)
 	MarketService.refresh_npc_listings()
 	_refresh_header()
 	_build_listings()
@@ -16,6 +22,10 @@ func _ready() -> void:
 	_populate_sell_items()
 	EventBus.market_trade.connect(func(_a, _i, _q, _p): _refresh_all())
 	EventBus.item_gained.connect(func(_i, _a, _r): _refresh_all())
+
+func _process(_delta: float) -> void:
+	if has_node("Hero"):
+		$Hero.position.y = 36.0 + sin(Time.get_ticks_msec() * 0.0018) * 3.0
 
 func _refresh_all() -> void:
 	_refresh_header()
@@ -42,22 +52,24 @@ func _make_listing_row(row: Dictionary) -> Control:
 	var name := item.display_name if item else item_id
 	var qty := int(row.get("qty", 1))
 	var price := int(row.get("price", 0))
-	var seller := str(row.get("seller", "未知"))
 	var listing_id := str(row.get("id", ""))
 
 	var panel := PanelContainer.new()
+	_UiStyle.apply_panel(panel)
 	var h := HBoxContainer.new()
 	panel.add_child(h)
 
 	var info := Label.new()
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	info.text = "[%s] %s x%d — %d 灵石" % [seller, name, qty, price]
+	info.text = "%s ×%d · %d石" % [name, qty, price]
 	if item:
 		info.add_theme_color_override("font_color", LootService.rarity_color(item.rarity))
+		info.add_theme_font_size_override("font_size", 11)
 	h.add_child(info)
 
 	var btn := Button.new()
 	btn.text = "购买"
+	_UiStyle.apply_button(btn)
 	btn.pressed.connect(func() -> void: _on_buy(listing_id))
 	h.add_child(btn)
 	return panel
@@ -65,13 +77,15 @@ func _make_listing_row(row: Dictionary) -> Control:
 func _on_buy(listing_id: String) -> void:
 	var result := MarketService.buy_listing(listing_id)
 	if bool(result.get("ok", false)):
-		_status.text = "购入 %s" % str(result.get("item_id", ""))
+		var item := ContentDB.get_item(str(result.get("item_id", "")))
+		var n := item.display_name if item else str(result.get("item_id", ""))
+		_status.text = "购入 %s" % n
 	else:
 		var reason := str(result.get("reason", ""))
 		if reason == "no_money":
-			_status.text = "灵石不足，需要 %d" % int(result.get("need", 0))
+			_status.text = "灵石不足"
 		else:
-			_status.text = "购买失败"
+			_status.text = "失败"
 
 func _build_bag() -> void:
 	while _bag.get_child_count() > 0:
@@ -90,16 +104,22 @@ func _build_bag() -> void:
 		var qty := int(counts[item_id])
 		var row := HBoxContainer.new()
 		var lbl := Label.new()
-		lbl.text = "%s x%d" % [name, qty]
+		lbl.text = "%s ×%d" % [name, qty]
+		lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		if item:
 			lbl.add_theme_color_override("font_color", LootService.rarity_color(item.rarity))
+			lbl.add_theme_font_size_override("font_size", 11)
 		row.add_child(lbl)
 		if item and item.tradeable:
 			var sell_btn := Button.new()
 			sell_btn.text = "回收"
+			_UiStyle.apply_button(sell_btn)
 			sell_btn.pressed.connect(func() -> void: _on_quick_sell(str(item_id), 1))
 			row.add_child(sell_btn)
-		_bag.add_child(row)
+		var wrap := PanelContainer.new()
+		_UiStyle.apply_panel(wrap, Color(0.55, 0.78, 0.88, 0.3))
+		wrap.add_child(row)
+		_bag.add_child(wrap)
 
 func _populate_sell_items() -> void:
 	_sell_item.clear()

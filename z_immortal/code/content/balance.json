@@ -1,6 +1,5 @@
 {
   "_doc": "平衡总表。所有可调数字只放这一份。JSON 没有真注释，用 _doc 当说明：改数字时不要删 _doc，也不要改 id。改完保存，Godot 里 F5 即生效。表结构（境界名、抽卡档、装备来源）在同目录其它 json，以及 design/sheets/ 的 Excel。",
-
   "attack": {
     "_doc": "攻。表：通玄之下～凡、通玄之上～玄，两段都是 1～1亿。",
     "min": 1,
@@ -12,25 +11,42 @@
     "cultivate_gain": 20,
     "cultivate_gain_doc": "按 J 吐纳一次加多少攻。只是开发期手感，正式功法出来后再改。"
   },
-
   "wisdom": {
     "_doc": "智。表：1～100 阶。暂时没有子境名字。",
     "min_rank": 1,
     "max_rank": 100
   },
-
   "defense": {
     "_doc": "防。表：1～100 点，再按区间分凡/灵/绝/玄。",
     "min": 1,
     "max": 100,
     "bands": [
-      { "id": "mortal", "name": "凡", "min": 1, "max": 10 },
-      { "id": "spirit", "name": "灵", "min": 11, "max": 40 },
-      { "id": "extreme", "name": "绝", "min": 41, "max": 70 },
-      { "id": "mystic", "name": "玄", "min": 71, "max": 100 }
+      {
+        "id": "mortal",
+        "name": "凡",
+        "min": 1,
+        "max": 10
+      },
+      {
+        "id": "spirit",
+        "name": "灵",
+        "min": 11,
+        "max": 40
+      },
+      {
+        "id": "extreme",
+        "name": "绝",
+        "min": 41,
+        "max": 70
+      },
+      {
+        "id": "mystic",
+        "name": "玄",
+        "min": 71,
+        "max": 100
+      }
     ]
   },
-
   "start": {
     "_doc": "新号初始值。",
     "attack": 1,
@@ -45,47 +61,89 @@
       "wooden_sword": 1
     }
   },
-
   "loot": {
     "_doc": "掉落与关卡稀有宝。stage_bonus_chance 为每杀额外掉宝概率。",
     "stage_bonus_chance": 0.05,
     "boss_bonus_chance": 0.35,
     "boss_stone_reward": 40,
     "stage_bonus_pool": {
-      "default": [{ "item_id": "spirit_grass", "amount": 1 }],
-      "sect": [{ "item_id": "sect_token", "amount": 1 }, { "item_id": "white_pill", "amount": 1 }],
-      "country": [{ "item_id": "white_pill", "amount": 1 }],
-      "planet": [{ "item_id": "star_shard", "amount": 1 }],
-      "galaxy": [{ "item_id": "void_silk", "amount": 1 }],
-      "world": [{ "item_id": "rift_core", "amount": 1 }],
-      "universe": [{ "item_id": "chaos_fragment", "amount": 1 }]
+      "default": [
+        {
+          "item_id": "spirit_grass",
+          "amount": 1
+        }
+      ],
+      "sect": [
+        {
+          "item_id": "sect_token",
+          "amount": 1
+        },
+        {
+          "item_id": "white_pill",
+          "amount": 1
+        }
+      ],
+      "country": [
+        {
+          "item_id": "white_pill",
+          "amount": 1
+        }
+      ],
+      "planet": [
+        {
+          "item_id": "star_shard",
+          "amount": 1
+        }
+      ],
+      "galaxy": [
+        {
+          "item_id": "void_silk",
+          "amount": 1
+        }
+      ],
+      "world": [
+        {
+          "item_id": "rift_core",
+          "amount": 1
+        }
+      ],
+      "universe": [
+        {
+          "item_id": "chaos_fragment",
+          "amount": 1
+        }
+      ]
     }
   },
-
   "combat": {
     "_doc": "刷怪战斗手感。关卡击杀目标/刷怪间隔在 stages.json，这里是全局默认和玩家弹道。",
-    "player_speed": 110,
+    "player_speed": 118,
     "hp_base": 100,
     "hp_per_defense": 20,
     "hp_per_defense_doc": "最大气血 = hp_base + 防 * hp_per_defense",
     "damage_flat": 10,
     "damage_per_attack": 1.2,
     "damage_doc": "弹道伤害 = damage_flat + 攻 * damage_per_attack - 怪防，至少 1",
-    "auto_attack_interval": 0.38,
-    "projectile_speed": 280,
+    "auto_attack_interval": 0.27,
+    "projectile_speed": 265,
     "projectile_lifetime": 0.9,
-    "contact_cooldown": 0.55,
-    "hurt_iframes": 0.4,
-    "spawn_min_radius": 140,
-    "spawn_max_radius": 220,
-    "essence_magnet": 64,
-    "item_magnet": 72,
-    "elite_spawn_chance": 0.1,
-    "elite_hp_mult": 1.55,
-    "elite_loot_chance_bonus": 0.15,
-    "combo_window": 3.0
+    "contact_cooldown": 0.48,
+    "hurt_iframes": 0.38,
+    "spawn_min_radius": 130,
+    "spawn_max_radius": 210,
+    "essence_magnet": 96,
+    "item_magnet": 98,
+    "elite_spawn_chance": 0.13,
+    "elite_hp_mult": 1.6,
+    "elite_loot_chance_bonus": 0.18,
+    "combo_window": 3.2,
+    "combo_damage_per_stack": 0.025,
+    "knockback": 100,
+    "wave_pause": 0.4,
+    "ranged_cooldown": 1.25,
+    "low_hp_damage_mult": 1.22,
+    "hitstop_scale": 0.05
   },
-
   "growth": {
     "_doc": "击杀成长。每 kills_per_tick 杀触发一次。",
     "kills_per_wisdom": 8,
@@ -93,7 +151,6 @@
     "stage_clear_stones_base": 15,
     "stage_clear_stones_per_order": 8
   },
-
   "breakthrough_attack": {
     "_doc": "进入该攻境所需的攻。0 表示起点。全部是占位，请按手感改。通玄之上的数字是重置后的攻（若 mystic_resets_attack 为 true）。",
     "ninglu_chu": 0,
@@ -129,7 +186,6 @@
     "mieyuan": 30000,
     "yuan": 80000
   },
-
   "gacha": {
     "_doc": "抽卡权重。",
     "white_pill_tier1_weight": 85,
@@ -137,7 +193,6 @@
     "white_weapon_t1_weight": 70,
     "white_weapon_t2_weight": 30
   },
-
   "alchemy": {
     "_doc": "炼丹/抽卡默认成本（可被 alchemy.json 覆盖）。",
     "default_recipe_stones": 0

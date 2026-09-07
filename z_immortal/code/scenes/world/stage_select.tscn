@@ -23,7 +23,7 @@ texture = ExtResource("2_bg")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="Vignette" type="ColorRect" parent="."]
+[node name="Dim" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -31,116 +31,112 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.03, 0.05, 0.08, 0.42)
+color = Color(0.02, 0.04, 0.07, 0.4)
 
-[node name="Root" type="MarginContainer" parent="."]
+[node name="Root" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 8
 
-[node name="Panel" type="VBoxContainer" parent="Root"]
-layout_mode = 2
-theme_override_constants/separation = 6
+[node name="MapFrame" type="PanelContainer" parent="Root"]
+layout_mode = 0
+offset_left = 196.0
+offset_top = 4.0
+offset_right = 636.0
+offset_bottom = 296.0
+mouse_filter = 2
 
-[node name="Header" type="HBoxContainer" parent="Root/Panel"]
-layout_mode = 2
-
-[node name="Title" type="Label" parent="Root/Panel/Header"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.96, 0.92, 0.78, 1)
-theme_override_font_sizes/font_size = 18
-text = "通玄之路 · 选图"
-
-[node name="BackButton" type="Button" parent="Root/Panel/Header"]
-custom_minimum_size = Vector2(72, 0)
-layout_mode = 2
-theme_override_font_sizes/font_size = 12
-text = "返回"
-
-[node name="Hint" type="Label" parent="Root/Panel"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.72, 0.8, 0.86, 1)
-theme_override_font_sizes/font_size = 10
-text = "宗门 → 王朝 → 荒星 → 星域 → 界域 → 混沌星海"
-
-[node name="Body" type="HBoxContainer" parent="Root/Panel"]
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_constants/separation = 8
-
-[node name="MapList" type="VBoxContainer" parent="Root/Panel/Body"]
-custom_minimum_size = Vector2(168, 0)
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="ListTitle" type="Label" parent="Root/Panel/Body/MapList"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.85, 0.8, 0.65, 1)
-theme_override_font_sizes/font_size = 11
-text = "地图"
-
-[node name="Scroll" type="ScrollContainer" parent="Root/Panel/Body/MapList"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="List" type="VBoxContainer" parent="Root/Panel/Body/MapList/Scroll"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 4
-
-[node name="Detail" type="VBoxContainer" parent="Root/Panel/Body"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-theme_override_constants/separation = 4
-
-[node name="Thumb" type="TextureRect" parent="Root/Panel/Body/Detail"]
-custom_minimum_size = Vector2(0, 72)
-layout_mode = 2
+[node name="MapPreview" type="TextureRect" parent="Root"]
+layout_mode = 0
+offset_left = 200.0
+offset_top = 8.0
+offset_right = 632.0
+offset_bottom = 292.0
 expand_mode = 1
 stretch_mode = 6
 
-[node name="Title" type="Label" parent="Root/Panel/Body/Detail"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.96, 0.9, 0.7, 1)
-theme_override_font_sizes/font_size = 16
+[node name="PreviewShade" type="ColorRect" parent="Root"]
+layout_mode = 0
+offset_left = 200.0
+offset_top = 230.0
+offset_right = 632.0
+offset_bottom = 292.0
+mouse_filter = 2
+color = Color(0.02, 0.04, 0.07, 0.55)
+
+[node name="DetailTitle" type="Label" parent="Root"]
+layout_mode = 0
+offset_left = 214.0
+offset_top = 242.0
+offset_right = 500.0
+offset_bottom = 268.0
+theme_override_colors/font_color = Color(0.98, 0.92, 0.75, 1)
+theme_override_font_sizes/font_size = 18
 text = "关卡"
 
-[node name="Lore" type="Label" parent="Root/Panel/Body/Detail"]
-custom_minimum_size = Vector2(0, 28)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.78, 0.84, 0.9, 1)
-theme_override_font_sizes/font_size = 10
-autowrap_mode = 3
-text = "说明"
+[node name="DetailStats" type="Label" parent="Root"]
+layout_mode = 0
+offset_left = 214.0
+offset_top = 268.0
+offset_right = 500.0
+offset_bottom = 288.0
+theme_override_colors/font_color = Color(0.82, 0.86, 0.9, 1)
+theme_override_font_sizes/font_size = 11
+text = ""
 
-[node name="Stats" type="Label" parent="Root/Panel/Body/Detail"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.88, 0.82, 0.62, 1)
-theme_override_font_sizes/font_size = 10
-autowrap_mode = 3
-text = "数值"
+[node name="EnterButton" type="Button" parent="Root"]
+custom_minimum_size = Vector2(110, 36)
+layout_mode = 0
+offset_left = 510.0
+offset_top = 244.0
+offset_right = 620.0
+offset_bottom = 280.0
+theme_override_font_sizes/font_size = 14
+text = "开战"
 
-[node name="Mobs" type="Label" parent="Root/Panel/Body/Detail"]
+[node name="LeftPanel" type="PanelContainer" parent="Root"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 192.0
+offset_bottom = 352.0
+
+[node name="LeftVBox" type="VBoxContainer" parent="Root/LeftPanel"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Header" type="HBoxContainer" parent="Root/LeftPanel/LeftVBox"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Root/LeftPanel/LeftVBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.96, 0.92, 0.78, 1)
+theme_override_font_sizes/font_size = 16
+text = "选关"
+
+[node name="BackButton" type="Button" parent="Root/LeftPanel/LeftVBox/Header"]
+custom_minimum_size = Vector2(48, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "返回"
+
+[node name="Hint" type="Label" parent="Root/LeftPanel/LeftVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.78, 0.85, 1)
+theme_override_font_sizes/font_size = 10
+text = ""
+
+[node name="Scroll" type="ScrollContainer" parent="Root/LeftPanel/LeftVBox"]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_colors/font_color = Color(0.75, 0.8, 0.86, 1)
-theme_override_font_sizes/font_size = 10
-autowrap_mode = 3
-text = "怪物"
 
-[node name="EnterButton" type="Button" parent="Root/Panel/Body/Detail"]
-custom_minimum_size = Vector2(0, 32)
+[node name="List" type="VBoxContainer" parent="Root/LeftPanel/LeftVBox/Scroll"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "进入战场"
+size_flags_horizontal = 3
+theme_override_constants/separation = 5
 
-[connection signal="pressed" from="Root/Panel/Header/BackButton" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="Root/LeftPanel/LeftVBox/Header/BackButton" to="." method="_on_back_pressed"]

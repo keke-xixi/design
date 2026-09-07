@@ -11,9 +11,14 @@ collision_mask = 2
 monitorable = false
 script = ExtResource("1_essence")
 
+[node name="Glow" type="Polygon2D" parent="."]
+z_index = -1
+color = Color(0.35, 1, 0.6, 0.32)
+polygon = PackedVector2Array(0, -10, 9, 0, 0, 10, -9, 0)
+
 [node name="Visual" type="Polygon2D" parent="."]
-color = Color(0.45, 0.95, 0.55, 1)
-polygon = PackedVector2Array(0, -5, 5, 0, 0, 5, -5, 0)
+color = Color(0.45, 0.98, 0.65, 1)
+polygon = PackedVector2Array(0, -6, 6, 0, 0, 6, -6, 0)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_essence")

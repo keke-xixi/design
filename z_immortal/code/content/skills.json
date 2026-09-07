@@ -5,9 +5,9 @@
       "id": "dash",
       "name": "闪避",
       "key": "L",
-      "cooldown": 2.8,
-      "dash_distance": 90,
-      "iframe": 0.25,
+      "cooldown": 2.6,
+      "dash_distance": 98,
+      "iframe": 0.28,
       "description": "向移动方向瞬移并短暂无敌。"
     },
     {
@@ -15,8 +15,8 @@
       "name": "环斩",
       "key": "U",
       "cooldown": 5.0,
-      "radius": 110,
-      "damage_mult": 1.6,
+      "radius": 118,
+      "damage_mult": 1.7,
       "description": "以自身为中心释放剑气，伤害周围敌人。"
     },
     {
@@ -24,7 +24,10 @@
       "name": "服丹",
       "key": "I",
       "cooldown": 1.2,
-      "pill_priority": ["white_pill", "qi_pill_low"],
+      "pill_priority": [
+        "white_pill",
+        "qi_pill_low"
+      ],
       "description": "消耗背包丹药恢复气血。"
     },
     {
@@ -32,8 +35,8 @@
       "name": "灵爆",
       "key": "O",
       "cooldown": 8.0,
-      "projectiles": 8,
-      "damage_mult": 0.85,
+      "projectiles": 10,
+      "damage_mult": 0.9,
       "description": "向八方同时射出剑气。"
     }
   ]

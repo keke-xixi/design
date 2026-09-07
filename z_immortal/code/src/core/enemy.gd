@@ -17,6 +17,7 @@ var xp_attack: int = 1
 var is_boss: bool = false
 var loot: Array = []
 var boss_skill: Dictionary = {}
+var ai: String = "chase"
 
 static func from_dict(data: Dictionary) -> EnemyDef:
 	var row := EnemyDef.new()
@@ -32,6 +33,7 @@ static func from_dict(data: Dictionary) -> EnemyDef:
 	row.sprite_scale = float(data.get("sprite_scale", 0.05))
 	row.xp_attack = int(data.get("xp_attack", 1))
 	row.is_boss = bool(data.get("is_boss", false))
+	row.ai = str(data.get("ai", "chase"))
 	var raw_loot: Variant = data.get("loot", [])
 	row.loot = raw_loot if typeof(raw_loot) == TYPE_ARRAY else []
 	var raw_skill: Variant = data.get("boss_skill", {})

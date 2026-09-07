@@ -8,28 +8,28 @@
       "lore": "外门试炼场。击败同门与灵兽，证明你有资格踏入通玄之路。",
       "order": 1,
       "next_id": "country",
-      "kill_target": 20,
-      "spawn_interval": 0.85,
-      "max_alive": 14,
+      "kill_target": 14,
+      "spawn_interval": 0.7,
+      "max_alive": 17,
       "boss_id": "sect_elder",
-      "boss_at_kill": 16,
-      "accent": "#6ecf8a",
+      "boss_at_kill": 10,
+      "accent": "#7ec8d8",
       "waves": [
         {
           "at_kills": 0,
-          "hint": "第一波 · 外门试炼",
+          "hint": "外门",
           "spawn_interval_mult": 1.0,
           "max_alive_bonus": 0
         },
         {
-          "at_kills": 8,
-          "hint": "灵潮涌动 · 刷怪加速",
+          "at_kills": 6,
+          "hint": "灵潮",
           "spawn_interval_mult": 0.88,
           "max_alive_bonus": 2
         },
         {
-          "at_kills": 14,
-          "hint": "守关长老将至",
+          "at_kills": 11,
+          "hint": "长老",
           "spawn_interval_mult": 0.8,
           "max_alive_bonus": 1
         }
@@ -43,7 +43,7 @@
         "ground_alt": "#2f582e",
         "path": "#8d7044",
         "border": "#6a6e76",
-        "tile_opacity": 0.35,
+        "tile_opacity": 0.28,
         "zones": [
           {
             "cx": 0.5,
@@ -162,22 +162,22 @@
       "lore": "王朝铁骑巡城，江湖刀客横行。杀伐之中，气运与修为并进。",
       "order": 2,
       "next_id": "planet",
-      "kill_target": 28,
-      "spawn_interval": 0.75,
-      "max_alive": 16,
+      "kill_target": 18,
+      "spawn_interval": 0.62,
+      "max_alive": 18,
       "boss_id": "dynasty_general",
-      "boss_at_kill": 22,
-      "accent": "#d4b06a",
+      "boss_at_kill": 13,
+      "accent": "#c9a86a",
       "waves": [
         {
           "at_kills": 0,
-          "hint": "第一波 · 巡城卫出动",
+          "hint": "巡城",
           "spawn_interval_mult": 1.0,
           "max_alive_bonus": 0
         },
         {
           "at_kills": 12,
-          "hint": "刀客混入阵中",
+          "hint": "刀客",
           "spawn_interval_mult": 0.9,
           "max_alive_bonus": 2,
           "spawns": [
@@ -193,7 +193,7 @@
         },
         {
           "at_kills": 20,
-          "hint": "镇国将军驾临",
+          "hint": "将军",
           "spawn_interval_mult": 0.82,
           "max_alive_bonus": 1
         }
@@ -207,7 +207,7 @@
         "ground_alt": "#4a4438",
         "path": "#9a8a6a",
         "border": "#7a7568",
-        "tile_opacity": 0.32,
+        "tile_opacity": 0.28,
         "zones": [
           {
             "cx": 0.5,
@@ -327,22 +327,22 @@
       "max_alive": 18,
       "boss_id": "star_tyrant",
       "boss_at_kill": 28,
-      "accent": "#e08a4a",
+      "accent": "#6db3e0",
       "waves": [
         {
           "at_kills": 0,
-          "hint": "星陆猎场开启",
+          "hint": "猎场",
           "spawn_interval_mult": 1.0
         },
         {
           "at_kills": 15,
-          "hint": "沙虫破土",
+          "hint": "沙虫",
           "spawn_interval_mult": 0.88,
           "max_alive_bonus": 3
         },
         {
           "at_kills": 26,
-          "hint": "星陆霸主苏醒",
+          "hint": "霸主",
           "spawn_interval_mult": 0.78,
           "max_alive_bonus": 2
         }
@@ -356,7 +356,7 @@
         "ground_alt": "#4a342a",
         "path": "#8a6a52",
         "border": "#3a3030",
-        "tile_opacity": 0.3,
+        "tile_opacity": 0.28,
         "zones": [
           {
             "cx": 0.5,
@@ -466,22 +466,22 @@
       "max_alive": 20,
       "boss_id": "void_matriarch",
       "boss_at_kill": 34,
-      "accent": "#9a7cff",
+      "accent": "#8a7ad4",
       "waves": [
         {
           "at_kills": 0,
-          "hint": "进入天河乱流",
+          "hint": "天河",
           "spawn_interval_mult": 1.0
         },
         {
           "at_kills": 18,
-          "hint": "陨星坠落",
+          "hint": "陨星",
           "spawn_interval_mult": 0.85,
           "max_alive_bonus": 3
         },
         {
           "at_kills": 32,
-          "hint": "空冥母神降临",
+          "hint": "母神",
           "spawn_interval_mult": 0.75,
           "max_alive_bonus": 2
         }
@@ -598,22 +598,22 @@
       "max_alive": 22,
       "boss_id": "rift_lord",
       "boss_at_kill": 40,
-      "accent": "#e06070",
+      "accent": "#d4b06a",
       "waves": [
         {
           "at_kills": 0,
-          "hint": "裂隙战场",
+          "hint": "裂隙",
           "spawn_interval_mult": 1.0
         },
         {
           "at_kills": 22,
-          "hint": "古战卒复苏",
+          "hint": "战卒",
           "spawn_interval_mult": 0.82,
           "max_alive_bonus": 4
         },
         {
           "at_kills": 38,
-          "hint": "裂隙领主现身",
+          "hint": "领主",
           "spawn_interval_mult": 0.72,
           "max_alive_bonus": 2
         }
@@ -737,22 +737,22 @@
       "max_alive": 24,
       "boss_id": "chaos_overlord",
       "boss_at_kill": 50,
-      "accent": "#70c8ff",
+      "accent": "#5ec4b0",
       "waves": [
         {
           "at_kills": 0,
-          "hint": "踏入混沌星海",
+          "hint": "星海",
           "spawn_interval_mult": 1.0
         },
         {
           "at_kills": 25,
-          "hint": "星骸苏醒",
+          "hint": "星骸",
           "spawn_interval_mult": 0.8,
           "max_alive_bonus": 4
         },
         {
           "at_kills": 45,
-          "hint": "混沌主宰降临",
+          "hint": "主宰",
           "spawn_interval_mult": 0.68,
           "max_alive_bonus": 3
         }

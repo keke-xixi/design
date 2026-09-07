@@ -19,10 +19,12 @@ func _process(_delta: float) -> void:
 	queue_redraw()
 
 func _draw() -> void:
-	var pad := 4.0
+	var pad := 3.0
+	var outer := Rect2(0, 0, size.x, size.y)
+	draw_rect(outer, Color(0.04, 0.06, 0.09, 0.82))
+	draw_rect(outer, Color(0.55, 0.78, 0.88, 0.5), false, 1.0)
 	var inner := Rect2(pad, pad, size.x - pad * 2.0, size.y - pad * 2.0)
-	draw_rect(inner, Color(0.05, 0.07, 0.1, 0.75))
-	draw_rect(inner, Color(0.35, 0.45, 0.55, 0.6), false, 1.0)
+	draw_rect(inner, Color(0.05, 0.07, 0.1, 0.55))
 	if _map_size.x <= 0.0 or _map_size.y <= 0.0:
 		return
 	var sx := inner.size.x / _map_size.x
@@ -33,25 +35,34 @@ func _draw() -> void:
 			var mini := Rect2(
 				inner.position.x + r.position.x * sx,
 				inner.position.y + r.position.y * sy,
-				r.size.x * sx,
-				r.size.y * sy,
+				maxi(r.size.x * sx, 1.5),
+				maxi(r.size.y * sy, 1.5),
 			)
-			draw_rect(mini, Color(0.25, 0.22, 0.2, 0.85))
+			draw_rect(mini, Color(0.28, 0.24, 0.2, 0.9))
 	var player := get_tree().get_first_node_in_group("player") as Node2D
 	if player:
 		var pp := _world_to_mini(player.global_position, inner, sx, sy)
-		draw_circle(pp, 3.0, Color(0.45, 0.95, 0.55))
+		draw_circle(pp, 3.2, Color(0.45, 0.95, 0.85))
+		draw_arc(pp, 5.0, 0.0, TAU, 12, Color(0.45, 0.95, 0.85, 0.35), 1.0)
 	for node in get_tree().get_nodes_in_group("mobs"):
 		if not is_instance_valid(node) or not (node is Node2D):
 			continue
 		var mp := _world_to_mini((node as Node2D).global_position, inner, sx, sy)
 		var mob_node: Node = node
 		var is_boss := false
+		var is_elite := false
 		if mob_node.get("def") != null:
 			var enemy_def: Variant = mob_node.get("def")
 			if enemy_def != null:
 				is_boss = bool(enemy_def.is_boss)
-		draw_circle(mp, 2.0 if not is_boss else 3.5, Color(1.0, 0.45, 0.4) if is_boss else Color(0.95, 0.55, 0.45))
+		if mob_node.get("is_elite") != null:
+			is_elite = bool(mob_node.get("is_elite"))
+		if is_boss:
+			draw_circle(mp, 3.5, Color(1.0, 0.45, 0.4))
+		elif is_elite:
+			draw_circle(mp, 2.4, Color(1.0, 0.85, 0.35))
+		else:
+			draw_circle(mp, 2.0, Color(0.95, 0.55, 0.45))
 	for node in get_tree().get_nodes_in_group("chests"):
 		if not is_instance_valid(node) or not (node is Node2D):
 			continue

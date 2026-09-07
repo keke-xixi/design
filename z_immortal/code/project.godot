@@ -29,6 +29,7 @@ FloatTextManager="*res://src/ui/float_text_manager.gd"
 LootService="*res://src/core/loot_service.gd"
 MarketService="*res://src/data/market_service.gd"
 AlchemyService="*res://src/data/alchemy_service.gd"
+SfxService="*res://src/core/sfx_service.gd"
 
 [display]
 
