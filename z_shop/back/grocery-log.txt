@@ -1,0 +1,29 @@
+﻿
+> z-shop-back@0.1.0 db:grocery
+> node scripts/update-grocery.js
+
+OK tomato
+OK cabbage
+OK potato
+OK carrot
+OK pepper
+OK onion
+OK beef
+OK egg
+OK pork
+OK rib
+OK chicken
+OK shrimp
+OK fish
+OK duck
+OK brisket
+OK rice
+OK oil
+OK tofu
+npm : 
+所在位置 C:\Users\Administrator\AppData\Local\Temp\ps-script-2075d1ac-1427-44c8-ae67-9ad21ccf678b.ps1:95 字符: 49
++ ... on "d:\zg\code\z-Design\z_shop\back"; npm run db:grocery 2>&1 | Out-F ...
++                                           ~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 

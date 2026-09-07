@@ -1,0 +1,11 @@
+﻿
+> z-shop-back@0.1.0 db:rider
+> node scripts/update-rider.js && node scripts/fix-store.js
+
+npm : 
+所在位置 C:\Users\Administrator\AppData\Local\Temp\ps-script-2075d1ac-1427-44c8-ae67-9ad21ccf678b.ps1:95 字符: 116
++ ... ut-File grocery-log.txt -Encoding utf8; npm run db:rider 2>&1 | Out-F ...
++                                             ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
