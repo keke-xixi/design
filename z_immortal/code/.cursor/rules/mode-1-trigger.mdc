@@ -1,0 +1,15 @@
+---
+description: 用户只发「1」时：为当前改动写好注释并 git commit（不 push）
+alwaysApply: true
+---
+
+# Mode-1 触发
+
+若用户消息去掉首尾空白后**恰好等于** `1`：
+
+1. 立刻阅读并完整执行项目 Skill：`.cursor/skills/tongxuan-mode-1/SKILL.md`
+2. 为**当前未提交改动**补上必要注释，然后按仓库规范 `git commit`
+3. **不要**提问、不要要确认、不要 push
+4. 无改动则说明即可，不要空提交
+
+这是聊天触发：在本对话单独发送 `1` 即可。

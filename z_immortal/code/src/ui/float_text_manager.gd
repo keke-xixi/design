@@ -42,8 +42,8 @@ func _on_stat_gained(stat: String, value: int) -> void:
 	_spawn(player.global_position + Vector2(0, -32), label, Color(0.75, 0.88, 1.0))
 
 func _on_combo(count: int) -> void:
-	# HUD already shows combo; only celebrate big milestones.
-	if count < 8 or count % 4 != 0:
+	# Float only on chunky milestones; HUD already shows live combo.
+	if count != 3 and (count < 8 or count % 5 != 0):
 		return
 	var player := get_tree().get_first_node_in_group("player") as Node2D
 	if player:

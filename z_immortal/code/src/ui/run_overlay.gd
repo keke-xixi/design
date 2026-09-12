@@ -93,7 +93,12 @@ func _show_start() -> void:
 	var accent := Color.from_string(stage.accent, Color(0.55, 0.78, 0.88))
 	_UiStyle.apply_panel(_panel, Color(accent.r, accent.g, accent.b, 0.85))
 	_title.add_theme_color_override("font_color", accent.lightened(0.25))
-	_open_panel(stage.display_name, "击杀 %d" % stage.kill_target, [["开战", _close]])
+	_open_panel(
+		stage.display_name,
+		# One-line skill crib so first runs learn L/U/I/O without a tutorial modal.
+		"击杀 %d · L闪 U斩 I丹 O爆" % stage.kill_target,
+		[["开战", _close]],
+	)
 	# Soft panel pop.
 	_panel.scale = Vector2(0.94, 0.94)
 	_panel.pivot_offset = _panel.size * 0.5

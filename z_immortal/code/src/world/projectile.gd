@@ -44,8 +44,8 @@ func launch_hostile(from: Vector2, dir: Vector2, flat_damage: int) -> void:
 func _physics_process(delta: float) -> void:
 	position += _dir * _speed * delta
 	_life -= delta
-	# Soft trail spark.
-	if Engine.get_process_frames() % 2 == 0:
+	# Soft trail — every 3rd frame to cut particle spam stutter.
+	if Engine.get_process_frames() % 3 == 0:
 		_spawn_trail()
 	if _life <= 0.0:
 		queue_free()

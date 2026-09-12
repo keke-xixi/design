@@ -1,5 +1,5 @@
 {
-  "_doc": "关卡层级。nodes=试炼/奇遇/休整/守关；zones.effect=slow|damage|heal。",
+  "_doc": "关卡层级。nodes=试炼/奇遇/休整/守关；zones.effect=slow|damage|heal。早期关 kill_target/波次 at_kills 须落在通关前，否则波次永不触发。",
   "stages": [
     {
       "id": "sect",
@@ -8,11 +8,11 @@
       "lore": "外门试炼场。击败同门与灵兽，证明你有资格踏入通玄之路。",
       "order": 1,
       "next_id": "country",
-      "kill_target": 14,
-      "spawn_interval": 0.7,
-      "max_alive": 17,
+      "kill_target": 12,
+      "spawn_interval": 0.58,
+      "max_alive": 15,
       "boss_id": "sect_elder",
-      "boss_at_kill": 10,
+      "boss_at_kill": 8,
       "accent": "#7ec8d8",
       "waves": [
         {
@@ -22,16 +22,16 @@
           "max_alive_bonus": 0
         },
         {
-          "at_kills": 6,
+          "at_kills": 4,
           "hint": "灵潮",
-          "spawn_interval_mult": 0.88,
+          "spawn_interval_mult": 0.9,
           "max_alive_bonus": 2
         },
         {
-          "at_kills": 11,
+          "at_kills": 8,
           "hint": "长老",
-          "spawn_interval_mult": 0.8,
-          "max_alive_bonus": 1
+          "spawn_interval_mult": 0.78,
+          "max_alive_bonus": 2
         }
       ],
       "map": {
@@ -115,11 +115,11 @@
       "spawns": [
         {
           "enemy_id": "outer_disciple",
-          "weight": 70
+          "weight": 62
         },
         {
           "enemy_id": "spirit_hare",
-          "weight": 30
+          "weight": 38
         }
       ],
       "nodes": [
@@ -162,11 +162,11 @@
       "lore": "王朝铁骑巡城，江湖刀客横行。杀伐之中，气运与修为并进。",
       "order": 2,
       "next_id": "planet",
-      "kill_target": 18,
-      "spawn_interval": 0.62,
+      "kill_target": 16,
+      "spawn_interval": 0.58,
       "max_alive": 18,
       "boss_id": "dynasty_general",
-      "boss_at_kill": 13,
+      "boss_at_kill": 11,
       "accent": "#c9a86a",
       "waves": [
         {
@@ -176,7 +176,7 @@
           "max_alive_bonus": 0
         },
         {
-          "at_kills": 12,
+          "at_kills": 7,
           "hint": "刀客",
           "spawn_interval_mult": 0.9,
           "max_alive_bonus": 2,
@@ -192,7 +192,7 @@
           ]
         },
         {
-          "at_kills": 20,
+          "at_kills": 12,
           "hint": "将军",
           "spawn_interval_mult": 0.82,
           "max_alive_bonus": 1

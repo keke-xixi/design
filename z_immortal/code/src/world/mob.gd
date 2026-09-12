@@ -75,8 +75,8 @@ func setup(enemy: EnemyDef) -> void:
 		outline.name = "Outline"
 		outline.texture = _visual.texture
 		outline.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-		outline.scale = _visual.scale * 1.06
-		outline.modulate = Color(0.04, 0.05, 0.08, 0.45)
+		outline.scale = _visual.scale * 1.03
+		outline.modulate = Color(0.04, 0.05, 0.08, 0.4)
 		outline.z_index = -1
 		outline.position = _visual.position + Vector2(0, 1)
 		add_child(outline)
@@ -409,11 +409,12 @@ func take_damage(amount: int, knock_dir: Vector2 = Vector2.ZERO) -> void:
 	tw.tween_property(self, "scale", base_scale * 1.12, 0.04)
 	tw.tween_property(self, "scale", base_scale, 0.06)
 	tw.parallel().tween_property(self, "modulate", restore, 0.1)
-	# Micro hitstop for weighty hits.
-	if amount >= 8 or (def != null and def.is_boss) or is_elite:
+	# Micro hitstop only for heavy hits — avoids combat stutter.
+	var min_hs := float(ContentDB.section("combat").get("hitstop_min_damage", 18))
+	if amount >= min_hs or (def != null and def.is_boss) or is_elite:
 		var world := get_tree().get_first_node_in_group("game_world")
 		if world and world.has_method("hitstop"):
-			world.hitstop(0.035 if amount < 20 else 0.055)
+			world.hitstop(0.02 if amount < 28 else 0.035)
 	if hp <= 0:
 		_die()
 
@@ -446,7 +447,7 @@ func _die() -> void:
 	if def != null and (def.is_boss or is_elite):
 		var world2 := get_tree().get_first_node_in_group("game_world")
 		if world2 and world2.has_method("hitstop"):
-			world2.hitstop(0.08 if is_elite else 0.12)
+			world2.hitstop(0.04 if is_elite else 0.055)
 	set_deferred("collision_layer", 0)
 	set_deferred("collision_mask", 0)
 	call_deferred("set_physics_process", false)

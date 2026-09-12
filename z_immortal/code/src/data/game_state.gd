@@ -249,7 +249,8 @@ func _update_combo() -> void:
 	else:
 		combo = 1
 	_last_kill_time = run_time
-	if combo >= 5 and combo % 5 == 0:
+	# Celebrate sooner so early runs feel sticky.
+	if combo == 3 or (combo >= 5 and combo % 5 == 0):
 		EventBus.combo_milestone.emit(combo)
 		heal_amount(maxi(int(float(max_hp) * 0.05), 1))
 

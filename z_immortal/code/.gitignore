@@ -15,3 +15,8 @@ Thumbs.db
 *.tmp
 .env
 .env.local
+
+# Mode-2 runtime
+.cursor/mode2-session.json
+.cursor/mode2-next.md
+.cursor/mode2-last-summary.md

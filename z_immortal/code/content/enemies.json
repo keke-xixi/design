@@ -10,7 +10,7 @@
       "speed": 42,
       "size": 8,
       "sprite": "mob_disciple_clear.png",
-      "sprite_scale": 0.236,
+      "sprite_scale": 0.17,
       "color": "#ffffff",
       "xp_attack": 1,
       "loot": [
@@ -38,7 +38,7 @@
       "speed": 70,
       "size": 7,
       "sprite": "mob_hare_clear.png",
-      "sprite_scale": 0.236,
+      "sprite_scale": 0.17,
       "color": "#ffffff",
       "xp_attack": 1,
       "loot": [
@@ -60,7 +60,7 @@
       "speed": 46,
       "size": 8,
       "sprite": "mob_guard_clear.png",
-      "sprite_scale": 0.241,
+      "sprite_scale": 0.174,
       "color": "#ffffff",
       "xp_attack": 2,
       "loot": [
@@ -88,7 +88,7 @@
       "speed": 58,
       "size": 8,
       "sprite": "mob_bandit_clear.png",
-      "sprite_scale": 0.236,
+      "sprite_scale": 0.17,
       "color": "#ffffff",
       "xp_attack": 2,
       "loot": [
@@ -116,7 +116,7 @@
       "speed": 48,
       "size": 9,
       "sprite": "mob_tyrant_clear.png",
-      "sprite_scale": 0.264,
+      "sprite_scale": 0.19,
       "color": "#ffe0a8",
       "xp_attack": 3,
       "loot": [
@@ -144,7 +144,7 @@
       "speed": 62,
       "size": 7,
       "sprite": "mob_worm_clear.png",
-      "sprite_scale": 0.236,
+      "sprite_scale": 0.17,
       "color": "#d8c090",
       "xp_attack": 2,
       "loot": [
@@ -166,7 +166,7 @@
       "speed": 72,
       "size": 8,
       "sprite": "mob_rift_clear.png",
-      "sprite_scale": 0.236,
+      "sprite_scale": 0.17,
       "color": "#c8a8ff",
       "xp_attack": 3,
       "loot": [
@@ -194,7 +194,7 @@
       "speed": 50,
       "size": 8,
       "sprite": "mob_worm_clear.png",
-      "sprite_scale": 0.241,
+      "sprite_scale": 0.174,
       "color": "#ffe080",
       "xp_attack": 3,
       "loot": [
@@ -216,7 +216,7 @@
       "speed": 54,
       "size": 9,
       "sprite": "mob_rift_clear.png",
-      "sprite_scale": 0.248,
+      "sprite_scale": 0.179,
       "color": "#ff9098",
       "xp_attack": 4,
       "loot": [
@@ -238,7 +238,7 @@
       "speed": 44,
       "size": 9,
       "sprite": "mob_general_clear.png",
-      "sprite_scale": 0.256,
+      "sprite_scale": 0.184,
       "color": "#c0b0a0",
       "xp_attack": 4,
       "loot": [
@@ -266,7 +266,7 @@
       "speed": 56,
       "size": 9,
       "sprite": "mob_rift_clear.png",
-      "sprite_scale": 0.256,
+      "sprite_scale": 0.184,
       "color": "#a0e8ff",
       "xp_attack": 5,
       "loot": [
@@ -288,7 +288,7 @@
       "speed": 40,
       "size": 10,
       "sprite": "mob_tyrant_clear.png",
-      "sprite_scale": 0.281,
+      "sprite_scale": 0.202,
       "color": "#e0a0ff",
       "xp_attack": 6,
       "loot": [
@@ -311,7 +311,7 @@
       "speed": 38,
       "size": 10,
       "sprite": "mob_elder_clear.png",
-      "sprite_scale": 0.344,
+      "sprite_scale": 0.248,
       "color": "#ffd080",
       "xp_attack": 8,
       "boss_skill": {
@@ -352,7 +352,7 @@
       "speed": 40,
       "size": 10,
       "sprite": "mob_general_clear.png",
-      "sprite_scale": 0.344,
+      "sprite_scale": 0.248,
       "color": "#ffb060",
       "xp_attack": 10,
       "boss_skill": {
@@ -387,7 +387,7 @@
       "speed": 44,
       "size": 11,
       "sprite": "mob_tyrant_clear.png",
-      "sprite_scale": 0.344,
+      "sprite_scale": 0.248,
       "color": "#ffa040",
       "xp_attack": 12,
       "boss_skill": {
@@ -416,7 +416,7 @@
       "speed": 48,
       "size": 11,
       "sprite": "mob_tyrant_clear.png",
-      "sprite_scale": 0.344,
+      "sprite_scale": 0.248,
       "color": "#c080ff",
       "xp_attack": 14,
       "boss_skill": {
@@ -445,7 +445,7 @@
       "speed": 46,
       "size": 11,
       "sprite": "mob_rift_clear.png",
-      "sprite_scale": 0.344,
+      "sprite_scale": 0.248,
       "color": "#ff6070",
       "xp_attack": 16,
       "boss_skill": {
@@ -475,7 +475,7 @@
       "speed": 42,
       "size": 12,
       "sprite": "mob_tyrant_clear.png",
-      "sprite_scale": 0.354,
+      "sprite_scale": 0.255,
       "color": "#e0a0ff",
       "xp_attack": 20,
       "boss_skill": {

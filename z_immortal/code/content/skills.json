@@ -5,18 +5,18 @@
       "id": "dash",
       "name": "闪避",
       "key": "L",
-      "cooldown": 2.6,
-      "dash_distance": 98,
-      "iframe": 0.28,
+      "cooldown": 2.3,
+      "dash_distance": 105,
+      "iframe": 0.3,
       "description": "向移动方向瞬移并短暂无敌。"
     },
     {
       "id": "ring_slash",
       "name": "环斩",
       "key": "U",
-      "cooldown": 5.0,
-      "radius": 118,
-      "damage_mult": 1.7,
+      "cooldown": 4.4,
+      "radius": 124,
+      "damage_mult": 1.85,
       "description": "以自身为中心释放剑气，伤害周围敌人。"
     },
     {
@@ -34,9 +34,9 @@
       "id": "spirit_burst",
       "name": "灵爆",
       "key": "O",
-      "cooldown": 8.0,
-      "projectiles": 10,
-      "damage_mult": 0.9,
+      "cooldown": 7.2,
+      "projectiles": 12,
+      "damage_mult": 0.95,
       "description": "向八方同时射出剑气。"
     }
   ]

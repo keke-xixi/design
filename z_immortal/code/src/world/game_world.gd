@@ -96,11 +96,13 @@ func _on_wave_banner(hint: String) -> void:
 func hitstop(duration: float = 0.04) -> void:
 	if _hitstopping or DisplayServer.get_name() == "headless":
 		return
+	# Soft hitch — do not freeze the whole game.
 	_hitstopping = true
 	var prev := Engine.time_scale
-	Engine.time_scale = 0.06
-	await get_tree().create_timer(duration, true, true).timeout
-	Engine.time_scale = prev if prev > 0.05 else 1.0
+	var scale := float(ContentDB.section("combat").get("hitstop_scale", 0.22))
+	Engine.time_scale = clampf(scale, 0.15, 0.5)
+	await get_tree().create_timer(minf(duration, 0.045), true, true).timeout
+	Engine.time_scale = prev if prev > 0.1 else 1.0
 	_hitstopping = false
 
 func _apply_zone_effects(delta: float) -> void:
@@ -222,13 +224,14 @@ func _apply_stage(stage_id: String) -> void:
 	_build_chests(map, pixel)
 	_player.position = pixel * 0.5
 	_player.configure(_projectiles, _bounds)
-	_camera.zoom = Vector2(1.22, 1.22)
+	# Slightly wider view after sprite shrink — keeps characters readable, not oversized.
+	_camera.zoom = Vector2(1.12, 1.12)
 	_camera.limit_left = 0
 	_camera.limit_top = 0
 	_camera.limit_right = int(pixel.x)
 	_camera.limit_bottom = int(pixel.y)
 	var ztw := create_tween()
-	ztw.tween_property(_camera, "zoom", Vector2(1.28, 1.28), 0.45).set_trans(Tween.TRANS_SINE)
+	ztw.tween_property(_camera, "zoom", Vector2(1.18, 1.18), 0.45).set_trans(Tween.TRANS_SINE)
 	add_to_group("game_world")
 	_ensure_vignette()
 	_spawn_ambient_motes(pixel)

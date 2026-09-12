@@ -178,8 +178,18 @@ func _refresh() -> void:
 		var kills := GameState.stage_kills()
 		var target := maxi(stage.kill_target, 1)
 		_kill_label.text = "%d/%d" % [kills, stage.kill_target]
-		_kill_fill.size.x = _KILL_BAR_W * clampf(float(kills) / float(target), 0.0, 1.0)
-		_kill_fill.color = Color(1.0, 0.5, 0.35) if kills >= stage.boss_at_kill and not stage.boss_id.is_empty() and kills < stage.kill_target else Color(0.9, 0.75, 0.4)
+		var ratio := clampf(float(kills) / float(target), 0.0, 1.0)
+		_kill_fill.size.x = _KILL_BAR_W * ratio
+		# Boss phase = orange; near-clear = gold pulse (urge to finish).
+		var near_clear := ratio >= 0.75 and kills < stage.kill_target
+		var boss_phase := kills >= stage.boss_at_kill and not stage.boss_id.is_empty() and kills < stage.kill_target
+		if boss_phase:
+			_kill_fill.color = Color(1.0, 0.5, 0.35)
+		elif near_clear:
+			var pulse := 0.55 + 0.35 * sin(Time.get_ticks_msec() * 0.01)
+			_kill_fill.color = Color(1.0, 0.82, 0.35, pulse)
+		else:
+			_kill_fill.color = Color(0.9, 0.75, 0.4)
 	else:
 		_kill_label.text = "—"
 		_kill_fill.size.x = 0.0
