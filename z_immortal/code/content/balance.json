@@ -63,7 +63,7 @@
   },
   "loot": {
     "_doc": "掉落与关卡稀有宝。stage_bonus_chance 为每杀额外掉宝概率。",
-    "stage_bonus_chance": 0.05,
+    "stage_bonus_chance": 0.09,
     "boss_bonus_chance": 0.35,
     "boss_stone_reward": 40,
     "stage_bonus_pool": {
@@ -113,7 +113,8 @@
           "amount": 1
         }
       ]
-    }
+    },
+    "early_stage_loot_mult": 1.35
   },
   "combat": {
     "_doc": "刷怪战斗手感。关卡击杀目标/刷怪间隔在 stages.json，这里是全局默认和玩家弹道。",
@@ -149,10 +150,14 @@
   },
   "growth": {
     "_doc": "击杀成长。每 kills_per_tick 杀触发一次。",
-    "kills_per_wisdom": 8,
-    "kills_per_defense": 10,
+    "kills_per_wisdom": 5,
+    "kills_per_defense": 7,
     "stage_clear_stones_base": 15,
-    "stage_clear_stones_per_order": 8
+    "stage_clear_stones_per_order": 8,
+    "stage_clear_first_bonus": 8,
+    "stage_clear_first_bonus_doc": "Extra stones when unlocking next stage order",
+    "death_pity_stones": 2,
+    "death_pity_stones_doc": "Once per stage entry on first death"
   },
   "breakthrough_attack": {
     "_doc": "进入该攻境所需的攻。0 表示起点。全部是占位，请按手感改。通玄之上的数字是重置后的攻（若 mystic_resets_attack 为 true）。",

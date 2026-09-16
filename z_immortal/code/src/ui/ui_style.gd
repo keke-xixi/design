@@ -32,12 +32,20 @@ static func button_hover() -> StyleBoxFlat:
 	s.border_color = Color(0.95, 0.88, 0.55, 1.0)
 	return s
 
+static func button_disabled() -> StyleBoxFlat:
+	var s := button_normal()
+	s.bg_color = Color(0.08, 0.1, 0.12, 0.75)
+	s.border_color = Color(0.4, 0.48, 0.52, 0.55)
+	return s
+
 static func apply_button(btn: Button) -> void:
 	btn.add_theme_stylebox_override("normal", button_normal())
 	btn.add_theme_stylebox_override("hover", button_hover())
 	btn.add_theme_stylebox_override("pressed", button_hover())
+	btn.add_theme_stylebox_override("disabled", button_disabled())
 	btn.add_theme_color_override("font_color", Color(0.95, 0.94, 0.88))
 	btn.add_theme_color_override("font_hover_color", Color(1.0, 0.97, 0.82))
+	btn.add_theme_color_override("font_disabled_color", Color(0.55, 0.58, 0.62))
 
 static func apply_primary_button(btn: Button) -> void:
 	var n := button_normal()

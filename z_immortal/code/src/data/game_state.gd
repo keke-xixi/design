@@ -223,9 +223,11 @@ func register_kill(enemy_id: String) -> void:
 
 func _complete_stage_unlock(stage: StageDef) -> void:
 	var nxt := ContentDB.get_stage(stage.next_id)
+	# First clear = unlocking the next order (or final stage with no next).
+	var first_clear := nxt == null or unlocked_order < nxt.order
 	if nxt:
 		unlocked_order = maxi(unlocked_order, nxt.order)
-	_grant_stage_clear_reward(stage)
+	_grant_stage_clear_reward(stage, first_clear)
 	run.cleared_stage = true
 	EventBus.stage_cleared.emit(stage_id)
 
@@ -236,9 +238,11 @@ func complete_run_stage() -> void:
 	_complete_stage_unlock(stage)
 	SaveService.save_game()
 
-func _grant_stage_clear_reward(stage: StageDef) -> void:
+func _grant_stage_clear_reward(stage: StageDef, first_clear: bool = true) -> void:
 	var g := ContentDB.section("growth")
 	var stones := int(g.get("stage_clear_stones_base", 15)) + stage.order * int(g.get("stage_clear_stones_per_order", 8))
+	if first_clear:
+		stones += int(g.get("stage_clear_first_bonus", 6))
 	add_spirit_stones(stones)
 	EventBus.stage_reward.emit(stones)
 
@@ -272,6 +276,16 @@ func _apply_kill_growth() -> void:
 		EventBus.player_hp_changed.emit(hp, max_hp)
 		SaveService.save_game()
 
+func revive() -> void:
+	if not dead:
+		return
+	# Soft revive: keep kill progress and map state so early deaths aren't a full wipe.
+	dead = false
+	combo = 0
+	_last_kill_time = -999.0
+	refill_hp()
+	EventBus.player_hp_changed.emit(hp, max_hp)
+
 func apply_hurt(amount: int) -> void:
 	if dead:
 		return
@@ -280,14 +294,12 @@ func apply_hurt(amount: int) -> void:
 	EventBus.player_hp_changed.emit(hp, max_hp)
 	if hp <= 0:
 		dead = true
+		# Tiny pity once per stage entry — makes retry feel less empty.
+		var pity := int(ContentDB.section("growth").get("death_pity_stones", 2))
+		if pity > 0 and not run.death_pity_given:
+			run.death_pity_given = true
+			add_spirit_stones(pity)
 		EventBus.player_died.emit()
-
-func revive() -> void:
-	dead = false
-	run_time = 0.0
-	run.reset(stage_id)
-	refill_hp()
-	EventBus.stage_changed.emit(stage_id)
 
 func recompute_max_hp() -> void:
 	var cbt := ContentDB.section("combat")

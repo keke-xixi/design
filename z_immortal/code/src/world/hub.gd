@@ -18,7 +18,8 @@ func _ready() -> void:
 	_UiStyle.apply_button($Footer/QuitButton)
 	_load_hero_art()
 	var tag := ContentDB.lore_tagline()
-	_tagline.text = tag if tag.length() <= 18 else tag.substr(0, 18)
+	# Soft ellipsis — keep brand line readable without hard-cutting mid-phrase.
+	_tagline.text = tag if tag.length() <= 26 else tag.substr(0, 25) + "…"
 	_refresh_status()
 	EventBus.cultivation_broke_through.connect(func(_id): _refresh_status())
 	EventBus.attack_gained.connect(func(_a, _t): _refresh_status())
@@ -40,9 +41,18 @@ func _process(_delta: float) -> void:
 	var t := Time.get_ticks_msec() * 0.002
 	var glow := 1.0 + 0.07 * sin(t)
 	_challenge.modulate = Color(glow, glow * 0.97, glow * 0.9)
-	# Soft hero float.
+	# Soft hero float + glow/shadow breathe with the CTA pulse.
 	if _hero:
 		_hero.position.y = -18.0 + sin(t * 0.8) * 4.0
+	if has_node("HeroGlow"):
+		var hg := $HeroGlow as ColorRect
+		hg.color.a = 0.1 + 0.06 * (0.5 + 0.5 * sin(t * 0.9))
+	if has_node("HeroShadow"):
+		var hs := $HeroShadow as ColorRect
+		var w := 100.0 + 12.0 * sin(t * 0.8)
+		hs.offset_left = 460.0 - w
+		hs.offset_right = 460.0 + w
+		hs.color.a = 0.28 + 0.1 * (0.5 + 0.5 * sin(t * 0.8 + 0.4))
 	if has_node("Brand"):
 		$Brand.modulate = Color(1.0, 1.0, 1.0, 0.92 + 0.08 * sin(t * 0.6))
 

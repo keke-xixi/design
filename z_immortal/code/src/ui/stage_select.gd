@@ -13,6 +13,7 @@ const _UiStyle := preload("res://src/ui/ui_style.gd")
 @onready var _left_panel: PanelContainer = $Root/LeftPanel
 
 var _selected_id: String = ""
+var _thumb_base := Vector2(200, 8)
 
 func _process(_delta: float) -> void:
 	if _enter_btn == null:
@@ -23,6 +24,9 @@ func _process(_delta: float) -> void:
 		_enter_btn.modulate = Color(g, g * 0.96, g * 0.88)
 	else:
 		_enter_btn.modulate = Color(0.55, 0.55, 0.58)
+	# Slow drift on map preview — atmosphere without noise.
+	if _thumb and _thumb.texture != null:
+		_thumb.position = _thumb_base + Vector2(sin(t * 0.35) * 2.0, cos(t * 0.28) * 1.5)
 
 func _ready() -> void:
 	_UiStyle.apply_panel(_left_panel)
@@ -31,6 +35,8 @@ func _ready() -> void:
 	_UiStyle.apply_primary_button(_enter_btn)
 	_UiStyle.apply_button($Root/LeftPanel/LeftVBox/Header/BackButton)
 	_enter_btn.pressed.connect(_on_enter)
+	if _thumb:
+		_thumb_base = _thumb.position
 	_build_list()
 	_hint.text = "已开至第 %d 层" % GameState.unlocked_order
 	var stages := ContentDB.stages.all_stages()
@@ -60,11 +66,13 @@ func _make_map_button(stage: StageDef) -> Control:
 	btn.disabled = not unlocked
 	btn.set_meta("stage_id", stage.id)
 	btn.set_meta("accent", stage.accent)
+	_UiStyle.apply_button(btn)
 	if unlocked:
-		_UiStyle.apply_button(btn)
 		btn.modulate = Color.from_string(stage.accent, Color(0.92, 0.88, 0.75))
 	else:
-		btn.modulate = Color(0.45, 0.45, 0.48)
+		# Keep a whisper of accent so locked rows still feel designed.
+		var acc := Color.from_string(stage.accent, Color(0.5, 0.55, 0.6))
+		btn.modulate = Color(acc.r * 0.45, acc.g * 0.45, acc.b * 0.5, 0.85)
 	var sid := stage.id
 	btn.pressed.connect(func() -> void: _select_stage(sid))
 	return btn
@@ -74,34 +82,53 @@ func _select_stage(stage_id: String) -> void:
 	var stage := ContentDB.get_stage(stage_id)
 	if stage == null:
 		return
+	var accent_col := Color.from_string(stage.accent, Color(0.55, 0.78, 0.88))
+	if has_node("Root/MapFrame"):
+		_UiStyle.apply_panel($Root/MapFrame, Color(accent_col.r, accent_col.g, accent_col.b, 0.55))
 	for child in _list.get_children():
 		if not (child is Button):
 			continue
 		var b := child as Button
 		var sid := str(b.get_meta("stage_id", ""))
 		var accent := str(b.get_meta("accent", "#c0c0c0"))
+		var acc := Color.from_string(accent, Color(0.9, 0.9, 0.9))
 		if b.disabled:
-			b.modulate = Color(0.45, 0.45, 0.48)
+			b.modulate = Color(acc.r * 0.45, acc.g * 0.45, acc.b * 0.5, 0.85)
 		elif sid == stage_id:
-			b.modulate = Color(1.2, 1.15, 1.0)
+			# Soft highlight — avoid >1.0 modulate blowout.
+			b.modulate = Color(
+				minf(acc.r * 1.08 + 0.08, 1.0),
+				minf(acc.g * 1.05 + 0.06, 1.0),
+				minf(acc.b * 0.95 + 0.05, 1.0),
+			)
 		else:
-			b.modulate = Color.from_string(accent, Color(0.9, 0.9, 0.9))
+			b.modulate = acc
 	var unlocked := GameState.can_enter(stage)
 	var cleared := GameState.is_stage_cleared(stage.id)
 	_detail_title.text = stage.display_name
-	_detail_title.add_theme_color_override("font_color", Color.from_string(stage.accent, Color(0.95, 0.9, 0.7)))
+	_detail_title.add_theme_color_override("font_color", accent_col.lightened(0.15))
 	var boss_name := "—"
 	if not stage.boss_id.is_empty():
 		var boss := ContentDB.get_enemy(stage.boss_id)
 		boss_name = boss.display_name if boss else stage.boss_id
-	_detail_stats.text = "目标 %d  ·  Boss %s" % [stage.kill_target, boss_name]
+	var desc := stage.description.strip_edges()
+	if desc.is_empty():
+		desc = stage.lore.strip_edges()
+	if desc.length() > 28:
+		desc = desc.substr(0, 27) + "…"
+	var stats := "目标 %d  ·  Boss %s" % [stage.kill_target, boss_name]
+	_detail_stats.text = ("%s\n%s" % [desc, stats]) if not desc.is_empty() else stats
+	_enter_btn.tooltip_text = stats
 	var bg_path := stage.background_path()
 	if not bg_path.is_empty() and ResourceLoader.exists(bg_path):
 		_thumb.texture = load(bg_path)
 		_thumb.modulate = Color.WHITE if unlocked else Color(0.35, 0.35, 0.38)
 	else:
 		_thumb.texture = null
-		_thumb.modulate = Color.from_string(stage.accent, Color.GRAY)
+		_thumb.modulate = Color(accent_col.r, accent_col.g, accent_col.b, 0.55)
+	if has_node("Root/PreviewShade"):
+		var shade := $Root/PreviewShade as ColorRect
+		shade.color = Color(accent_col.r * 0.08, accent_col.g * 0.1, accent_col.b * 0.12, 0.62)
 	if unlocked:
 		_enter_btn.disabled = false
 		_enter_btn.text = "再战" if cleared else "开战"

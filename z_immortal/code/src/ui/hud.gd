@@ -25,6 +25,8 @@ const _SKILL_KEYS := ["L", "U", "I", "O"]
 const _HP_BAR_W := 152.0
 const _KILL_BAR_W := 152.0
 
+var _skill_was_ready: Array[bool] = [true, true, true, true] # edge-detect CD→ready flash
+
 func _style_skill_keys() -> void:
 	for key_name in ["KeyL", "KeyU", "KeyI", "KeyO"]:
 		var key := $Root/SkillDock/SkillBar.get_node_or_null(key_name) as PanelContainer
@@ -53,6 +55,8 @@ func _ready() -> void:
 	EventBus.boss_hp_cleared.connect(_on_boss_hp_cleared)
 	EventBus.stage_reward.connect(_on_stage_reward)
 	EventBus.combo_milestone.connect(_on_combo_milestone)
+	EventBus.cultivation_stat_gained.connect(_on_growth_ping)
+	EventBus.skill_used.connect(_on_skill_used)
 	_clear.visible = false
 	_hint_label.visible = false
 	_refresh()
@@ -81,15 +85,26 @@ func _update_skill_bar() -> void:
 		if player and player.has_method("get_skill_cooldown"):
 			cd_left = player.get_skill_cooldown(_SKILL_IDS[i])
 		var key_panel := $Root/SkillDock/SkillBar.get_node_or_null(keys[i]) as CanvasItem
-		if cd_left > 0.05:
+		var ready := cd_left <= 0.05
+		# Flash when a skill comes off cooldown — readable agency.
+		if ready and i < _skill_was_ready.size() and not _skill_was_ready[i]:
+			if key_panel:
+				key_panel.modulate = Color(1.35, 1.2, 0.7)
+				var tw := create_tween()
+				tw.tween_property(key_panel, "modulate", Color.WHITE, 0.28)
+			labels[i].modulate = Color(1.0, 0.95, 0.65, 1.0)
+		if i < _skill_was_ready.size():
+			_skill_was_ready[i] = ready
+		if not ready:
 			labels[i].text = "%.0f" % ceil(cd_left)
 			labels[i].modulate = Color(0.45, 0.5, 0.55, 0.9)
-			if key_panel:
+			if key_panel and key_panel.modulate.r < 1.2:
 				key_panel.modulate = Color(0.65, 0.7, 0.75, 0.85)
 		else:
 			labels[i].text = key
-			labels[i].modulate = Color(0.95, 0.97, 1.0, 1.0)
-			if key_panel:
+			if labels[i].modulate.g < 0.9:
+				labels[i].modulate = Color(0.95, 0.97, 1.0, 1.0)
+			if key_panel and key_panel.modulate.r < 1.15:
 				key_panel.modulate = Color(1.0, 1.0, 1.0, 1.0)
 
 func show_clear(custom: String = "") -> void:
@@ -118,7 +133,7 @@ func _on_hp(_hp: int, _max_hp: int) -> void:
 
 func _on_dead() -> void:
 	_hint_label.visible = true
-	_hint_label.text = "R 重生 · Esc"
+	_hint_label.text = "气散 · 看中央再战"
 	_refresh()
 
 func _on_stage(_stage_id: String) -> void:
@@ -140,6 +155,23 @@ func _on_combo_milestone(count: int) -> void:
 	tw.tween_interval(0.65)
 	tw.tween_property(_combo_label, "modulate:a", 0.0, 0.3)
 	tw.tween_callback(func() -> void: _combo_label.visible = false)
+
+func _on_growth_ping(stat: String, _value: int) -> void:
+	# Brief top-bar flash so kill-growth is felt even if float text is missed.
+	var tip := "悟性↑" if stat == "wisdom" else "体魄↑"
+	show_clear(tip)
+
+func _on_skill_used(skill_id: String, _cooldown: float) -> void:
+	var idx := _SKILL_IDS.find(skill_id)
+	if idx < 0:
+		return
+	var keys := ["KeyL", "KeyU", "KeyI", "KeyO"]
+	var key_panel := $Root/SkillDock/SkillBar.get_node_or_null(keys[idx]) as CanvasItem
+	if key_panel == null:
+		return
+	key_panel.modulate = Color(0.55, 0.85, 1.0)
+	var tw := create_tween()
+	tw.tween_property(key_panel, "modulate", Color(0.65, 0.7, 0.75, 0.85), 0.15)
 
 func _on_boss_hp(name: String, hp: int, max_hp: int) -> void:
 	_boss_bar.visible = true
@@ -209,9 +241,9 @@ func _refresh() -> void:
 			edge.color = Color(0.45, 0.05, 0.05, 0.4) if crisis else Color(0.02, 0.03, 0.05, 0.26)
 	if GameState.dead:
 		_hint_label.visible = true
-		_hint_label.text = "R 重生 · Esc"
+		_hint_label.text = "气散 · 看中央再战"
 	elif GameState.is_stage_cleared():
 		_hint_label.visible = true
-		_hint_label.text = "Esc 选关"
+		_hint_label.text = "Esc 选关 · 通关奖励已入账"
 	else:
 		_hint_label.visible = false

@@ -19,9 +19,14 @@ func _ready() -> void:
 	EventBus.item_gained.connect(_on_item_gained)
 
 func _on_item_gained(item_id: String, amount: int, rarity: String) -> void:
-	# Only celebrate uncommon+ to reduce screen clutter.
-	if rarity not in ["rare", "epic", "legendary"]:
-		return
+	# Early runs celebrate common drops too (throttled); later only uncommon+.
+	var early := GameState.stage_id in ["sect", "country"]
+	if rarity not in ["uncommon", "rare", "epic", "legendary"]:
+		if not early:
+			return
+		# Skip most grass spam; still show ~35% so bags feel alive.
+		if rarity == "common" and randf() > 0.35:
+			return
 	var player := get_tree().get_first_node_in_group("player") as Node2D
 	if player == null:
 		return
@@ -38,8 +43,10 @@ func _on_stat_gained(stat: String, value: int) -> void:
 	var player := get_tree().get_first_node_in_group("player") as Node2D
 	if player == null:
 		return
-	var label := "智%d" % value if stat == "wisdom" else "防%d" % value
-	_spawn(player.global_position + Vector2(0, -32), label, Color(0.75, 0.88, 1.0))
+	var label := "悟性↑%d" % value if stat == "wisdom" else "体魄↑%d" % value
+	_spawn(player.global_position + Vector2(0, -32), label, Color(0.75, 0.92, 1.0))
+	# Extra beat so growth reads as a power spike.
+	_spawn(player.global_position + Vector2(0, -48), "修为精进", Color(0.95, 0.88, 0.55))
 
 func _on_combo(count: int) -> void:
 	# Float only on chunky milestones; HUD already shows live combo.

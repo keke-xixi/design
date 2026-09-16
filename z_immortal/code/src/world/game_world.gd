@@ -22,6 +22,7 @@ var _obstacle_rects: Array[Rect2] = []
 var _zone_defs: Array[Dictionary] = []
 var _last_wave_hint := ""
 var _zone_tick := 0.0
+var _last_zone_effect := ""
 var _overlay: CanvasLayer
 var _cleared_stop := false
 var _spawn_pause := 0.0
@@ -115,6 +116,23 @@ func _apply_zone_effects(delta: float) -> void:
 	var mods := zone_mods_at(_player.global_position)
 	var dps := float(mods.get("dps", 0.0))
 	var hps := float(mods.get("hps", 0.0))
+	var effect := str(mods.get("effect", ""))
+	# One toast when stepping into a new zone type — teaches map without a modal.
+	if effect != _last_zone_effect and not effect.is_empty():
+		var label := effect
+		var col := Color(0.9, 0.9, 0.95)
+		match effect:
+			"heal":
+				label = "灵脉·回血"
+				col = Color(0.55, 0.95, 0.7)
+			"slow":
+				label = "滞气·减速"
+				col = Color(0.95, 0.85, 0.45)
+			"damage":
+				label = "煞地·伤血"
+				col = Color(1.0, 0.5, 0.4)
+		FloatTextManager.show_message(_player.global_position + Vector2(0, -28), label, col)
+	_last_zone_effect = effect
 	if dps > 0.0:
 		_player.take_hit(maxi(int(dps * 0.25), 1))
 	if hps > 0.0:
@@ -124,6 +142,7 @@ func zone_mods_at(pos: Vector2) -> Dictionary:
 	var speed_mult := 1.0
 	var dps := 0.0
 	var hps := 0.0
+	var effect := ""
 	for z in _zone_defs:
 		var c: Vector2 = z["center"]
 		var r: float = z["radius"]
@@ -132,11 +151,14 @@ func zone_mods_at(pos: Vector2) -> Dictionary:
 		match str(z.get("effect", "")):
 			"slow":
 				speed_mult = minf(speed_mult, float(z.get("speed_mult", 0.75)))
+				effect = "slow"
 			"damage":
 				dps = maxf(dps, float(z.get("dps", 4.0)))
+				effect = "damage"
 			"heal":
 				hps = maxf(hps, float(z.get("hps", 2.0)))
-	return { "speed_mult": speed_mult, "dps": dps, "hps": hps }
+				effect = "heal"
+	return { "speed_mult": speed_mult, "dps": dps, "hps": hps, "effect": effect }
 
 func _on_stage_changed(stage_id: String) -> void:
 	_apply_stage(stage_id)
@@ -211,14 +233,20 @@ func _apply_stage(stage_id: String) -> void:
 	_spawn_pause = 0.0
 	_obstacle_rects.clear()
 	_zone_defs.clear()
+	_last_zone_effect = ""
 	var map: Dictionary = stage.map
 	_map_size = Vector2i(int(map.get("width", 48)), int(map.get("height", 30)))
 	var pixel := Vector2(_map_size) * float(TILE)
 	_bounds = Rect2(Vector2(24, 24), pixel - Vector2(48, 48))
 	_set_background(stage, pixel)
-	_tiles.modulate = Color(1, 1, 1, float(map.get("tile_opacity", 0.28)))
+	var pattern := str(map.get("pattern", "yard"))
+	# Slightly stronger tiles on patterned stages so layouts read at a glance.
+	var tile_a := float(map.get("tile_opacity", 0.28))
+	if pattern in ["city", "rift", "crater"]:
+		tile_a = maxf(tile_a, 0.34)
+	_tiles.modulate = Color(1, 1, 1, tile_a)
 	_tiles.tile_set = _build_tileset(map)
-	_paint_map(str(map.get("pattern", "yard")))
+	_paint_map(pattern)
 	_build_obstacles(map)
 	_build_zones(map, pixel)
 	_build_chests(map, pixel)
@@ -234,11 +262,18 @@ func _apply_stage(stage_id: String) -> void:
 	ztw.tween_property(_camera, "zoom", Vector2(1.18, 1.18), 0.45).set_trans(Tween.TRANS_SINE)
 	add_to_group("game_world")
 	_ensure_vignette()
-	_spawn_ambient_motes(pixel)
+	_spawn_ambient_motes(pixel, stage)
 	var obs_array: Array = []
 	for r in _obstacle_rects:
 		obs_array.append(r)
-	EventBus.map_layout_updated.emit(pixel, obs_array)
+	var zone_array: Array = []
+	for z in _zone_defs:
+		zone_array.append({
+			"center": z["center"],
+			"radius": z["radius"],
+			"effect": z.get("effect", ""),
+		})
+	EventBus.map_layout_updated.emit(pixel, obs_array, zone_array)
 	print("Stage: %s (%s)" % [stage.display_name, stage.id])
 
 func _set_background(stage: StageDef, pixel: Vector2) -> void:
@@ -286,7 +321,7 @@ func _ensure_vignette() -> void:
 		edge.color = Color(0.02, 0.03, 0.05, 0.26)
 		root.add_child(edge)
 
-func _spawn_ambient_motes(pixel: Vector2) -> void:
+func _spawn_ambient_motes(pixel: Vector2, stage: StageDef = null) -> void:
 	var old := get_node_or_null("AmbientMotes")
 	if old:
 		old.queue_free()
@@ -294,9 +329,12 @@ func _spawn_ambient_motes(pixel: Vector2) -> void:
 	root.name = "AmbientMotes"
 	root.z_index = 8
 	add_child(root)
+	var accent := Color(0.75, 0.95, 1.0)
+	if stage != null:
+		accent = Color.from_string(stage.accent, accent)
 	for i in 18:
 		var mote := Polygon2D.new()
-		mote.color = Color(0.75, 0.95, 1.0, randf_range(0.12, 0.3))
+		mote.color = Color(accent.r, accent.g, accent.b, randf_range(0.12, 0.3))
 		mote.polygon = [Vector2(-1, -1), Vector2(1, -1), Vector2(1, 1), Vector2(-1, 1)]
 		mote.position = Vector2(randf() * pixel.x, randf() * pixel.y)
 		root.add_child(mote)
@@ -430,7 +468,15 @@ func _build_zones(map: Dictionary, pixel: Vector2) -> void:
 		var cx := float(raw.get("cx", 0.5)) * pixel.x
 		var cy := float(raw.get("cy", 0.5)) * pixel.y
 		var r := float(raw.get("r", 0.1)) * minf(pixel.x, pixel.y)
+		var effect := str(raw.get("effect", ""))
 		var col := Color.from_string(str(raw.get("color", "#ffffff22")), Color(1, 1, 1, 0.12))
+		match effect:
+			"heal":
+				col = Color(0.35, 0.85, 0.55, 0.22)
+			"slow":
+				col = Color(0.95, 0.78, 0.35, 0.2)
+			"damage":
+				col = Color(0.95, 0.35, 0.3, 0.22)
 		var ring := Polygon2D.new()
 		ring.position = Vector2(cx, cy)
 		ring.color = col
@@ -442,17 +488,28 @@ func _build_zones(map: Dictionary, pixel: Vector2) -> void:
 		ring.set_meta("pulse_phase", randf() * TAU)
 		_zones.add_child(ring)
 		var rim := Line2D.new()
-		rim.width = 1.5
-		rim.default_color = Color(col.r, col.g, col.b, minf(col.a + 0.35, 0.7))
+		rim.width = 2.0
+		rim.default_color = Color(col.r, col.g, col.b, minf(col.a + 0.45, 0.85))
 		rim.position = Vector2(cx, cy)
 		for i in 25:
 			var a2 := TAU * float(i) / 24.0
 			rim.add_point(Vector2(cos(a2), sin(a2)) * r)
 		_zones.add_child(rim)
+		# Tiny ground glyph so heal/slow/damage read without HUD clutter.
+		var mark := Label.new()
+		mark.text = {"heal": "愈", "slow": "滞", "damage": "煞"}.get(effect, "·")
+		mark.add_theme_font_size_override("font_size", 11)
+		mark.add_theme_color_override("font_color", Color(col.r, col.g, col.b, 0.9).lightened(0.25))
+		mark.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.7))
+		mark.add_theme_constant_override("shadow_offset_x", 1)
+		mark.add_theme_constant_override("shadow_offset_y", 1)
+		mark.position = Vector2(cx - 8, cy - 8)
+		mark.z_index = 2
+		_zones.add_child(mark)
 		_zone_defs.append({
 			"center": Vector2(cx, cy),
 			"radius": r,
-			"effect": str(raw.get("effect", "")),
+			"effect": effect,
 			"speed_mult": float(raw.get("speed_mult", 0.75)),
 			"dps": float(raw.get("dps", 0.0)),
 			"hps": float(raw.get("hps", 0.0)),
@@ -524,22 +581,34 @@ func _atlas_for(pattern: String, x: int, y: int) -> Vector2i:
 	var h := _map_size.y
 	match pattern:
 		"city":
+			# Street grid + plaza blocks — reads as human city vs wild yard.
 			if x % 8 == 0 or y % 8 == 0:
 				return TILE_DIRT
+			if (x / 8 + y / 8) % 2 == 0 and (x % 8 > 2 and y % 8 > 2):
+				return TILE_STONE if ((x + y) % 5 == 0) else TILE_GRASS
 		"crater":
 			var d := Vector2(x - w * 0.5, y - h * 0.5).length()
+			if d < 5.0:
+				return TILE_DIRT
 			if int(d) % 7 == 0:
 				return TILE_DIRT
 		"nebula":
 			if (x * 17 + y * 31) % 11 == 0:
 				return TILE_DIRT
+			if (x * 3 + y * 5) % 19 == 0:
+				return TILE_STONE
 		"rift":
 			if absi(x * h - y * w) < h or absi(x + y - h) <= 1:
 				return TILE_DIRT
+			if absi(x - y) <= 1:
+				return TILE_STONE
 		"void":
 			if (x * 13 + y * 7) % 17 == 0:
 				return TILE_DIRT
 		_:
+			# Yard: cross path + soft garden patches.
 			if y == int(h * 0.5) or x == int(w * 0.5):
+				return TILE_DIRT
+			if (x + y) % 13 == 0:
 				return TILE_DIRT
 	return TILE_GRASS

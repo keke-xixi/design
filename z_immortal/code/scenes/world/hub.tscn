@@ -75,12 +75,12 @@ layout_mode = 0
 offset_left = 14.0
 offset_top = 16.0
 offset_right = 248.0
-offset_bottom = 300.0
+offset_bottom = 348.0
 mouse_filter = 2
 
 [node name="MenuPad" type="Control" parent="MenuFrame"]
 layout_mode = 2
-custom_minimum_size = Vector2(220, 270)
+custom_minimum_size = Vector2(220, 318)
 
 [node name="Brand" type="Label" parent="."]
 layout_mode = 0

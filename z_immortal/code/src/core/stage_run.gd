@@ -18,6 +18,8 @@ var run_buffs: Dictionary = {
 var pending_choices: Array = []
 var last_title: String = ""
 var cleared_stage: bool = false
+## One death-pity payout per stage entry (reset with run.reset).
+var death_pity_given: bool = false
 
 func reset(for_stage_id: String) -> void:
 	stage_id = for_stage_id
@@ -29,6 +31,7 @@ func reset(for_stage_id: String) -> void:
 	pending_choices.clear()
 	last_title = ""
 	cleared_stage = false
+	death_pity_given = false
 
 func stage() -> StageDef:
 	return ContentDB.get_stage(stage_id)

@@ -14,10 +14,14 @@ func roll_enemy_loot(enemy: EnemyDef, stage_id: String) -> Array:
 	if enemy == null:
 		return []
 	var drops: Array = []
+	# Early stages get a gentle loot mult so first 10 minutes feel rewarding.
+	var early_mult := 1.0
+	if stage_id in ["sect", "country"]:
+		early_mult = float(ContentDB.section("loot").get("early_stage_loot_mult", 1.25))
 	for raw in enemy.loot:
 		if typeof(raw) != TYPE_DICTIONARY:
 			continue
-		var chance := float(raw.get("chance", 0.0))
+		var chance := float(raw.get("chance", 0.0)) * early_mult
 		if chance <= 0.0 or randf() > chance:
 			continue
 		var item_id := str(raw.get("item_id", ""))

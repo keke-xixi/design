@@ -1,18 +1,20 @@
 extends Control
 
-## Top-right minimap: player, mobs, obstacles, map bounds.
+## Top-right minimap: player, mobs, obstacles, zones, map bounds.
 
 var _map_size := Vector2(768, 480)
 var _obstacles: Array = []
+var _zones: Array = []
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(108, 68)
 	EventBus.map_layout_updated.connect(_on_map_layout)
 	EventBus.stage_changed.connect(func(_id): queue_redraw())
 
-func _on_map_layout(map_size: Vector2, obstacles: Array) -> void:
+func _on_map_layout(map_size: Vector2, obstacles: Array, zones: Array = []) -> void:
 	_map_size = map_size
 	_obstacles = obstacles
+	_zones = zones
 	queue_redraw()
 
 func _process(_delta: float) -> void:
@@ -29,6 +31,24 @@ func _draw() -> void:
 		return
 	var sx := inner.size.x / _map_size.x
 	var sy := inner.size.y / _map_size.y
+	for raw in _zones:
+		if typeof(raw) != TYPE_DICTIONARY:
+			continue
+		var c: Vector2 = raw.get("center", Vector2.ZERO)
+		var r: float = float(raw.get("radius", 8.0))
+		var effect := str(raw.get("effect", ""))
+		var col := Color(0.7, 0.8, 0.9, 0.25)
+		match effect:
+			"heal":
+				col = Color(0.35, 0.9, 0.55, 0.35)
+			"slow":
+				col = Color(0.95, 0.8, 0.35, 0.32)
+			"damage":
+				col = Color(0.95, 0.4, 0.35, 0.35)
+		var cp := _world_to_mini(c, inner, sx, sy)
+		var rr := maxf(r * minf(sx, sy), 2.5)
+		draw_circle(cp, rr, col)
+		draw_arc(cp, rr, 0.0, TAU, 16, Color(col.r, col.g, col.b, 0.7), 1.0)
 	for raw in _obstacles:
 		if raw is Rect2:
 			var r: Rect2 = raw
@@ -66,8 +86,8 @@ func _draw() -> void:
 	for node in get_tree().get_nodes_in_group("chests"):
 		if not is_instance_valid(node) or not (node is Node2D):
 			continue
-		var cp := _world_to_mini((node as Node2D).global_position, inner, sx, sy)
-		draw_rect(Rect2(cp.x - 2, cp.y - 2, 4, 4), Color(0.95, 0.82, 0.35))
+		var cp2 := _world_to_mini((node as Node2D).global_position, inner, sx, sy)
+		draw_rect(Rect2(cp2.x - 2, cp2.y - 2, 4, 4), Color(0.95, 0.82, 0.35))
 
 func _world_to_mini(pos: Vector2, inner: Rect2, sx: float, sy: float) -> Vector2:
 	return Vector2(inner.position.x + pos.x * sx, inner.position.y + pos.y * sy)

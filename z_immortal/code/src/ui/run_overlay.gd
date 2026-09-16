@@ -1,8 +1,8 @@
 extends CanvasLayer
 
-## Slim combat ceremony: start + clear result only (no wave modal).
+## Slim combat ceremony: start + clear + soft death (no wave modal).
 
-enum Kind { NONE, START, RESULT }
+enum Kind { NONE, START, RESULT, DEATH }
 
 const _UiStyle := preload("res://src/ui/ui_style.gd")
 
@@ -20,14 +20,20 @@ func _ready() -> void:
 	visible = false
 	EventBus.stage_cleared.connect(_on_stage_cleared)
 	EventBus.stage_reward.connect(_on_stage_reward)
+	EventBus.player_died.connect(_on_player_died)
 	call_deferred("_show_start")
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not visible or _kind != Kind.START:
+	if not visible:
 		return
-	if event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_cancel"):
-		_close()
-		get_viewport().set_input_as_handled()
+	if _kind == Kind.START:
+		if event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_cancel"):
+			_close()
+			get_viewport().set_input_as_handled()
+	elif _kind == Kind.DEATH:
+		if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_R:
+			_do_revive()
+			get_viewport().set_input_as_handled()
 
 func _build() -> void:
 	_root = Control.new()
@@ -83,6 +89,9 @@ func _on_stage_cleared(stage_id: String) -> void:
 func _on_stage_reward(stones: int) -> void:
 	call_deferred("_show_result", GameState.stage_id, stones)
 
+func _on_player_died() -> void:
+	call_deferred("_show_death")
+
 func _show_start() -> void:
 	if DisplayServer.get_name() == "headless":
 		return
@@ -109,24 +118,58 @@ func _show_start() -> void:
 			_close()
 	)
 
+func _show_death() -> void:
+	if DisplayServer.get_name() == "headless":
+		return
+	if not GameState.dead:
+		return
+	_kind = Kind.DEATH
+	_UiStyle.apply_panel(_panel, Color(0.75, 0.35, 0.35, 0.85))
+	_title.add_theme_color_override("font_color", Color(1.0, 0.82, 0.75))
+	var kills := GameState.stage_kills()
+	var stage := GameState.current_stage()
+	var target := stage.kill_target if stage else 0
+	var pity := int(ContentDB.section("growth").get("death_pity_stones", 2))
+	var desc := "进度保留 %d/%d" % [kills, target]
+	if pity > 0 and GameState.run.death_pity_given:
+		desc += " · 拾得 +%d石" % pity
+	_panel.offset_top = -92
+	_panel.offset_bottom = 92
+	_open_panel("气散", desc, [
+		["再战 (R)", _do_revive],
+		["选关", _leave],
+		["回宗门", _hub],
+	])
+
 func _show_result(stage_id: String, stones: int) -> void:
 	if DisplayServer.get_name() == "headless":
 		_close()
 		return
 	var stage := ContentDB.get_stage(stage_id)
 	var name := stage.display_name if stage else stage_id
-	var desc := ""
+	var kills := GameState.stage_kills()
+	var desc := "击杀 %d" % kills
 	if stones >= 0:
-		desc = "+%d 灵石" % stones
-	_kind = Kind.RESULT
-	var actions: Array = [["选关", _leave]]
+		desc = "+%d 灵石 · 击杀 %d" % [stones, kills]
 	if stage and not stage.next_id.is_empty():
 		var nxt := ContentDB.get_stage(stage.next_id)
 		if nxt and GameState.can_enter(nxt):
-			var nid := nxt.id
+			desc += "\n已开：%s" % nxt.display_name
+	_kind = Kind.RESULT
+	_UiStyle.apply_panel(_panel, Color(0.72, 0.62, 0.38, 0.88))
+	_title.add_theme_color_override("font_color", Color(1.0, 0.94, 0.7))
+	_panel.offset_top = -96
+	_panel.offset_bottom = 96
+	var actions: Array = []
+	if stage and not stage.next_id.is_empty():
+		var nxt2 := ContentDB.get_stage(stage.next_id)
+		if nxt2 and GameState.can_enter(nxt2):
+			var nid := nxt2.id
 			actions.append(["下一层", func() -> void: SceneManager.go_combat(nid)])
+	actions.append(["回宗门", _hub])
+	actions.append(["选关", _leave])
 	actions.append(["留下", _close])
-	_open_panel("%s" % name, ("通关 · " + desc) if not desc.is_empty() else "通关", actions)
+	_open_panel("%s · 通关" % name, desc, actions)
 
 func _open_panel(title: String, desc: String, actions: Array) -> void:
 	visible = true
@@ -140,7 +183,7 @@ func _open_panel(title: String, desc: String, actions: Array) -> void:
 		var b := Button.new()
 		b.custom_minimum_size = Vector2(0, 26)
 		b.text = str(raw[0])
-		if str(raw[0]) in ["下一层", "开战"]:
+		if str(raw[0]) in ["下一层", "开战", "再战 (R)"]:
 			_UiStyle.apply_primary_button(b)
 		else:
 			_UiStyle.apply_button(b)
@@ -161,5 +204,17 @@ func _close() -> void:
 	visible = false
 	_clear_buttons()
 
+func _do_revive() -> void:
+	_close()
+	GameState.revive()
+	var player := get_tree().get_first_node_in_group("player") as Node2D
+	if player:
+		FloatTextManager.show_message(player.global_position + Vector2(0, -36), "再起", Color(0.65, 0.95, 0.85))
+		if player.has_method("pulse_camera"):
+			player.pulse_camera(0.1)
+
 func _leave() -> void:
 	SceneManager.go_stage_select()
+
+func _hub() -> void:
+	SceneManager.go_hub()

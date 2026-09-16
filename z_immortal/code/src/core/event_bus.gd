@@ -20,7 +20,7 @@ signal skill_used(skill_id: String, cooldown: float)
 signal equipment_changed
 signal alchemy_crafted(recipe_id: String, item_id: String, qty: int)
 signal gacha_rolled(pool_id: String, item_id: String, qty: int)
-signal map_layout_updated(map_size: Vector2, obstacles: Array)
+signal map_layout_updated(map_size: Vector2, obstacles: Array, zones: Array) # zones: {center, radius, effect} for minimap
 signal boss_hp_changed(name: String, hp: int, max_hp: int)
 signal boss_hp_cleared
 signal chest_opened(world_pos: Vector2)

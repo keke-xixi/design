@@ -214,6 +214,7 @@ func _do_dash(cfg: Dictionary) -> void:
 	_dash_iframe = float(cfg.get("iframe", 0.25))
 	if SfxService:
 		SfxService.play_skill()
+	FloatTextManager.show_message(global_position + Vector2(0, -28), "闪", Color(0.55, 0.9, 1.0))
 	modulate = Color(0.7, 0.9, 1.0)
 	var tw := create_tween()
 	tw.tween_property(self, "modulate", Color.WHITE, 0.12)
@@ -256,13 +257,13 @@ func _do_ring_slash(cfg: Dictionary) -> void:
 				defense = int(mob.def.defense)
 			var knock := (mob.global_position - global_position).normalized()
 			mob.call("take_damage", GameState.projectile_damage_against(defense, mult), knock)
-	FloatTextManager.show_message(global_position + Vector2(0, -32), "斩", Color(0.85, 0.95, 0.55))
+	FloatTextManager.show_message(global_position + Vector2(0, -32), "斩", Color(0.95, 0.88, 0.45))
 	pulse_camera(0.1)
 
 func _spawn_ring_fx(radius: float) -> void:
 	var ring := Polygon2D.new()
 	ring.z_index = 5
-	ring.color = Color(0.55, 0.92, 1.0, 0.35)
+	ring.color = Color(1.0, 0.82, 0.4, 0.38)
 	var pts: PackedVector2Array = []
 	for i in 28:
 		var a := TAU * float(i) / 28.0
@@ -278,7 +279,7 @@ func _spawn_ring_fx(radius: float) -> void:
 	tw.tween_callback(ring.queue_free)
 	var rim := Line2D.new()
 	rim.width = 2.5
-	rim.default_color = Color(0.7, 0.95, 1.0, 0.8)
+	rim.default_color = Color(1.0, 0.9, 0.45, 0.9)
 	rim.z_index = 6
 	for i in 29:
 		var a2 := TAU * float(i) / 28.0
@@ -331,6 +332,7 @@ func _do_spirit_burst(cfg: Dictionary) -> void:
 		var bolt := preload("res://scenes/world/projectile.tscn").instantiate()
 		_projectiles.add_child(bolt)
 		bolt.launch(global_position + Vector2(0, -8), dir, mult)
+	FloatTextManager.show_message(global_position + Vector2(0, -36), "爆", Color(0.65, 0.9, 1.0))
 	pulse_camera(0.08)
 
 func _spawn_spirit_burst_fx() -> void:
@@ -339,7 +341,7 @@ func _spawn_spirit_burst_fx() -> void:
 		return
 	var ring := Line2D.new()
 	ring.width = 3.0
-	ring.default_color = Color(0.55, 0.9, 1.0, 0.85)
+	ring.default_color = Color(0.45, 0.85, 1.0, 0.9)
 	ring.z_index = 8
 	for i in 25:
 		var a := TAU * float(i) / 24.0

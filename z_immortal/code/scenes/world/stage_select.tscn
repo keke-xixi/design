@@ -61,18 +61,18 @@ stretch_mode = 6
 [node name="PreviewShade" type="ColorRect" parent="Root"]
 layout_mode = 0
 offset_left = 200.0
-offset_top = 230.0
+offset_top = 218.0
 offset_right = 632.0
 offset_bottom = 292.0
 mouse_filter = 2
-color = Color(0.02, 0.04, 0.07, 0.55)
+color = Color(0.02, 0.04, 0.07, 0.62)
 
 [node name="DetailTitle" type="Label" parent="Root"]
 layout_mode = 0
 offset_left = 214.0
-offset_top = 242.0
+offset_top = 224.0
 offset_right = 500.0
-offset_bottom = 268.0
+offset_bottom = 248.0
 theme_override_colors/font_color = Color(0.98, 0.92, 0.75, 1)
 theme_override_font_sizes/font_size = 18
 text = "关卡"
@@ -80,11 +80,12 @@ text = "关卡"
 [node name="DetailStats" type="Label" parent="Root"]
 layout_mode = 0
 offset_left = 214.0
-offset_top = 268.0
+offset_top = 248.0
 offset_right = 500.0
 offset_bottom = 288.0
 theme_override_colors/font_color = Color(0.82, 0.86, 0.9, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 10
+autowrap_mode = 3
 text = ""
 
 [node name="EnterButton" type="Button" parent="Root"]

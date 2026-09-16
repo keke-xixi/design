@@ -93,6 +93,18 @@ func setup(enemy: EnemyDef) -> void:
 				pts.append(Vector2(cos(a), sin(a)) * (def.size + 14.0))
 			aura.polygon = pts
 			add_child(aura)
+		if get_node_or_null("BossTitle") == null:
+			var title := Label.new()
+			title.name = "BossTitle"
+			title.text = def.display_name
+			title.add_theme_font_size_override("font_size", 10)
+			title.add_theme_color_override("font_color", Color(1.0, 0.82, 0.45))
+			title.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
+			title.add_theme_constant_override("shadow_offset_x", 1)
+			title.add_theme_constant_override("shadow_offset_y", 1)
+			title.position = Vector2(-28, -42)
+			title.z_index = 8
+			add_child(title)
 	var shadow := get_node_or_null("Shadow") as Polygon2D
 	if shadow:
 		var s := 1.0 + def.size * 0.04
@@ -144,6 +156,9 @@ func _physics_process(delta: float) -> void:
 		var aura := get_node_or_null("BossAura") as CanvasItem
 		if aura:
 			aura.modulate.a = 0.55 + 0.35 * sin(_bob * 0.8)
+		var title := get_node_or_null("BossTitle") as Node2D
+		if title:
+			title.position.y = bob_y - 38.0
 	if GameState.dead:
 		velocity = Vector2.ZERO
 		return
@@ -196,6 +211,31 @@ func _ai_move(delta: float, player: Node2D) -> void:
 			if _ranged_cd <= 0.0:
 				_ranged_cd = float(ContentDB.section("combat").get("ranged_cooldown", 1.35))
 				_fire_at(player)
+		"skittish":
+			# Hare-like: flee when close, arc in, then poke — readable early prey.
+			if dist < 55.0:
+				velocity = -offset.normalized() * def.speed * 1.25
+			elif dist > 110.0:
+				var approach := offset.normalized() * 0.7 + offset.normalized().orthogonal() * 0.55
+				velocity = approach.normalized() * def.speed
+			else:
+				velocity = offset.normalized().orthogonal() * def.speed * 1.1
+				if Engine.get_process_frames() % 45 == 0:
+					velocity = offset.normalized() * def.speed * 1.4
+			if offset.length_squared() > 0.01:
+				_visual.flip_h = offset.x < 0.0
+		"guard":
+			# Patrol: keep mid range, step in for contact — reads different from disciples.
+			if dist < 48.0:
+				velocity = -offset.normalized() * def.speed * 0.9
+			elif dist > 95.0:
+				velocity = offset.normalized() * def.speed
+			else:
+				velocity = offset.normalized().orthogonal() * def.speed * 0.65
+				if Engine.get_process_frames() % 55 == 0:
+					velocity = offset.normalized() * def.speed * 1.35
+			if offset.length_squared() > 0.01:
+				_visual.flip_h = offset.x < 0.0
 		"charge":
 			_charge_cd -= delta
 			if _charging:
@@ -225,14 +265,24 @@ func _ai_move(delta: float, player: Node2D) -> void:
 
 func _spawn_charge_warn() -> void:
 	var line := Line2D.new()
-	line.width = 3.0
-	line.default_color = Color(1.0, 0.55, 0.3, 0.7)
+	line.width = 4.0
+	line.default_color = Color(1.0, 0.55, 0.3, 0.85)
 	line.add_point(Vector2.ZERO)
-	line.add_point(_charge_dir * 70.0)
+	line.add_point(_charge_dir * 85.0)
 	add_child(line)
+	var tip := Polygon2D.new()
+	tip.color = Color(1.0, 0.75, 0.35, 0.9)
+	tip.polygon = [Vector2(-5, -4), Vector2(7, 0), Vector2(-5, 4)]
+	tip.position = _charge_dir * 85.0
+	tip.rotation = _charge_dir.angle()
+	add_child(tip)
 	var tw := line.create_tween()
-	tw.tween_property(line, "modulate:a", 0.0, 0.28)
-	tw.tween_callback(line.queue_free)
+	tw.tween_property(line, "modulate:a", 0.0, 0.32)
+	tw.parallel().tween_property(tip, "modulate:a", 0.0, 0.32)
+	tw.tween_callback(func() -> void:
+		line.queue_free()
+		tip.queue_free()
+	)
 
 func _fire_at(player: Node2D) -> void:
 	var world := get_tree().get_first_node_in_group("game_world")
@@ -262,6 +312,23 @@ func _start_skill(player: Node2D) -> void:
 	var skill: Dictionary = def.boss_skill
 	var sid := str(skill.get("id", "aoe_ring"))
 	var telegraph := float(skill.get("telegraph", 0.8))
+	# Call out the move so early bosses teach patterns.
+	var callout := "秘法"
+	match sid:
+		"aoe_ring":
+			callout = "戒圈"
+		"dash_strike":
+			callout = "突斩"
+		"summon":
+			callout = "召侍"
+		"spread_shots":
+			callout = "散矢"
+		"void_pull":
+			callout = "虚引"
+	FloatTextManager.show_message(global_position + Vector2(0, -48), callout, Color(1.0, 0.7, 0.4))
+	modulate = Color(1.35, 0.85, 0.65)
+	var flash := create_tween()
+	flash.tween_property(self, "modulate", Color.WHITE if not is_elite else Color(1.15, 1.05, 0.65), telegraph * 0.6)
 	match sid:
 		"dash_strike":
 			_telegraph_line(player.global_position, telegraph)
@@ -319,7 +386,7 @@ func _telegraph_ring(radius: float, _duration: float) -> void:
 	_telegraph = Node2D.new()
 	add_child(_telegraph)
 	var fill := Polygon2D.new()
-	fill.color = Color(1.0, 0.28, 0.2, 0.22)
+	fill.color = Color(1.0, 0.28, 0.2, 0.28)
 	var pts: PackedVector2Array = []
 	for i in 32:
 		var a := TAU * float(i) / 32.0
@@ -327,15 +394,23 @@ func _telegraph_ring(radius: float, _duration: float) -> void:
 	fill.polygon = pts
 	_telegraph.add_child(fill)
 	var rim := Line2D.new()
-	rim.width = 2.0
-	rim.default_color = Color(1.0, 0.55, 0.35, 0.85)
+	rim.width = 3.0
+	rim.default_color = Color(1.0, 0.55, 0.35, 0.95)
 	for i in 33:
 		var a2 := TAU * float(i) / 32.0
 		rim.add_point(Vector2(cos(a2), sin(a2)) * radius)
 	_telegraph.add_child(rim)
+	# Inner danger ring for readability.
+	var inner := Line2D.new()
+	inner.width = 1.5
+	inner.default_color = Color(1.0, 0.85, 0.4, 0.7)
+	for i in 33:
+		var a3 := TAU * float(i) / 32.0
+		inner.add_point(Vector2(cos(a3), sin(a3)) * (radius * 0.55))
+	_telegraph.add_child(inner)
 	fill.scale = Vector2(0.55, 0.55)
-	var tw := fill.create_tween()
-	tw.tween_property(fill, "scale", Vector2.ONE, 0.25)
+	var tw := create_tween()
+	tw.tween_property(fill, "scale", Vector2.ONE, maxf(_duration * 0.85, 0.2))
 
 func _telegraph_line(target: Vector2, _duration: float) -> void:
 	_clear_telegraph()
