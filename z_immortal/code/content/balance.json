@@ -143,21 +143,30 @@
     "wave_pause": 0.16,
     "ranged_cooldown": 1.25,
     "low_hp_damage_mult": 1.22,
-    "hitstop_scale": 0.22,
+    "hitstop_scale": 0.28,
     "hitstop_scale_doc": "Engine.time_scale during hitstop; keep >=0.15 to avoid freeze stutter",
-    "hitstop_min_damage": 18,
-    "hitstop_min_damage_doc": "Only hits >= this (or elite/boss) trigger hitstop"
+    "hitstop_min_damage": 16,
+    "hitstop_min_damage_doc": "Only hits >= this (or elite/boss) trigger heavy hitstop; light auto uses projectile micro-hitch"
   },
   "growth": {
-    "_doc": "击杀成长。每 kills_per_tick 杀触发一次。",
-    "kills_per_wisdom": 5,
-    "kills_per_defense": 7,
+    "_doc": "击杀成长。每 kills_per_tick 杀触发一次。早期关额外怜悯/通关石，降低前十分钟挫败。",
+    "kills_per_wisdom": 4,
+    "kills_per_defense": 6,
     "stage_clear_stones_base": 15,
     "stage_clear_stones_per_order": 8,
     "stage_clear_first_bonus": 8,
     "stage_clear_first_bonus_doc": "Extra stones when unlocking next stage order",
-    "death_pity_stones": 2,
-    "death_pity_stones_doc": "Once per stage entry on first death"
+    "early_clear_stones_bonus": 8,
+    "early_clear_stones_bonus_doc": "Extra clear stones on sect/country",
+    "early_first_clear_extra": 10,
+    "early_first_clear_extra_doc": "Extra first-clear stones on sect/country — pulls player back to hub spend",
+    "death_pity_stones": 3,
+    "death_pity_stones_doc": "Once per stage entry on first death",
+    "early_death_pity_bonus": 4,
+    "early_death_pity_bonus_doc": "Extra pity stones on sect/country first death",
+    "early_revive_temp_damage": 0.08,
+    "early_revive_hurt_reduce": 1,
+    "early_revive_pill_id": "white_pill"
   },
   "breakthrough_attack": {
     "_doc": "进入该攻境所需的攻。0 表示起点。全部是占位，请按手感改。通玄之上的数字是重置后的攻（若 mystic_resets_attack 为 true）。",

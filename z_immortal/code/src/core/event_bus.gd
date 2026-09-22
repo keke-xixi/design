@@ -13,10 +13,13 @@ signal boss_spawned(enemy_id: String)
 signal enemy_killed(enemy_id: String, stage_id: String)
 signal player_hp_changed(hp: int, max_hp: int)
 signal player_died
+signal death_pity_gained(amount: int)
 signal stage_changed(stage_id: String)
 signal stage_cleared(stage_id: String)
 signal damage_dealt(world_pos: Vector2, amount: int, is_player_hurt: bool)
 signal skill_used(skill_id: String, cooldown: float)
+## Pressed while on CD / empty pill — HUD grey deny flash.
+signal skill_denied(skill_id: String, reason: String)
 signal equipment_changed
 signal alchemy_crafted(recipe_id: String, item_id: String, qty: int)
 signal gacha_rolled(pool_id: String, item_id: String, qty: int)
@@ -26,6 +29,7 @@ signal boss_hp_cleared
 signal chest_opened(world_pos: Vector2)
 signal cultivation_stat_gained(stat: String, value: int)
 signal stage_reward(spirit_stones: int)
+signal spirit_stones_gained(amount: int)
 signal combo_milestone(count: int)
 signal run_node_changed(index: int, node: Dictionary)
 signal run_phase_changed(phase: int, payload: Dictionary)

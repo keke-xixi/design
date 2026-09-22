@@ -88,7 +88,7 @@ text = "返回"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.75, 0.8, 0.88, 1)
 theme_override_font_sizes/font_size = 11
-text = ""
+text = "买入后可直接开战"
 
 [node name="Body" type="HBoxContainer" parent="Panel"]
 layout_mode = 2
@@ -99,7 +99,7 @@ theme_override_constants/separation = 10
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-custom_minimum_size = Vector2(320, 200)
+custom_minimum_size = Vector2(320, 180)
 
 [node name="List" type="VBoxContainer" parent="Panel/Body/Scroll"]
 layout_mode = 2
@@ -108,7 +108,7 @@ theme_override_constants/separation = 6
 
 [node name="BagPanel" type="PanelContainer" parent="Panel/Body"]
 layout_mode = 2
-custom_minimum_size = Vector2(180, 200)
+custom_minimum_size = Vector2(180, 180)
 
 [node name="BagVBox" type="VBoxContainer" parent="Panel/Body/BagPanel"]
 layout_mode = 2
@@ -153,5 +153,26 @@ theme_override_colors/font_color = Color(0.7, 0.85, 0.75, 1)
 theme_override_font_sizes/font_size = 11
 text = ""
 
+[node name="ActionBar" type="HBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="FightButton" type="Button" parent="Panel/ActionBar"]
+visible = false
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+text = "开战"
+
+[node name="HubButton" type="Button" parent="Panel/ActionBar"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
+text = "回宗门"
+
 [connection signal="pressed" from="Panel/Header/BackButton" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="Panel/SellRow/ListButton" to="." method="_on_list_pressed"]
+[connection signal="pressed" from="Panel/ActionBar/FightButton" to="." method="_on_fight_pressed"]
+[connection signal="pressed" from="Panel/ActionBar/HubButton" to="." method="_on_back_pressed"]

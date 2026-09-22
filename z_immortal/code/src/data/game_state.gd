@@ -18,6 +18,25 @@ var combo: int = 0
 var run = _StageRunScript.new()
 var _boss_spawned_this_run: bool = false
 var _last_kill_time: float = -999.0
+## Last clear payout (UI); hub_celebrate drives return-to-spend flash.
+var last_clear_stones: int = 0
+var last_clear_first: bool = false
+var last_clear_stage_id: String = ""
+var hub_celebrate_stones: int = 0
+var last_death_pity: int = 0
+## Transient: hub「炼丹 · 花」→ alchemy shows「花石炼丹」tip (not saved).
+var alchemy_flower_enter: bool = false
+## Transient: hub「坊市 · 花」→ market shows「花石坊市」tip (not saved).
+var market_flower_enter: bool = false
+## Transient: hub「王朝 · 首通」→ stage select focuses country (not saved).
+var stage_select_focus_id: String = ""
+## Transient: hub challenge CTA → stage select shows「开战到手 · 选关」tip (not saved).
+var hub_fight_enter: bool = false
+## Transient: after dynasty「收刀」return → stage select tip echoes 收刀 (not saved).
+var hub_shoudao_enter: bool = false
+## Transient: stage-select「开战」→ combat start teal/gold handoff (not saved).
+## Values: "" | "sect" | "country"
+var combat_enter_handoff: String = ""
 
 func _ready() -> void:
 	cultivation = CultivationState.new()
@@ -112,6 +131,12 @@ func from_save_dict(data: Dictionary) -> void:
 func grant_item(item_id: String, amount: int = 1, emit_event: bool = true) -> void:
 	if item_id.is_empty() or amount <= 0:
 		return
+	# Spirit stones are currency — never stash as inventory rows.
+	if item_id == "spirit_stones":
+		add_spirit_stones(amount)
+		if emit_event:
+			EventBus.item_gained.emit(item_id, amount, "rare")
+		return
 	inventory.add(item_id, amount)
 	if emit_event:
 		var item := ContentDB.get_item(item_id)
@@ -123,6 +148,7 @@ func add_spirit_stones(amount: int) -> void:
 	if amount <= 0:
 		return
 	spirit_stones += amount
+	EventBus.spirit_stones_gained.emit(amount)
 	SaveService.save_game()
 
 func heal_amount(amount: int) -> int:
@@ -201,6 +227,10 @@ func cycle_stage(delta_order: int) -> bool:
 		return false
 	return enter_stage(next.id)
 
+func early_kill_hook() -> bool:
+	# First minute of 宗门/王朝 — punchy kill read for early retention.
+	return run_time < 60.0 and stage_id in ["sect", "country"]
+
 func register_kill(enemy_id: String) -> void:
 	kills[stage_id] = stage_kills() + 1
 	_update_combo()
@@ -212,6 +242,10 @@ func register_kill(enemy_id: String) -> void:
 		var hint := str(wave.get("hint", ""))
 		if not hint.is_empty():
 			EventBus.wave_changed.emit(hint)
+		# Halfway ping on early maps — keeps forward momentum readable.
+		var half := maxi(int(ceil(float(stage.kill_target) * 0.5)), 1)
+		if stage_id in ["sect", "country"] and stage_kills() == half:
+			EventBus.wave_changed.emit("半途 · 愈区可回血")
 		if not _boss_spawned_this_run and not stage.boss_id.is_empty():
 			var trigger := stage.boss_at_kill if stage.boss_at_kill > 0 else stage.kill_target - 1
 			if stage_kills() >= trigger:
@@ -243,6 +277,17 @@ func _grant_stage_clear_reward(stage: StageDef, first_clear: bool = true) -> voi
 	var stones := int(g.get("stage_clear_stones_base", 15)) + stage.order * int(g.get("stage_clear_stones_per_order", 8))
 	if first_clear:
 		stones += int(g.get("stage_clear_first_bonus", 6))
+	# Early stages pay a bit more so first clears pull players back to hub shops.
+	if stage.id in ["sect", "country"]:
+		stones += int(g.get("early_clear_stones_bonus", 6))
+		if first_clear:
+			stones += int(g.get("early_first_clear_extra", 8))
+	last_clear_stones = stones
+	last_clear_first = first_clear
+	last_clear_stage_id = stage.id
+	# Flag hub to flash spend CTAs when player returns with a fresh purse.
+	if stage.id in ["sect", "country"] or first_clear:
+		hub_celebrate_stones = stones
 	add_spirit_stones(stones)
 	EventBus.stage_reward.emit(stones)
 
@@ -253,16 +298,31 @@ func _update_combo() -> void:
 	else:
 		combo = 1
 	_last_kill_time = run_time
-	# Celebrate sooner so early runs feel sticky.
-	if combo == 3 or (combo >= 5 and combo % 5 == 0):
+	# Dense early milestones so combo power reads every few kills.
+	var hit := combo == 3 or combo == 5 or combo == 8
+	hit = hit or (combo >= 10 and combo % 5 == 0)
+	if hit:
 		EventBus.combo_milestone.emit(combo)
-		heal_amount(maxi(int(float(max_hp) * 0.05), 1))
+		# Slightly meatier heal on shout beats — reward the streak.
+		var heal_pct := 0.05
+		if combo >= 8:
+			heal_pct = 0.08
+		elif combo >= 5:
+			heal_pct = 0.06
+		heal_amount(maxi(int(float(max_hp) * heal_pct), 1))
+	elif combo == 2:
+		# 二连 always cues — sect teal / dynasty gold short feedback, no heal.
+		EventBus.combo_milestone.emit(combo)
 
 func _apply_kill_growth() -> void:
 	var g := ContentDB.section("growth")
 	var kill_n := stage_kills()
 	var w_every := int(g.get("kills_per_wisdom", 8))
 	var d_every := int(g.get("kills_per_defense", 10))
+	# Sect first: slightly faster visible growth.
+	if stage_id == "sect":
+		w_every = maxi(w_every - 1, 3)
+		d_every = maxi(d_every - 1, 4)
 	var w_max := int(ContentDB.section("wisdom").get("max_rank", 100))
 	var d_max := int(ContentDB.section("defense").get("max", 100))
 	if w_every > 0 and kill_n % w_every == 0 and cultivation.wisdom_rank < w_max:
@@ -284,6 +344,21 @@ func revive() -> void:
 	combo = 0
 	_last_kill_time = -999.0
 	refill_hp()
+	# Early stages: soft power + free pill so retry feels hopeful, not punished.
+	if stage_id in ["sect", "country"]:
+		var g := ContentDB.section("growth")
+		var dmg := float(g.get("early_revive_temp_damage", 0.08))
+		var reduce := int(g.get("early_revive_hurt_reduce", 1))
+		var effect := {}
+		if dmg > 0.0 and float(run.run_buffs.get("temp_damage", 0.0)) < 0.2:
+			effect["temp_damage"] = dmg
+		if reduce > 0 and int(run.run_buffs.get("hurt_reduce", 0)) < 2:
+			effect["hurt_reduce"] = reduce
+		if not effect.is_empty():
+			run.apply_effect(effect)
+		var pill_id := str(g.get("early_revive_pill_id", "white_pill"))
+		if not pill_id.is_empty() and inventory.count_of(pill_id) < 1:
+			grant_item(pill_id, 1)
 	EventBus.player_hp_changed.emit(hp, max_hp)
 
 func apply_hurt(amount: int) -> void:
@@ -295,10 +370,19 @@ func apply_hurt(amount: int) -> void:
 	if hp <= 0:
 		dead = true
 		# Tiny pity once per stage entry — makes retry feel less empty.
-		var pity := int(ContentDB.section("growth").get("death_pity_stones", 2))
+		var g := ContentDB.section("growth")
+		var pity := int(g.get("death_pity_stones", 2))
+		if stage_id in ["sect", "country"]:
+			pity += int(g.get("early_death_pity_bonus", 3))
+		last_death_pity = 0
 		if pity > 0 and not run.death_pity_given:
 			run.death_pity_given = true
+			last_death_pity = pity
 			add_spirit_stones(pity)
+			# Early deaths still feed the hub spend loop — purse flash on return.
+			if stage_id in ["sect", "country"]:
+				hub_celebrate_stones = maxi(hub_celebrate_stones, pity)
+			EventBus.death_pity_gained.emit(pity)
 		EventBus.player_died.emit()
 
 func recompute_max_hp() -> void:

@@ -62,5 +62,49 @@ static func apply_primary_button(btn: Button) -> void:
 	btn.add_theme_color_override("font_color", Color(0.98, 0.96, 0.88))
 	btn.add_theme_color_override("font_hover_color", Color(1.0, 0.98, 0.9))
 
+static func apply_cta_button(btn: Button) -> void:
+	# Hero CTA — taller, gold-heavy, used for 开战 / 再战 / 下一层.
+	var n := button_normal()
+	n.bg_color = Color(0.2, 0.3, 0.28, 0.98)
+	n.border_color = Color(0.95, 0.85, 0.45, 1.0)
+	n.set_border_width_all(2)
+	n.set_corner_radius_all(5)
+	n.content_margin_left = 14
+	n.content_margin_right = 14
+	n.content_margin_top = 8
+	n.content_margin_bottom = 8
+	var h := button_hover()
+	h.bg_color = Color(0.28, 0.4, 0.36, 1.0)
+	h.border_color = Color(1.0, 0.94, 0.6, 1.0)
+	h.set_border_width_all(2)
+	h.set_corner_radius_all(5)
+	h.content_margin_left = 14
+	h.content_margin_right = 14
+	h.content_margin_top = 8
+	h.content_margin_bottom = 8
+	var d := button_disabled()
+	d.set_corner_radius_all(5)
+	btn.add_theme_stylebox_override("normal", n)
+	btn.add_theme_stylebox_override("hover", h)
+	btn.add_theme_stylebox_override("pressed", h)
+	btn.add_theme_stylebox_override("disabled", d)
+	btn.add_theme_color_override("font_color", Color(1.0, 0.97, 0.88))
+	btn.add_theme_color_override("font_hover_color", Color(1.0, 0.99, 0.92))
+	btn.add_theme_color_override("font_disabled_color", Color(0.5, 0.52, 0.55))
+	btn.add_theme_font_size_override("font_size", 15)
+
 static func apply_panel(panel: PanelContainer, accent: Color = Color(0.55, 0.78, 0.88, 0.75)) -> void:
 	panel.add_theme_stylebox_override("panel", panel(Color(0.06, 0.09, 0.12, 0.9), accent))
+
+static func apply_ceremony_panel(panel: PanelContainer, accent: Color) -> void:
+	# Ceremony: denser fill + thicker accent rim so the hero CTA reads on top.
+	var s := panel(Color(0.04, 0.06, 0.09, 0.96), accent, 8)
+	s.set_border_width_all(2)
+	s.shadow_color = Color(accent.r, accent.g, accent.b, 0.28)
+	s.shadow_size = 8
+	s.shadow_offset = Vector2(0, 2)
+	s.content_margin_left = 16
+	s.content_margin_right = 16
+	s.content_margin_top = 14
+	s.content_margin_bottom = 14
+	panel.add_theme_stylebox_override("panel", s)

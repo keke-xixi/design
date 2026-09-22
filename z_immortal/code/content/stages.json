@@ -39,55 +39,98 @@
         "width": 48,
         "height": 30,
         "background": "stage_sect.png",
-        "ground": "#3a6b38",
-        "ground_alt": "#2f582e",
-        "path": "#8d7044",
-        "border": "#6a6e76",
-        "tile_opacity": 0.28,
+        "ground": "#2f6a48",
+        "ground_alt": "#24553a",
+        "path": "#7a8a6a",
+        "border": "#5a7a78",
+        "tile_opacity": 0.38,
+        "spawn_lanes": [
+          { "cx": 0.5, "cy": 0.1 },
+          { "cx": 0.12, "cy": 0.3 },
+          { "cx": 0.88, "cy": 0.3 },
+          { "cx": 0.14, "cy": 0.78 },
+          { "cx": 0.86, "cy": 0.78 },
+          { "cx": 0.5, "cy": 0.9 }
+        ],
         "zones": [
           {
             "cx": 0.5,
             "cy": 0.52,
-            "r": 0.1,
+            "r": 0.085,
             "color": "#6ecf8a44",
             "effect": "heal",
-            "hps": 2.0
+            "hps": 2.2
           },
           {
             "cx": 0.5,
-            "cy": 0.35,
-            "r": 0.07,
+            "cy": 0.18,
+            "r": 0.075,
             "color": "#ffd08044",
             "effect": "slow",
-            "speed_mult": 0.72
+            "speed_mult": 0.7
           }
         ],
         "obstacles": [
           {
             "x": 8,
-            "y": 10,
-            "w": 3,
+            "y": 7,
+            "w": 2,
             "h": 2,
-            "color": "#5a5040"
+            "color": "#4a6a48",
+            "style": "moss"
           },
           {
-            "x": 36,
-            "y": 12,
+            "x": 38,
+            "y": 7,
             "w": 2,
-            "h": 3,
-            "color": "#5a5040"
+            "h": 2,
+            "color": "#4a6a48",
+            "style": "moss"
+          },
+          {
+            "x": 16,
+            "y": 18,
+            "w": 3,
+            "h": 1,
+            "color": "#5a7050",
+            "style": "moss"
+          },
+          {
+            "x": 29,
+            "y": 18,
+            "w": 3,
+            "h": 1,
+            "color": "#5a7050",
+            "style": "moss"
           },
           {
             "x": 22,
-            "y": 20,
+            "y": 5,
             "w": 4,
             "h": 1,
-            "color": "#6a6050"
+            "color": "#6a7860",
+            "style": "moss"
+          },
+          {
+            "x": 2,
+            "y": 11,
+            "w": 2,
+            "h": 2,
+            "color": "#5a6848",
+            "style": "moss"
+          },
+          {
+            "x": 44,
+            "y": 18,
+            "w": 2,
+            "h": 2,
+            "color": "#5a6848",
+            "style": "moss"
           }
         ],
         "chests": [
           {
-            "cx": 0.25,
+            "cx": 0.1,
             "cy": 0.4,
             "loot": [
               {
@@ -97,8 +140,8 @@
             ]
           },
           {
-            "cx": 0.72,
-            "cy": 0.55,
+            "cx": 0.9,
+            "cy": 0.66,
             "loot": [
               {
                 "item_id": "qi_pill_low",
@@ -203,56 +246,83 @@
         "width": 48,
         "height": 30,
         "background": "stage_country.png",
-        "ground": "#5a5346",
-        "ground_alt": "#4a4438",
-        "path": "#9a8a6a",
-        "border": "#7a7568",
-        "tile_opacity": 0.28,
+        "ground": "#6a5a48",
+        "ground_alt": "#554838",
+        "path": "#b09868",
+        "border": "#8a7860",
+        "tile_opacity": 0.42,
         "zones": [
           {
             "cx": 0.5,
-            "cy": 0.5,
-            "r": 0.11,
+            "cy": 0.48,
+            "r": 0.1,
             "color": "#d4b06a44",
             "effect": "slow",
-            "speed_mult": 0.75
+            "speed_mult": 0.72
           },
           {
-            "cx": 0.28,
-            "cy": 0.42,
+            "cx": 0.22,
+            "cy": 0.38,
+            "r": 0.08,
+            "color": "#c0605044",
+            "effect": "damage",
+            "dps": 4.5
+          },
+          {
+            "cx": 0.78,
+            "cy": 0.62,
             "r": 0.07,
             "color": "#c0605044",
             "effect": "damage",
-            "dps": 4.0
+            "dps": 3.5
           }
         ],
         "obstacles": [
           {
-            "x": 6,
-            "y": 8,
+            "x": 7,
+            "y": 6,
             "w": 2,
-            "h": 4,
-            "color": "#4a4038"
+            "h": 5,
+            "color": "#3a3834",
+            "style": "wall"
           },
           {
-            "x": 38,
-            "y": 7,
-            "w": 3,
-            "h": 3,
-            "color": "#4a4038"
+            "x": 39,
+            "y": 6,
+            "w": 2,
+            "h": 5,
+            "color": "#3a3834",
+            "style": "wall"
           },
           {
-            "x": 20,
-            "y": 14,
-            "w": 8,
+            "x": 16,
+            "y": 12,
+            "w": 6,
             "h": 1,
-            "color": "#5a5048"
+            "color": "#4a4840",
+            "style": "wall"
+          },
+          {
+            "x": 26,
+            "y": 12,
+            "w": 6,
+            "h": 1,
+            "color": "#4a4840",
+            "style": "wall"
+          },
+          {
+            "x": 22,
+            "y": 20,
+            "w": 4,
+            "h": 2,
+            "color": "#45423c",
+            "style": "wall"
           }
         ],
         "chests": [
           {
-            "cx": 0.3,
-            "cy": 0.45,
+            "cx": 0.32,
+            "cy": 0.58,
             "loot": [
               {
                 "item_id": "white_pill",
@@ -261,8 +331,8 @@
             ]
           },
           {
-            "cx": 0.68,
-            "cy": 0.38,
+            "cx": 0.7,
+            "cy": 0.32,
             "loot": [
               {
                 "item_id": "spirit_stones",

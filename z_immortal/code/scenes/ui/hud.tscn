@@ -18,18 +18,18 @@ mouse_filter = 2
 [node name="TopBar" type="PanelContainer" parent="Root"]
 layout_mode = 0
 offset_left = 8.0
-offset_top = 8.0
-offset_right = 200.0
-offset_bottom = 78.0
+offset_top = 6.0
+offset_right = 196.0
+offset_bottom = 74.0
 
 [node name="Panel" type="VBoxContainer" parent="Root/TopBar"]
 layout_mode = 2
-theme_override_constants/separation = 3
+theme_override_constants/separation = 2
 
 [node name="StageLabel" type="Label" parent="Root/TopBar/Panel"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.96, 0.9, 0.7, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.9, 0.86, 0.72, 0.92)
+theme_override_font_sizes/font_size = 12
 text = "关卡"
 
 [node name="HpRow" type="HBoxContainer" parent="Root/TopBar/Panel"]
@@ -37,49 +37,52 @@ layout_mode = 2
 theme_override_constants/separation = 4
 
 [node name="HpBarBg" type="ColorRect" parent="Root/TopBar/Panel/HpRow"]
-custom_minimum_size = Vector2(152, 8)
+custom_minimum_size = Vector2(152, 9)
 layout_mode = 2
 size_flags_vertical = 4
-color = Color(0.08, 0.1, 0.12, 0.95)
+color = Color(0.06, 0.08, 0.1, 0.96)
 
 [node name="HpBarFill" type="ColorRect" parent="Root/TopBar/Panel/HpRow/HpBarBg"]
 layout_mode = 0
 offset_right = 152.0
-offset_bottom = 8.0
+offset_bottom = 9.0
 color = Color(0.35, 0.82, 0.48, 1)
 
 [node name="KillLabel" type="Label" parent="Root/TopBar/Panel"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.88, 0.8, 0.58, 1)
-theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0.78, 0.74, 0.58, 0.88)
+theme_override_font_sizes/font_size = 9
 text = "0/16"
 
 [node name="KillBarBg" type="ColorRect" parent="Root/TopBar/Panel"]
-custom_minimum_size = Vector2(152, 5)
+custom_minimum_size = Vector2(152, 4)
 layout_mode = 2
-color = Color(0.1, 0.12, 0.14, 0.9)
+color = Color(0.08, 0.1, 0.12, 0.92)
 
 [node name="KillBarFill" type="ColorRect" parent="Root/TopBar/Panel/KillBarBg"]
 layout_mode = 0
 offset_right = 152.0
-offset_bottom = 5.0
+offset_bottom = 4.0
 color = Color(0.9, 0.75, 0.4, 1)
 
 [node name="StoneLabel" type="Label" parent="Root/TopBar/Panel"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.75, 0.88, 0.95, 0.9)
+theme_override_colors/font_color = Color(0.68, 0.82, 0.9, 0.82)
 theme_override_font_sizes/font_size = 9
 text = "石 0"
 
 [node name="ComboLabel" type="Label" parent="Root"]
 visible = false
 layout_mode = 0
-offset_left = 250.0
-offset_top = 40.0
-offset_right = 390.0
-offset_bottom = 68.0
-theme_override_colors/font_color = Color(1, 0.82, 0.4, 1)
-theme_override_font_sizes/font_size = 16
+offset_left = 220.0
+offset_top = 36.0
+offset_right = 420.0
+offset_bottom = 70.0
+theme_override_colors/font_color = Color(1, 0.86, 0.48, 1)
+theme_override_colors/font_shadow_color = Color(0.05, 0.04, 0.02, 0.75)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 15
 horizontal_alignment = 1
 text = ""
 
@@ -122,63 +125,199 @@ color = Color(1, 0.45, 0.3, 1)
 
 [node name="SkillDock" type="PanelContainer" parent="Root"]
 layout_mode = 0
-offset_left = 176.0
-offset_top = 312.0
-offset_right = 464.0
-offset_bottom = 354.0
+offset_left = 168.0
+offset_top = 306.0
+offset_right = 472.0
+offset_bottom = 356.0
 
 [node name="SkillBar" type="HBoxContainer" parent="Root/SkillDock"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 8
 alignment = 1
 
 [node name="KeyL" type="PanelContainer" parent="Root/SkillDock/SkillBar"]
-custom_minimum_size = Vector2(48, 28)
+custom_minimum_size = Vector2(56, 38)
 layout_mode = 2
 
-[node name="SkillL" type="Label" parent="Root/SkillDock/SkillBar/KeyL"]
+[node name="Body" type="Control" parent="Root/SkillDock/SkillBar/KeyL"]
+custom_minimum_size = Vector2(56, 38)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.95, 0.93, 0.86, 1)
-theme_override_font_sizes/font_size = 13
+mouse_filter = 2
+
+[node name="CdFill" type="ColorRect" parent="Root/SkillDock/SkillBar/KeyL/Body"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+color = Color(0.2, 0.55, 0.7, 0.38)
+
+[node name="SkillStack" type="VBoxContainer" parent="Root/SkillDock/SkillBar/KeyL/Body"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 0
+alignment = 1
+mouse_filter = 2
+
+[node name="SkillL" type="Label" parent="Root/SkillDock/SkillBar/KeyL/Body/SkillStack"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.96, 0.9, 1)
+theme_override_font_sizes/font_size = 14
 horizontal_alignment = 1
 vertical_alignment = 1
 text = "L"
 
+[node name="NameL" type="Label" parent="Root/SkillDock/SkillBar/KeyL/Body/SkillStack"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.82, 0.92, 0.85)
+theme_override_font_sizes/font_size = 8
+horizontal_alignment = 1
+text = "闪"
+
 [node name="KeyU" type="PanelContainer" parent="Root/SkillDock/SkillBar"]
-custom_minimum_size = Vector2(48, 28)
+custom_minimum_size = Vector2(56, 38)
 layout_mode = 2
 
-[node name="SkillU" type="Label" parent="Root/SkillDock/SkillBar/KeyU"]
+[node name="Body" type="Control" parent="Root/SkillDock/SkillBar/KeyU"]
+custom_minimum_size = Vector2(56, 38)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.95, 0.93, 0.86, 1)
-theme_override_font_sizes/font_size = 13
+mouse_filter = 2
+
+[node name="CdFill" type="ColorRect" parent="Root/SkillDock/SkillBar/KeyU/Body"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+color = Color(0.75, 0.6, 0.25, 0.38)
+
+[node name="SkillStack" type="VBoxContainer" parent="Root/SkillDock/SkillBar/KeyU/Body"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 0
+alignment = 1
+mouse_filter = 2
+
+[node name="SkillU" type="Label" parent="Root/SkillDock/SkillBar/KeyU/Body/SkillStack"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.96, 0.9, 1)
+theme_override_font_sizes/font_size = 14
 horizontal_alignment = 1
 vertical_alignment = 1
 text = "U"
 
+[node name="NameU" type="Label" parent="Root/SkillDock/SkillBar/KeyU/Body/SkillStack"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.92, 0.78, 0.42, 0.85)
+theme_override_font_sizes/font_size = 8
+horizontal_alignment = 1
+text = "斩"
+
 [node name="KeyI" type="PanelContainer" parent="Root/SkillDock/SkillBar"]
-custom_minimum_size = Vector2(48, 28)
+custom_minimum_size = Vector2(56, 38)
 layout_mode = 2
 
-[node name="SkillI" type="Label" parent="Root/SkillDock/SkillBar/KeyI"]
+[node name="Body" type="Control" parent="Root/SkillDock/SkillBar/KeyI"]
+custom_minimum_size = Vector2(56, 38)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.95, 0.93, 0.86, 1)
-theme_override_font_sizes/font_size = 13
+mouse_filter = 2
+
+[node name="CdFill" type="ColorRect" parent="Root/SkillDock/SkillBar/KeyI/Body"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+color = Color(0.3, 0.7, 0.45, 0.38)
+
+[node name="SkillStack" type="VBoxContainer" parent="Root/SkillDock/SkillBar/KeyI/Body"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 0
+alignment = 1
+mouse_filter = 2
+
+[node name="SkillI" type="Label" parent="Root/SkillDock/SkillBar/KeyI/Body/SkillStack"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.96, 0.9, 1)
+theme_override_font_sizes/font_size = 14
 horizontal_alignment = 1
 vertical_alignment = 1
 text = "I"
 
+[node name="NameI" type="Label" parent="Root/SkillDock/SkillBar/KeyI/Body/SkillStack"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.88, 0.62, 0.85)
+theme_override_font_sizes/font_size = 8
+horizontal_alignment = 1
+text = "丹"
+
 [node name="KeyO" type="PanelContainer" parent="Root/SkillDock/SkillBar"]
-custom_minimum_size = Vector2(48, 28)
+custom_minimum_size = Vector2(56, 38)
 layout_mode = 2
 
-[node name="SkillO" type="Label" parent="Root/SkillDock/SkillBar/KeyO"]
+[node name="Body" type="Control" parent="Root/SkillDock/SkillBar/KeyO"]
+custom_minimum_size = Vector2(56, 38)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.95, 0.93, 0.86, 1)
-theme_override_font_sizes/font_size = 13
+mouse_filter = 2
+
+[node name="CdFill" type="ColorRect" parent="Root/SkillDock/SkillBar/KeyO/Body"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+color = Color(0.85, 0.4, 0.35, 0.38)
+
+[node name="SkillStack" type="VBoxContainer" parent="Root/SkillDock/SkillBar/KeyO/Body"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 0
+alignment = 1
+mouse_filter = 2
+
+[node name="SkillO" type="Label" parent="Root/SkillDock/SkillBar/KeyO/Body/SkillStack"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.96, 0.9, 1)
+theme_override_font_sizes/font_size = 14
 horizontal_alignment = 1
 vertical_alignment = 1
 text = "O"
+
+[node name="NameO" type="Label" parent="Root/SkillDock/SkillBar/KeyO/Body/SkillStack"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.55, 0.45, 0.85)
+theme_override_font_sizes/font_size = 8
+horizontal_alignment = 1
+text = "爆"
 
 [node name="HintLabel" type="Label" parent="Root"]
 visible = false

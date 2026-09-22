@@ -49,12 +49,44 @@ func _on_stat_gained(stat: String, value: int) -> void:
 	_spawn(player.global_position + Vector2(0, -48), "修为精进", Color(0.95, 0.88, 0.55))
 
 func _on_combo(count: int) -> void:
-	# Float only on chunky milestones; HUD already shows live combo.
-	if count != 3 and (count < 8 or count % 5 != 0):
-		return
+	# Float on every milestone — HUD carries live count between pops.
 	var player := get_tree().get_first_node_in_group("player") as Node2D
-	if player:
-		_spawn(player.global_position + Vector2(0, -40), "%d连" % count, Color(1.0, 0.82, 0.45))
+	if player == null:
+		return
+	var col := Color(1.0, 0.82, 0.45)
+	if count == 2:
+		# 二连 — sect teal / dynasty gold short cue.
+		if GameState.stage_id == "sect":
+			col = Color(0.45, 0.98, 0.9)
+		elif GameState.stage_id == "country":
+			col = Color(1.0, 0.88, 0.42)
+		else:
+			col = Color(1.0, 0.94, 0.7)
+	elif count >= 15:
+		col = Color(1.0, 0.5, 0.26)
+	elif count >= 8:
+		# 疯斩 赤金 — pairs HUD banner / minimap hot rim.
+		col = Color(1.0, 0.55, 0.26)
+	var label := "二连!" if count == 2 else ("%d连·疯斩!" % count if count == 8 else "%d连!" % count)
+	_spawn(player.global_position + Vector2(0, -40), label, col)
+	# Stacked slash — dynasty 市斩 / sect 斩; 二连 uses stage color.
+	var slash_col := Color(1.0, 0.92, 0.45)
+	if count == 2 and GameState.stage_id == "sect":
+		slash_col = Color(0.5, 0.98, 0.9)
+	elif count == 2 and GameState.stage_id == "country":
+		slash_col = Color(1.0, 0.88, 0.42)
+	elif count >= 8:
+		slash_col = Color(1.0, 0.58, 0.28)
+	elif count >= 5:
+		slash_col = Color(1.0, 0.86, 0.38)
+	var slash_glyph := "市斩" if GameState.stage_id == "country" else "斩"
+	_spawn(player.global_position + Vector2(-10, -58), slash_glyph, slash_col)
+	if count >= 5:
+		_spawn(player.global_position + Vector2(12, -70), slash_glyph, Color(slash_col.r, slash_col.g, slash_col.b, 0.85))
+	var per := float(ContentDB.section("combat").get("combo_damage_per_stack", 0.03))
+	var bonus_pct := int(round(per * float(count) * 100.0))
+	if bonus_pct > 0 and count >= 3:
+		_spawn(player.global_position + Vector2(0, -54), "伤+%d%%" % bonus_pct, Color(1.0, 0.9, 0.55))
 
 func _on_damage(pos: Vector2, amount: int, is_player: bool) -> void:
 	if is_player:
@@ -67,9 +99,11 @@ func _on_damage(pos: Vector2, amount: int, is_player: bool) -> void:
 	if amount < 4 and randf() > 0.45:
 		return
 	var color := Color(0.85, 0.95, 0.55)
-	if GameState.combo >= 8:
+	if GameState.combo >= 10:
+		color = Color(1.0, 0.55, 0.28)
+	elif GameState.combo >= 6:
 		color = Color(1.0, 0.78, 0.35)
-	elif GameState.combo >= 4:
+	elif GameState.combo >= 3:
 		color = Color(0.95, 0.92, 0.55)
 	_spawn(pos, str(amount), color)
 

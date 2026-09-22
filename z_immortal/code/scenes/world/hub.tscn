@@ -108,51 +108,74 @@ text = "凡躯登仙"
 [node name="StatusStrip" type="Label" parent="."]
 layout_mode = 0
 offset_left = 28.0
-offset_top = 114.0
+offset_top = 112.0
 offset_right = 236.0
-offset_bottom = 134.0
-theme_override_colors/font_color = Color(0.82, 0.92, 0.96, 1)
+offset_bottom = 130.0
+theme_override_colors/font_color = Color(0.78, 0.88, 0.94, 0.95)
 theme_override_font_sizes/font_size = 11
-text = "凝露 · 攻0 · 石0"
+text = "凝露 · 攻0"
+
+[node name="StoneBadge" type="Label" parent="."]
+layout_mode = 0
+offset_left = 28.0
+offset_top = 130.0
+offset_right = 236.0
+offset_bottom = 156.0
+theme_override_colors/font_color = Color(1, 0.9, 0.55, 1)
+theme_override_colors/font_shadow_color = Color(0.05, 0.04, 0.02, 0.75)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 18
+text = "石 0"
+
+[node name="SpendHint" type="Label" parent="."]
+layout_mode = 0
+offset_left = 28.0
+offset_top = 156.0
+offset_right = 236.0
+offset_bottom = 174.0
+theme_override_colors/font_color = Color(0.75, 0.82, 0.78, 0.92)
+theme_override_font_sizes/font_size = 10
+text = "灵石可花 · 炼丹 / 坊市"
 
 [node name="ChallengeButton" type="Button" parent="."]
-custom_minimum_size = Vector2(200, 42)
+custom_minimum_size = Vector2(200, 40)
 layout_mode = 0
 offset_left = 26.0
-offset_top = 156.0
+offset_top = 178.0
 offset_right = 226.0
-offset_bottom = 198.0
-theme_override_font_sizes/font_size = 16
+offset_bottom = 218.0
+theme_override_font_sizes/font_size = 15
 text = "进入战场"
 
 [node name="SubNav" type="HBoxContainer" parent="."]
 layout_mode = 0
 offset_left = 26.0
-offset_top = 214.0
+offset_top = 228.0
 offset_right = 236.0
-offset_bottom = 250.0
+offset_bottom = 270.0
 theme_override_constants/separation = 8
 
-[node name="EquipmentButton" type="Button" parent="SubNav"]
-custom_minimum_size = Vector2(0, 32)
+[node name="MarketButton" type="Button" parent="SubNav"]
+custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 12
-text = "装备"
+text = "坊市"
 
 [node name="AlchemyButton" type="Button" parent="SubNav"]
-custom_minimum_size = Vector2(0, 32)
+custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 12
 text = "炼丹"
 
-[node name="MarketButton" type="Button" parent="SubNav"]
-custom_minimum_size = Vector2(0, 32)
+[node name="EquipmentButton" type="Button" parent="SubNav"]
+custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 12
-text = "坊市"
+text = "装备"
 
 [node name="Footer" type="HBoxContainer" parent="."]
 layout_mode = 0

@@ -7,7 +7,7 @@
       "key": "L",
       "cooldown": 2.3,
       "dash_distance": 105,
-      "iframe": 0.3,
+      "iframe": 0.36,
       "description": "向移动方向瞬移并短暂无敌。"
     },
     {
