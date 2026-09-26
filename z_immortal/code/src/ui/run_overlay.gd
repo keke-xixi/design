@@ -326,7 +326,7 @@ func _show_death() -> void:
 	var desc := "进度保留 · %d/%d" % [kills, target]
 	if pity > 0:
 		title = "抚恤到手"
-		desc = "抚恤 +%d石 · 进度 %d/%d" % [pity, kills, target]
+		desc = "抚恤 +%d石 · 进度 %d/%d · 回宗可花" % [pity, kills, target]
 	elif early:
 		desc = "进度保留 · %d/%d · R再战" % [kills, target]
 	_size_panel(-100, 100)
@@ -348,8 +348,8 @@ func _show_death() -> void:
 	_open_panel(title, desc, actions, true)
 	_pop_panel()
 	if _death_hub_pull and _hero_btn:
-		_hero_btn.add_theme_font_size_override("font_size", 15)
-		_hero_btn.custom_minimum_size = Vector2(0, 40)
+		_hero_btn.add_theme_font_size_override("font_size", 16)
+		_hero_btn.custom_minimum_size = Vector2(0, 42)
 		_hero_btn.add_theme_color_override("font_color", Color(1.0, 0.94, 0.62))
 		_hero_btn.add_theme_color_override("font_hover_color", Color(1.0, 0.98, 0.8))
 		_hero_btn.add_theme_color_override("font_pressed_color", Color(0.95, 0.85, 0.45))
@@ -359,6 +359,8 @@ func _show_death() -> void:
 		if player:
 			FloatTextManager.show_message(player.global_position + Vector2(0, -52), "+%d石" % pity, Color(1.0, 0.9, 0.5))
 			FloatTextManager.show_message(player.global_position + Vector2(0, -68), "回宗可花", Color(1.0, 0.92, 0.65))
+			if early:
+				FloatTextManager.show_message(player.global_position + Vector2(0, -84), "坊市炼丹", Color(1.0, 0.88, 0.55))
 		var hud := get_tree().get_first_node_in_group("hud")
 		if hud and hud.has_method("flash_recover_edges"):
 			# Soft gold rim — same family as combo flash, softer consolation.

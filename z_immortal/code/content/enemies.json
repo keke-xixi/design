@@ -4,10 +4,10 @@
     {
       "id": "outer_disciple",
       "name": "外门弟子",
-      "hp": 14,
+      "hp": 12,
       "attack": 4,
       "defense": 0,
-      "speed": 42,
+      "speed": 44,
       "size": 8,
       "sprite": "mob_disciple_clear.png",
       "sprite_scale": 0.17,
@@ -317,9 +317,9 @@
       "boss_skill": {
         "id": "aoe_ring",
         "cooldown": 3.8,
-        "telegraph": 1.25,
-        "recover": 0.85,
-        "radius": 88,
+        "telegraph": 1.45,
+        "recover": 0.9,
+        "radius": 92,
         "damage": 14
       },
       "loot": [
@@ -359,9 +359,9 @@
       "boss_skill": {
         "id": "dash_strike",
         "cooldown": 3.8,
-        "telegraph": 1.15,
-        "recover": 0.8,
-        "range": 140,
+        "telegraph": 1.35,
+        "recover": 0.85,
+        "range": 145,
         "damage": 18
       },
       "loot": [

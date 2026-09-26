@@ -3,7 +3,7 @@
   "hooks": {
     "stop": [
       {
-        "command": "python .cursor/hooks/mode2_stop.py",
+        "command": "node .cursor/hooks/mode2_stop.js",
         "loop_limit": null
       }
     ]

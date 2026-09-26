@@ -31,6 +31,13 @@ var _peck_wind := 0.0
 var _peck_dir := Vector2.ZERO
 ## Brief hard stun — set by 「迎刃」 so the punish window is fair.
 var _stun_t := 0.0
+## Fitted visual scale — squash/tweens must restore this (never raw sprite_scale alone).
+var _base_scale := Vector2(0.06, 0.06)
+## Target heights for 640×360 combat: keep mobs under ~1/3 screen so overdraw stays sane.
+const TARGET_H_NORMAL := 64.0
+const TARGET_H_BOSS := 92.0
+## Old JSON sprite_scale was calibrated ~0.17 for tall clear PNGs; use as relative size.
+const SPRITE_SCALE_REF := 0.17
 
 func _ready() -> void:
 	add_to_group("mobs")
@@ -81,7 +88,7 @@ func setup(enemy: EnemyDef) -> void:
 	var tex: Texture2D = load(tex_path)
 	if tex:
 		_visual.texture = tex
-	_visual.scale = Vector2(def.sprite_scale, def.sprite_scale)
+	_apply_base_visual_scale()
 	var tint := Color.from_string(def.color, Color.WHITE)
 	# Distinguish shared base sprites by role.
 	if "guard" in def.id or "general" in def.id:
@@ -99,11 +106,16 @@ func setup(enemy: EnemyDef) -> void:
 		outline.name = "Outline"
 		outline.texture = _visual.texture
 		outline.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-		outline.scale = _visual.scale * 1.03
+		outline.scale = _base_scale * 1.03
 		outline.modulate = Color(0.04, 0.05, 0.08, 0.4)
 		outline.z_index = -1
 		outline.position = _visual.position + Vector2(0, 1)
 		add_child(outline)
+	elif get_node_or_null("Outline") != null:
+		var existing := get_node("Outline") as Sprite2D
+		if existing:
+			existing.texture = _visual.texture
+			existing.scale = _base_scale * 1.03
 	if def.is_boss:
 		# Soft boss aura ring.
 		if get_node_or_null("BossAura") == null:
@@ -143,6 +155,21 @@ func setup(enemy: EnemyDef) -> void:
 	if def.is_boss:
 		EventBus.boss_hp_changed.emit(def.display_name, hp, max_hp)
 
+## Fit tall clear PNGs to TARGET_H_*; sprite_scale remains a relative size vs SPRITE_SCALE_REF.
+func _apply_base_visual_scale() -> void:
+	if _visual == null:
+		return
+	var th := TARGET_H_BOSS if (def != null and def.is_boss) else TARGET_H_NORMAL
+	var tex_h := 480.0
+	if _visual.texture != null:
+		tex_h = float(_visual.texture.get_height())
+	var rel := 1.0
+	if def != null:
+		rel = clampf(def.sprite_scale / SPRITE_SCALE_REF, 0.85, 1.55)
+	var s := (th * rel) / maxf(tex_h, 1.0)
+	_base_scale = Vector2(s, s)
+	_visual.scale = _base_scale
+
 func make_elite() -> void:
 	if def == null or def.is_boss or is_elite:
 		return
@@ -152,6 +179,13 @@ func make_elite() -> void:
 	hp = max_hp
 	modulate = Color(1.15, 1.05, 0.65)
 	_hp_bar.color = Color(0.95, 0.75, 0.25)
+	# Elite reads larger without blowing overdraw — relative to fitted base.
+	_base_scale *= 1.12
+	if _visual:
+		_visual.scale = _base_scale
+	var ol := get_node_or_null("Outline") as Sprite2D
+	if ol:
+		ol.scale = _base_scale * 1.03
 	# Gold crown mark.
 	var mark := Polygon2D.new()
 	mark.name = "EliteMark"
@@ -198,7 +232,8 @@ func _physics_process(delta: float) -> void:
 			mark.position.y = bob_y - 16.0
 		var aura := get_node_or_null("BossAura") as CanvasItem
 		if aura:
-			aura.modulate.a = 0.55 + 0.35 * sin(_bob * 0.8)
+			# Stronger pulse — boss presence must read even when telegraph is off.
+			aura.modulate.a = 0.42 + 0.48 * sin(_bob * 0.9)
 		var title := get_node_or_null("BossTitle") as Node2D
 		if title:
 			title.position.y = bob_y - 38.0
@@ -330,12 +365,12 @@ func _ai_hare_skittish(delta: float, offset: Vector2, dist: float) -> void:
 		velocity = side * def.speed * 0.35
 		if _visual and def:
 			var squat := 0.88 + 0.08 * sin(Time.get_ticks_msec() * 0.05)
-			_visual.scale = Vector2(def.sprite_scale * (2.05 - squat), def.sprite_scale * squat)
+			_visual.scale = Vector2(_base_scale.x * (2.05 - squat), _base_scale.y * squat)
 		if _peck_wind <= 0.0:
 			_do_hare_hop()
 			velocity = _peck_dir * def.speed * 1.7
 			if _visual and def:
-				_visual.scale = Vector2(def.sprite_scale, def.sprite_scale)
+				_visual.scale = _base_scale
 			_spawn_hop_pip(_peck_dir)
 			if SfxService:
 				SfxService.play_hare_peck()
@@ -382,13 +417,13 @@ func _ai_disciple_lunge(delta: float, offset: Vector2, dist: float) -> void:
 		# Soft crouch pulse while blade is drawn.
 		if _visual and def:
 			var crouch := 0.92 + 0.06 * sin(Time.get_ticks_msec() * 0.04)
-			_visual.scale = Vector2(def.sprite_scale * (2.0 - crouch), def.sprite_scale * crouch)
+			_visual.scale = Vector2(_base_scale.x * (2.0 - crouch), _base_scale.y * crouch)
 		if _lunge_wind <= 0.0:
 			_lunging = true
 			_lunge_dir = offset.normalized() if dist > 1.0 else Vector2.RIGHT
 			_lunge_cd = 0.22
 			if _visual and def:
-				_visual.scale = Vector2(def.sprite_scale, def.sprite_scale)
+				_visual.scale = _base_scale
 			if SfxService:
 				SfxService.play_blade_thrust()
 		return
@@ -406,11 +441,12 @@ func _ai_disciple_lunge(delta: float, offset: Vector2, dist: float) -> void:
 func _do_hare_hop() -> void:
 	if _visual == null:
 		return
-	var base := def.sprite_scale
-	_visual.scale = Vector2(base * 1.18, base * 0.78)
+	var bx := _base_scale.x
+	var by := _base_scale.y
+	_visual.scale = Vector2(bx * 1.18, by * 0.78)
 	var tw := create_tween()
-	tw.tween_property(_visual, "scale", Vector2(base * 0.92, base * 1.12), 0.08)
-	tw.tween_property(_visual, "scale", Vector2(base, base), 0.1)
+	tw.tween_property(_visual, "scale", Vector2(bx * 0.92, by * 1.12), 0.08)
+	tw.tween_property(_visual, "scale", _base_scale, 0.1)
 	var outline := get_node_or_null("Outline") as Sprite2D
 	if outline:
 		outline.modulate = Color(0.4, 1.0, 0.72, 0.7)
@@ -870,7 +906,8 @@ func _telegraph_ring(radius: float, duration: float) -> void:
 	_telegraph.z_index = 24
 	add_child(_telegraph)
 	var fill := Polygon2D.new()
-	fill.color = Color(1.0, 0.22, 0.15, 0.34)
+	# Stronger wash so AoE danger reads over busy tiles / tall sprites.
+	fill.color = Color(1.0, 0.18, 0.12, 0.42)
 	var pts: PackedVector2Array = []
 	for i in 36:
 		var a := TAU * float(i) / 36.0
@@ -878,16 +915,16 @@ func _telegraph_ring(radius: float, duration: float) -> void:
 	fill.polygon = pts
 	_telegraph.add_child(fill)
 	var rim := Line2D.new()
-	rim.width = 3.6
-	rim.default_color = Color(1.0, 0.5, 0.28, 1.0)
+	rim.width = 4.4
+	rim.default_color = Color(1.0, 0.55, 0.28, 1.0)
 	for i in 37:
 		var a2 := TAU * float(i) / 36.0
 		rim.add_point(Vector2(cos(a2), sin(a2)) * radius)
 	_telegraph.add_child(rim)
 	# Inner danger ring for readability.
 	var inner := Line2D.new()
-	inner.width = 1.8
-	inner.default_color = Color(1.0, 0.88, 0.4, 0.85)
+	inner.width = 2.2
+	inner.default_color = Color(1.0, 0.92, 0.42, 0.95)
 	for i in 37:
 		var a3 := TAU * float(i) / 36.0
 		inner.add_point(Vector2(cos(a3), sin(a3)) * (radius * 0.55))
@@ -896,18 +933,24 @@ func _telegraph_ring(radius: float, duration: float) -> void:
 	for i in 8:
 		var a4 := TAU * float(i) / 8.0
 		var tick := Line2D.new()
-		tick.width = 2.0
-		tick.default_color = Color(1.0, 0.85, 0.45, 0.9)
+		tick.width = 2.4
+		tick.default_color = Color(1.0, 0.88, 0.45, 0.95)
 		tick.add_point(Vector2.from_angle(a4) * (radius * 0.82))
-		tick.add_point(Vector2.from_angle(a4) * (radius * 1.06))
+		tick.add_point(Vector2.from_angle(a4) * (radius * 1.08))
 		_telegraph.add_child(tick)
-	fill.scale = Vector2(0.45, 0.45)
+	fill.scale = Vector2(0.4, 0.4)
 	var tw := create_tween()
-	tw.tween_property(fill, "scale", Vector2.ONE, maxf(duration * 0.88, 0.25)).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.tween_property(fill, "scale", Vector2.ONE, maxf(duration * 0.85, 0.25)).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	# Pulse rim so telegraph stays alive until impact.
 	var pulse := create_tween().set_loops()
-	pulse.tween_property(rim, "modulate:a", 0.45, 0.14)
-	pulse.tween_property(rim, "modulate:a", 1.0, 0.14)
+	pulse.tween_property(rim, "modulate:a", 0.4, 0.12)
+	pulse.tween_property(rim, "modulate:a", 1.0, 0.12)
+	# Impact beat — last ~18% snaps wider so dodge timing is readable.
+	var snap_at := maxf(duration * 0.82, 0.2)
+	var snap := create_tween()
+	snap.tween_interval(snap_at)
+	snap.tween_property(rim, "width", 6.2, maxf(duration - snap_at, 0.12))
+	snap.parallel().tween_property(fill, "modulate:a", 1.15, maxf(duration - snap_at, 0.12))
 
 func _telegraph_line(target: Vector2, duration: float) -> void:
 	_clear_telegraph()
@@ -921,10 +964,10 @@ func _telegraph_line(target: Vector2, duration: float) -> void:
 	var n := dir.normalized()
 	var perp := Vector2(-n.y, n.x)
 	# Flared corridor — reads as a dash sector, wider at the tip.
-	var half_w0 := 11.0
-	var half_w1 := 20.0
+	var half_w0 := 13.0
+	var half_w1 := 24.0
 	var road := Polygon2D.new()
-	road.color = Color(1.0, 0.3, 0.18, 0.34)
+	road.color = Color(1.0, 0.28, 0.14, 0.42)
 	road.polygon = PackedVector2Array([
 		perp * half_w0,
 		n * length + perp * half_w1,
@@ -933,20 +976,20 @@ func _telegraph_line(target: Vector2, duration: float) -> void:
 	])
 	_telegraph.add_child(road)
 	var edge_a := Line2D.new()
-	edge_a.width = 2.0
-	edge_a.default_color = Color(1.0, 0.78, 0.35, 0.9)
+	edge_a.width = 2.6
+	edge_a.default_color = Color(1.0, 0.82, 0.38, 0.95)
 	edge_a.add_point(perp * half_w0)
 	edge_a.add_point(n * length + perp * half_w1)
 	_telegraph.add_child(edge_a)
 	var edge_b := Line2D.new()
-	edge_b.width = 2.0
-	edge_b.default_color = Color(1.0, 0.78, 0.35, 0.9)
+	edge_b.width = 2.6
+	edge_b.default_color = Color(1.0, 0.82, 0.38, 0.95)
 	edge_b.add_point(-perp * half_w0)
 	edge_b.add_point(n * length - perp * half_w1)
 	_telegraph.add_child(edge_b)
 	var line := Line2D.new()
-	line.width = 5.2
-	line.default_color = Color(1.0, 0.45, 0.25, 0.95)
+	line.width = 6.0
+	line.default_color = Color(1.0, 0.48, 0.22, 1.0)
 	line.add_point(Vector2.ZERO)
 	line.add_point(n * length)
 	_telegraph.add_child(line)
@@ -1378,19 +1421,24 @@ func _spawn_burst() -> void:
 	if parent == null:
 		return
 	var combo := GameState.combo
-	var count := 8 if (def != null and def.is_boss) else (6 if is_elite else 5)
+	# Cap flecks — bright few beats read better and avoid overdraw spikes.
+	var count := 6 if (def != null and def.is_boss) else (5 if is_elite else 4)
 	if combo >= 6:
-		count += 2
+		count += 1
 	if combo >= 10:
-		count += 2
+		count += 1
 	if GameState.early_kill_hook() and not (def != null and def.is_boss):
-		count += 2
+		count += 1
+	count = mini(count, 8)
 	# Outer gold ring — one bright beat, then expand; sits above auto-hit sparks.
 	var gold := Color(1.0, 0.92, 0.45, 1.0)
 	if def != null and def.is_boss:
 		gold = Color(1.0, 0.6, 0.28, 1.0)
 	elif is_elite:
 		gold = Color(1.0, 0.88, 0.4, 1.0)
+	elif GameState.stage_id == "sect" and combo <= 3:
+		# Sect early kills — teal rim so 斩 language matches courtyard.
+		gold = Color(0.55, 0.98, 0.88, 1.0)
 	elif combo >= 8:
 		gold = Color(1.0, 0.7, 0.32, 1.0)
 	elif combo >= 4:
@@ -1398,7 +1446,7 @@ func _spawn_burst() -> void:
 	# Soft fill flash under the rim.
 	var fill := Polygon2D.new()
 	fill.z_index = 10
-	fill.color = Color(gold.r, gold.g, gold.b, 0.4)
+	fill.color = Color(gold.r, gold.g, gold.b, 0.45)
 	var fpts: PackedVector2Array = []
 	for i in 18:
 		var a0 := TAU * float(i) / 18.0
@@ -1408,13 +1456,13 @@ func _spawn_burst() -> void:
 	fill.global_position = global_position
 	fill.scale = Vector2(0.6, 0.6)
 	var ftw := fill.create_tween()
-	ftw.tween_property(fill, "scale", Vector2(1.4, 1.4), 0.06)
-	ftw.tween_property(fill, "scale", Vector2(2.8, 2.8), 0.16)
-	ftw.parallel().tween_property(fill, "modulate:a", 0.0, 0.16)
+	ftw.tween_property(fill, "scale", Vector2(1.55, 1.55), 0.05)
+	ftw.tween_property(fill, "scale", Vector2(2.6, 2.6), 0.14)
+	ftw.parallel().tween_property(fill, "modulate:a", 0.0, 0.14)
 	ftw.tween_callback(fill.queue_free)
 	# Bright rim — holds opaque a beat then blooms out.
 	var ring := Line2D.new()
-	ring.width = 3.4 if combo >= 6 else 2.8
+	ring.width = 3.6 if combo >= 6 else 3.0
 	ring.default_color = gold
 	ring.z_index = 12
 	for i in 21:
@@ -1424,26 +1472,27 @@ func _spawn_burst() -> void:
 	ring.global_position = global_position
 	ring.scale = Vector2(0.55, 0.55)
 	var rtw := ring.create_tween()
-	rtw.tween_property(ring, "scale", Vector2(1.05, 1.05), 0.05) # hold beat
-	rtw.tween_property(ring, "scale", Vector2(2.6, 2.6), 0.18).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	rtw.parallel().tween_property(ring, "modulate:a", 0.0, 0.18)
+	rtw.tween_property(ring, "scale", Vector2(1.1, 1.1), 0.05) # hold beat
+	rtw.tween_property(ring, "scale", Vector2(2.45, 2.45), 0.16).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	rtw.parallel().tween_property(ring, "modulate:a", 0.0, 0.16)
 	rtw.tween_callback(ring.queue_free)
-	# Secondary thinner echo ring — depth vs single auto-hit flecks.
-	var echo := Line2D.new()
-	echo.width = 1.6
-	echo.default_color = Color(gold.r, gold.g, gold.b, 0.7)
-	echo.z_index = 11
-	for i in 17:
-		var a2 := TAU * float(i) / 16.0
-		echo.add_point(Vector2(cos(a2), sin(a2)) * 9.0)
-	parent.add_child(echo)
-	echo.global_position = global_position
-	echo.scale = Vector2(0.8, 0.8)
-	var etw := echo.create_tween()
-	etw.tween_interval(0.04)
-	etw.tween_property(echo, "scale", Vector2(3.2, 3.2), 0.2)
-	etw.parallel().tween_property(echo, "modulate:a", 0.0, 0.2)
-	etw.tween_callback(echo.queue_free)
+	# Secondary thinner echo ring — skip on low combo to keep light kills snappy.
+	if combo >= 3 or (def != null and def.is_boss) or is_elite:
+		var echo := Line2D.new()
+		echo.width = 1.6
+		echo.default_color = Color(gold.r, gold.g, gold.b, 0.7)
+		echo.z_index = 11
+		for i in 17:
+			var a2 := TAU * float(i) / 16.0
+			echo.add_point(Vector2(cos(a2), sin(a2)) * 9.0)
+		parent.add_child(echo)
+		echo.global_position = global_position
+		echo.scale = Vector2(0.8, 0.8)
+		var etw := echo.create_tween()
+		etw.tween_interval(0.04)
+		etw.tween_property(echo, "scale", Vector2(3.0, 3.0), 0.18)
+		etw.parallel().tween_property(echo, "modulate:a", 0.0, 0.18)
+		etw.tween_callback(echo.queue_free)
 	for i in count:
 		var bit := Polygon2D.new()
 		bit.polygon = [Vector2(-2, -2), Vector2(2, -2), Vector2(2, 2), Vector2(-2, 2)]
@@ -1451,6 +1500,8 @@ func _spawn_burst() -> void:
 			bit.color = Color(1.0, 0.65, 0.3, 0.95)
 		elif is_elite:
 			bit.color = Color(1.0, 0.88, 0.4, 0.95)
+		elif GameState.stage_id == "sect" and combo <= 3:
+			bit.color = Color(0.55, 0.98, 0.88, 0.95)
 		elif combo >= 8:
 			bit.color = Color(1.0, 0.6, 0.3, 0.95)
 		elif combo >= 4:
@@ -1461,8 +1512,8 @@ func _spawn_burst() -> void:
 		bit.z_index = 13
 		parent.add_child(bit)
 		var dir := Vector2.from_angle(TAU * float(i) / float(count) + randf() * 0.25)
-		var dist := randf_range(22, 44) * (1.15 if combo >= 6 else 1.0)
+		var dist := randf_range(20, 40) * (1.12 if combo >= 6 else 1.0)
 		var tw := bit.create_tween()
-		tw.tween_property(bit, "global_position", global_position + dir * dist, 0.2)
-		tw.parallel().tween_property(bit, "modulate:a", 0.0, 0.2)
+		tw.tween_property(bit, "global_position", global_position + dir * dist, 0.18)
+		tw.parallel().tween_property(bit, "modulate:a", 0.0, 0.18)
 		tw.tween_callback(bit.queue_free)

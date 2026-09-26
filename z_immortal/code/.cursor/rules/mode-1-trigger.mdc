@@ -1,5 +1,5 @@
 ---
-description: 用户只发「1」时：为当前改动写好注释并 git commit（不 push）
+description: 用户只发「1」时：为当前改动写好注释、git commit，并推送到 origin
 alwaysApply: true
 ---
 
@@ -9,7 +9,8 @@ alwaysApply: true
 
 1. 立刻阅读并完整执行项目 Skill：`.cursor/skills/tongxuan-mode-1/SKILL.md`
 2. 为**当前未提交改动**补上必要注释，然后按仓库规范 `git commit`
-3. **不要**提问、不要要确认、不要 push
-4. 无改动则说明即可，不要空提交
+3. 提交成功后 **push** 到 `origin`（当前分支）
+4. **不要**提问、不要要确认
+5. 无改动则说明即可，不要空提交；若仅本地领先远程，仍可只 push
 
 这是聊天触发：在本对话单独发送 `1` 即可。

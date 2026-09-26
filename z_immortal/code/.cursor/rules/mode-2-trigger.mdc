@@ -1,5 +1,5 @@
 ---
-description: 用户只发「2」时启动通玄 Mode-2 八小时自主优化；发 stop/0 结束
+description: 用户只发「2」时启动通玄 Mode-2 八小时自主优化；发 3/stop/0/暂停 结束
 alwaysApply: true
 ---
 
@@ -10,18 +10,20 @@ alwaysApply: true
 若用户消息去掉首尾空白后**恰好等于** `2`：
 
 1. 立刻阅读并完整执行项目 Skill：`.cursor/skills/tongxuan-mode-2/SKILL.md`
-2. 先 `python .cursor/hooks/mode2_arm.py --hours 8`，再持续优化
+2. 先 `node .cursor/hooks/mode2_arm.js --hours 8`，再持续优化
 3. **不要**提问、不要要确认、不要列选项等用户选
-4. 方向：好玩、美观精致、战斗、地图、前期上头；把游戏越做越长
-5. 卡住自行换思路继续；依赖 stop hook 在时限内自动续跑
+4. 需要权限/联网/跑工具时自行申请并继续，不要停等用户放行
+5. 方向：好玩、美观精致、人物体型、战斗、卡顿/性能、地图、前期上头、代码规范；把游戏越做越长
+6. 卡住自行换思路继续；依赖 stop hook 在时限内自动续跑
+7. 人物体型：主角按目标身高拟合，禁止动画把 scale 拉回 `Vector2.ONE`；战斗中不挡小怪与地面
 
-## 停止
+## 暂停
 
-若用户消息为 `stop`、`0`、或明确「停止 Mode-2」：
+若用户消息去掉首尾空白后**恰好等于** `3`，或为 `stop`、`0`，或明确「暂停 / 停止 Mode-2」：
 
-1. 执行 `python .cursor/hooks/mode2_disarm.py`
+1. 执行 `node .cursor/hooks/mode2_disarm.js`
 2. 用几句话总结已做改动，然后结束自主循环
 
 ## 说明
 
-这是聊天触发，不是键盘全局热键。用户在本对话里单独发送 `2` 即可。
+这是聊天触发，不是键盘全局热键。本对话发送 `2` 开工，发送 `3` 暂停。

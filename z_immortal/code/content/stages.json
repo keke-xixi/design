@@ -9,8 +9,8 @@
       "order": 1,
       "next_id": "country",
       "kill_target": 12,
-      "spawn_interval": 0.58,
-      "max_alive": 15,
+      "spawn_interval": 0.52,
+      "max_alive": 12,
       "boss_id": "sect_elder",
       "boss_at_kill": 8,
       "accent": "#7ec8d8",
@@ -206,10 +206,10 @@
       "order": 2,
       "next_id": "planet",
       "kill_target": 16,
-      "spawn_interval": 0.58,
-      "max_alive": 18,
+      "spawn_interval": 0.5,
+      "max_alive": 14,
       "boss_id": "dynasty_general",
-      "boss_at_kill": 11,
+      "boss_at_kill": 10,
       "accent": "#c9a86a",
       "waves": [
         {
@@ -219,9 +219,9 @@
           "max_alive_bonus": 0
         },
         {
-          "at_kills": 7,
+          "at_kills": 5,
           "hint": "刀客",
-          "spawn_interval_mult": 0.9,
+          "spawn_interval_mult": 0.88,
           "max_alive_bonus": 2,
           "spawns": [
             {
@@ -235,9 +235,9 @@
           ]
         },
         {
-          "at_kills": 12,
+          "at_kills": 10,
           "hint": "将军",
-          "spawn_interval_mult": 0.82,
+          "spawn_interval_mult": 0.8,
           "max_alive_bonus": 1
         }
       ],

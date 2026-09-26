@@ -28,19 +28,36 @@ var last_ring_connected := false  # HUD reads this for U-key gold vs cool flash.
 ## Shared with HUD edge vignette — keep phase identical.
 const CRISIS_PULSE_HZ := 0.007
 const HEAL_PULSE_HZ := 0.010  # Half-beat faster jade breath; still calm vs 破绽 gold.
-const SLOW_PULSE_HZ := 0.0065  # Soft fog clock — slower than heal jade.
-const DAMAGE_PULSE_HZ := 0.009  # Snappy 煞地 sting — faster than mist.
+## Soft fog clock — slower than heal jade.
+const SLOW_PULSE_HZ := 0.0065
+## Snappy 煞地 sting — faster than mist.
+const DAMAGE_PULSE_HZ := 0.009
+## Fitted combat height (~1/4 of 640×360 with zoom). Tall clear PNGs must not use raw scale 1.0.
+## Attack squash/tween MUST restore `_base_scale` — Vector2.ONE blows 1400px portraits full-screen.
+const TARGET_VISUAL_H := 80.0
+var _base_scale := Vector2(0.056, 0.056)
 
 func _ready() -> void:
 	add_to_group("player")
 	collision_layer = 2
 	collision_mask = 1
 	_visual.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	_apply_base_visual_scale()
 	if _outline:
 		_outline.texture = _visual.texture
 		_outline.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+		_outline.scale = _base_scale * 1.03
 	EventBus.player_hp_changed.connect(_on_hp)
 	_on_hp(GameState.hp, GameState.max_hp)
+
+## Fit high-res portraits to TARGET_VISUAL_H so attack squash cannot blow the sprite full-screen.
+func _apply_base_visual_scale() -> void:
+	if _visual == null or _visual.texture == null:
+		return
+	var th := float(_visual.texture.get_height())
+	var s := TARGET_VISUAL_H / maxf(th, 1.0)
+	_base_scale = Vector2(s, s)
+	_visual.scale = _base_scale
 
 func configure(projectiles: Node2D, map_rect: Rect2) -> void:
 	_projectiles = projectiles
@@ -513,9 +530,10 @@ func _spawn_melee_muzzle(dir: Vector2) -> void:
 	tw.parallel().tween_property(arc, "scale", Vector2(1.35, 1.35), 0.1)
 	tw.tween_callback(arc.queue_free)
 	if _visual:
-		_visual.scale = Vector2(1.06, 0.94)
+		# Squash relative to fitted base — Vector2.ONE would blow tall PNGs full-screen.
+		_visual.scale = _base_scale * Vector2(1.06, 0.94)
 		var vtw := create_tween()
-		vtw.tween_property(_visual, "scale", Vector2.ONE, 0.08)
+		vtw.tween_property(_visual, "scale", _base_scale, 0.08)
 
 func _nearest_mob() -> Node2D:
 	var best: Node2D = null
@@ -675,29 +693,29 @@ func _spawn_dash_trail(from: Vector2, to: Vector2, dir: Vector2) -> void:
 	var parent := get_parent()
 	if parent == null:
 		return
-	# 4 afterimages along the path — cyan rim, staggered fade.
-	var steps := 4
+	# 3 afterimages — enough streak without multi-megapixel overdraw spikes.
+	var steps := 3
 	for i in steps:
 		var t := float(i) / float(steps)
 		var ghost := Sprite2D.new()
 		ghost.texture = _visual.texture
 		ghost.scale = _visual.scale * (1.0 - t * 0.08)
 		ghost.flip_h = _visual.flip_h
-		ghost.modulate = Color(0.45, 0.85, 1.0, 0.55 - t * 0.1)
+		ghost.modulate = Color(0.45, 0.85, 1.0, 0.5 - t * 0.1)
 		ghost.global_position = from.lerp(to, t) + _visual.position - dir * 4.0
 		ghost.z_index = int(ghost.global_position.y) - 1
 		parent.add_child(ghost)
 		# Soft silhouette plate behind the sprite for readability on busy ground.
 		var plate := Polygon2D.new()
-		plate.color = Color(0.35, 0.8, 1.0, 0.22 - t * 0.04)
+		plate.color = Color(0.35, 0.8, 1.0, 0.2 - t * 0.04)
 		plate.polygon = PackedVector2Array([
 			Vector2(-10, -6), Vector2(10, -6), Vector2(8, 8), Vector2(-8, 8),
 		])
 		plate.z_index = -1
 		ghost.add_child(plate)
 		var tw := ghost.create_tween()
-		tw.tween_property(ghost, "modulate:a", 0.0, 0.22 + float(i) * 0.05)
-		tw.parallel().tween_property(ghost, "scale", ghost.scale * 0.85, 0.22 + float(i) * 0.05)
+		tw.tween_property(ghost, "modulate:a", 0.0, 0.18 + float(i) * 0.04)
+		tw.parallel().tween_property(ghost, "scale", ghost.scale * 0.85, 0.18 + float(i) * 0.04)
 		tw.tween_callback(ghost.queue_free)
 
 func _spawn_dash_land_ring(dir: Vector2 = Vector2.RIGHT) -> void:
@@ -778,9 +796,9 @@ func _do_ring_slash(cfg: Dictionary) -> void:
 	var mult := float(cfg.get("damage_mult", 1.6))
 	# Brief wind-up punch so the cut lands as a beat, not a silent AoE.
 	if _visual:
-		_visual.scale = Vector2(0.88, 1.12)
+		_visual.scale = _base_scale * Vector2(0.88, 1.12)
 		var vtw := create_tween()
-		vtw.tween_property(_visual, "scale", Vector2.ONE, 0.14).set_trans(Tween.TRANS_BACK)
+		vtw.tween_property(_visual, "scale", _base_scale, 0.14).set_trans(Tween.TRANS_BACK)
 	# Resolve hits first — gold FX only on connect (whiff stays cool cyan-gray).
 	var hit_mobs: Array[Node2D] = []
 	for node in get_tree().get_nodes_in_group("mobs"):
@@ -808,6 +826,11 @@ func _do_ring_slash(cfg: Dictionary) -> void:
 			_spawn_slash_mark(mob.global_position, knock)
 		FloatTextManager.show_message(global_position + Vector2(0, -32), "环斩×%d" % hits, Color(1.0, 0.9, 0.45))
 		_flash_ring_body(true)
+		# Early stages: HUD banner so 环斩 reads as a skill beat, not only float text.
+		if GameState.stage_id in ["sect", "country"]:
+			var hud := get_tree().get_first_node_in_group("hud")
+			if hud and hud.has_method("show_clear"):
+				hud.call("show_clear", "环斩 · %d" % hits)
 		# Soft hitch only — short, capped, and skipped if already hitching.
 		var world := get_tree().get_first_node_in_group("game_world")
 		if world and world.has_method("hitstop"):
@@ -1076,7 +1099,12 @@ func _do_spirit_burst(cfg: Dictionary) -> void:
 		_projectiles.add_child(bolt)
 		bolt.launch(global_position + Vector2(0, -8), dir, mult, "burst")
 	FloatTextManager.show_message(global_position + Vector2(0, -36), "灵爆", Color(1.0, 0.75, 0.35))
+	if GameState.stage_id in ["sect", "country"]:
+		var hud_b := get_tree().get_first_node_in_group("hud")
+		if hud_b and hud_b.has_method("show_clear"):
+			hud_b.call("show_clear", "灵爆")
 	pulse_camera(0.1)
+	_burst_flash_t = 0.28
 
 func _spawn_spirit_burst_fx() -> void:
 	var parent := get_parent()

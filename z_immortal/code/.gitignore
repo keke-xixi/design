@@ -1,4 +1,4 @@
-.godot/
+﻿.godot/
 .import/
 *.translation
 export.cfg
@@ -20,3 +20,4 @@ Thumbs.db
 .cursor/mode2-session.json
 .cursor/mode2-next.md
 .cursor/mode2-last-summary.md
+.cursor/mode2-STATUS.md

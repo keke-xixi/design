@@ -630,32 +630,32 @@ func _tick_atmosphere(_delta: float) -> void:
 	if _bg and _bg.texture:
 		if _map_pattern == "yard":
 			_bg.modulate = Color(
-				_bg_base_mod.r * (1.0 - 0.035 * breath),
-				_bg_base_mod.g * (1.0 + 0.02 * breath),
-				_bg_base_mod.b * (1.0 + 0.045 * breath),
+				_bg_base_mod.r * (1.0 - 0.05 * breath),
+				_bg_base_mod.g * (1.0 + 0.03 * breath),
+				_bg_base_mod.b * (1.0 + 0.06 * breath),
 				1.0
 			)
 		else:
 			_bg.modulate = Color(
-				_bg_base_mod.r * (1.0 + 0.04 * breath),
-				_bg_base_mod.g * (1.0 + 0.015 * breath),
-				_bg_base_mod.b * (1.0 - 0.04 * breath),
+				_bg_base_mod.r * (1.0 + 0.055 * breath),
+				_bg_base_mod.g * (1.0 + 0.02 * breath),
+				_bg_base_mod.b * (1.0 - 0.055 * breath),
 				1.0
 			)
 	if _tiles:
 		var ta := _tiles_base_mod.a
 		if _map_pattern == "yard":
 			_tiles.modulate = Color(
-				_tiles_base_mod.r * (1.0 - 0.03 * breath),
-				_tiles_base_mod.g * (1.0 + 0.025 * breath),
-				_tiles_base_mod.b * (1.0 + 0.04 * breath),
+				_tiles_base_mod.r * (1.0 - 0.04 * breath),
+				_tiles_base_mod.g * (1.0 + 0.035 * breath),
+				_tiles_base_mod.b * (1.0 + 0.05 * breath),
 				ta
 			)
 		else:
 			_tiles.modulate = Color(
-				_tiles_base_mod.r * (1.0 + 0.035 * breath),
-				_tiles_base_mod.g * (1.0 + 0.01 * breath),
-				_tiles_base_mod.b * (1.0 - 0.035 * breath),
+				_tiles_base_mod.r * (1.0 + 0.045 * breath),
+				_tiles_base_mod.g * (1.0 + 0.015 * breath),
+				_tiles_base_mod.b * (1.0 - 0.045 * breath),
 				ta
 			)
 	var bands := get_node_or_null("GroundBands") as Node2D

@@ -419,6 +419,10 @@ func _update_skill_bar() -> void:
 		if cd_fill:
 			cd_fill.offset_top = -_KEY_H * cd_ratio
 			cd_fill.visible = cd_ratio > 0.02
+			# Accent-tinted CD wash — each skill's cooldown reads by color, not only height.
+			if not ready:
+				var acc: Color = _SKILL_ACCENTS[i]
+				cd_fill.color = Color(acc.r * 0.55, acc.g * 0.55, acc.b * 0.55, 0.48)
 		# Flash when a skill comes off cooldown — per-accent punch (闪青 / 环金 / 丹翠 / 爆火).
 		if ready and i < _skill_was_ready.size() and not _skill_was_ready[i]:
 			if not (is_pill and pill_empty):
@@ -426,11 +430,16 @@ func _update_skill_bar() -> void:
 		if i < _skill_was_ready.size():
 			_skill_was_ready[i] = ready
 		if not ready:
-			labels[i].text = "%.0f" % ceil(cd_left)
-			labels[i].modulate = Color(0.55, 0.6, 0.65, 0.95)
+			# Sub-2.5s show one decimal so short CDs feel responsive.
+			if cd_left < 2.5:
+				labels[i].text = "%.1f" % cd_left
+			else:
+				labels[i].text = "%.0f" % ceil(cd_left)
+			var acc2: Color = _SKILL_ACCENTS[i]
+			labels[i].modulate = Color(acc2.r * 0.85, acc2.g * 0.85, acc2.b * 0.85, 0.98)
 			var casting: bool = int(_skill_cast_flash.get(_KEY_NODES[i], 0)) > 0
 			if key_panel and key_panel.modulate.r < 1.2 and not casting:
-				key_panel.modulate = Color(0.72, 0.76, 0.8, 0.9)
+				key_panel.modulate = Color(0.78, 0.8, 0.82, 0.92)
 		else:
 			labels[i].text = key
 			if labels[i].modulate.g < 0.9:
@@ -1627,8 +1636,13 @@ func flash_telegraph_dock() -> void:
 	# Short warn punch — matches telegraph beep window, not full cast hold.
 	dtw.tween_property(_skill_dock, "modulate", Color.WHITE, 0.32)
 	dtw.tween_callback(_restore_skill_dock_style)
-	_spawn_edge_flash(Color(1.0, 0.52, 0.28, 0.38), 11.0, 0.26)
-	_spawn_edge_flash(Color(1.0, 0.78, 0.4, 0.16), 5.0, 0.16)
+	_spawn_edge_flash(Color(1.0, 0.52, 0.28, 0.42), 12.0, 0.28)
+	_spawn_edge_flash(Color(1.0, 0.78, 0.4, 0.18), 6.0, 0.18)
+	# Top bar coral blink — danger reads even if eyes are on the boss.
+	if _top_bar:
+		_top_bar.modulate = Color(1.35, 0.85, 0.65)
+		var ttw := create_tween()
+		ttw.tween_property(_top_bar, "modulate", Color.WHITE, 0.36)
 
 ## Boss 破绽 open — warm-gold dock with play_break / recover edges (not telegraph coral).
 func flash_break_dock() -> void:
