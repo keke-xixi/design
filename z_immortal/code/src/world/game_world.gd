@@ -40,6 +40,9 @@ var _spawn_pings: Array[Dictionary] = []
 ## Sect early: dwell on 愈地 then punch a close disciple (once per run).
 var _heal_rest_acc := 0.0
 var _heal_pressure_fired := false
+## Early-stage unopened-chest radar nudge — keeps exploration desire alive.
+var _chest_hunt_acc := 0.0
+var _chest_hint_kills := -1
 
 func _ready() -> void:
 	_pickups.add_to_group("pickups")
@@ -63,6 +66,7 @@ func _process(delta: float) -> void:
 	_apply_zone_effects(delta)
 	_pulse_zone_visuals()
 	_tick_heal_rest_pressure(delta)
+	_tick_chest_hunt(delta)
 	if _cleared_stop:
 		return
 	if _spawn_pause > 0.0:
@@ -179,12 +183,13 @@ func _on_wave_banner(hint: String) -> void:
 func hitstop(duration: float = 0.04) -> void:
 	if _hitstopping or DisplayServer.get_name() == "headless":
 		return
-	# Soft hitch — never freeze; keep duration tiny so combat stays fluid.
+	# Soft hitch — never freeze; duration capped so multi-kill waves stay fluid.
 	_hitstopping = true
 	var prev := Engine.time_scale
 	var scale := float(ContentDB.section("combat").get("hitstop_scale", 0.28))
-	Engine.time_scale = clampf(scale, 0.22, 0.55)
-	await get_tree().create_timer(minf(duration, 0.032), true, true).timeout
+	# Floor 0.24 avoids near-pause stutter; ceiling keeps light hits from freezing.
+	Engine.time_scale = clampf(scale, 0.24, 0.5)
+	await get_tree().create_timer(minf(duration, 0.028), true, true).timeout
 	Engine.time_scale = prev if prev > 0.1 else 1.0
 	_hitstopping = false
 
@@ -522,6 +527,8 @@ func _apply_stage(stage_id: String) -> void:
 	_last_zone_effect = ""
 	_heal_rest_acc = 0.0
 	_heal_pressure_fired = false
+	_chest_hunt_acc = 0.0
+	_chest_hint_kills = -1
 	var map: Dictionary = stage.map
 	_map_size = Vector2i(int(map.get("width", 48)), int(map.get("height", 30)))
 	var pixel := Vector2(_map_size) * float(TILE)
@@ -1025,7 +1032,7 @@ func _ping_spawn(pos: Vector2, kind: String = "", life_override: float = -1.0) -
 	if life_override > 0.0:
 		life = life_override
 	_spawn_pings.append({"pos": pos, "life": life, "kind": kind, "life_max": life})
-	if _spawn_pings.size() > 10:
+	if _spawn_pings.size() > 8:
 		_spawn_pings.pop_front()
 
 ## Public radar ping for overlays (sect open wipe, etc.).
@@ -1333,6 +1340,56 @@ func _hint_chests() -> void:
 		hud.call("show_clear", "小地图 · 寻宝")
 	if _player:
 		FloatTextManager.show_message(_player.global_position + Vector2(0, -36), "寻宝", Color(1.0, 0.88, 0.5))
+	# Seed radar so diamonds light up immediately on early stages.
+	_pulse_unopened_chest_pings()
+
+## Periodic gold radar pips + mid-run tip while unopened chests remain (sect/country).
+func _tick_chest_hunt(delta: float) -> void:
+	if GameState.stage_id not in ["sect", "country"]:
+		return
+	if _chests == null or _chests.get_child_count() == 0:
+		return
+	_chest_hunt_acc += delta
+	if _chest_hunt_acc >= 8.5:
+		_chest_hunt_acc = 0.0
+		_pulse_unopened_chest_pings()
+	# Once at ~halfway kills — remind without nagging every wave.
+	var stage := GameState.current_stage()
+	if stage == null:
+		return
+	var kills := GameState.stage_kills()
+	var mid := maxi(int(float(stage.kill_target) * 0.4), 3)
+	if kills >= mid and _chest_hint_kills < mid and _count_unopened_chests() > 0:
+		_chest_hint_kills = mid
+		var hud := get_node_or_null("HUD")
+		if hud and hud.has_method("show_clear"):
+			hud.call("show_clear", "宝箱 · 未开")
+		if _player:
+			FloatTextManager.show_message(_player.global_position + Vector2(0, -36), "寻宝", Color(1.0, 0.9, 0.45))
+		_pulse_unopened_chest_pings()
+
+func _count_unopened_chests() -> int:
+	var n := 0
+	for node in get_tree().get_nodes_in_group("chests"):
+		if not is_instance_valid(node):
+			continue
+		if node.has_method("is_opened") and bool(node.call("is_opened")):
+			continue
+		n += 1
+	return n
+
+func _pulse_unopened_chest_pings() -> void:
+	# Cap pings — enough to pull the eye, not clutter the radar.
+	var n := 0
+	for node in get_tree().get_nodes_in_group("chests"):
+		if n >= 3:
+			break
+		if not is_instance_valid(node) or not (node is Node2D):
+			continue
+		if node.has_method("is_opened") and bool(node.call("is_opened")):
+			continue
+		radar_ping((node as Node2D).global_position, "chest", 1.1)
+		n += 1
 
 func _clear_group_children(node: Node) -> void:
 	while node.get_child_count() > 0:

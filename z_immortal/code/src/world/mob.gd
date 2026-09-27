@@ -314,37 +314,45 @@ func _ai_move(delta: float, player: Node2D) -> void:
 			# 灵兔：绕圈起跳 → 侧啄预警 → 近身弹开。Jade arc tell ≠ disciple steel blade.
 			_ai_hare_skittish(delta, offset, dist)
 		"guard":
-			# Patrol: keep mid range, step in for contact — reads different from disciples.
-			if dist < 48.0:
-				velocity = -offset.normalized() * def.speed * 0.9
-			elif dist > 95.0:
-				velocity = offset.normalized() * def.speed
-			else:
-				velocity = offset.normalized().orthogonal() * def.speed * 0.65
-				if Engine.get_process_frames() % 55 == 0:
-					velocity = offset.normalized() * def.speed * 1.35
-			if offset.length_squared() > 0.01:
-				_visual.flip_h = offset.x < 0.0
+			# Patrol: mid orbit, then amber shield-tap step-in — ≠ disciple steel / hare jade.
+			_ai_guard_patrol(delta, offset, dist)
 		"charge":
-			_charge_cd -= delta
-			if _charging:
+			# Orange bolt: plant + road tell, then dash — readable vs steel 亮刃.
+			# Reuses _lunge_wind as plant timer only (charge mobs never run chase AI).
+			if _lunge_wind > 0.0:
+				_lunge_wind -= delta
+				velocity = offset.normalized() * def.speed * 0.1 if dist > 1.0 else Vector2.ZERO
+				if _visual and def:
+					var crouch := 0.9 + 0.06 * sin(Time.get_ticks_msec() * 0.05)
+					_visual.scale = Vector2(_base_scale.x * (2.05 - crouch), _base_scale.y * crouch)
+				if _lunge_wind <= 0.0:
+					_charging = true
+					_charge_cd = 0.34
+					if _visual and def:
+						_visual.scale = _base_scale
+				if offset.length_squared() > 0.01:
+					_visual.flip_h = offset.x < 0.0
+			elif _charging:
 				velocity = _charge_dir * def.speed * 2.4
 				_charge_cd -= delta
 				if _charge_cd <= 0.0:
 					_charging = false
 					_charge_cd = randf_range(1.4, 2.2)
-			elif _charge_cd <= 0.0 and dist < 160.0:
-				_charging = true
-				_charge_dir = offset.normalized() if dist > 1.0 else Vector2.RIGHT
-				_charge_cd = 0.35
-				modulate = Color(1.3, 0.9, 0.7)
-				_spawn_charge_warn()
-				var tw := create_tween()
-				tw.tween_property(self, "modulate", Color.WHITE if not is_elite else Color(1.15, 1.05, 0.65), 0.2)
+				if offset.length_squared() > 0.01:
+					_visual.flip_h = offset.x < 0.0
 			else:
-				velocity = offset.normalized() * def.speed if dist > 1.0 else Vector2.ZERO
-			if offset.length_squared() > 0.01:
-				_visual.flip_h = offset.x < 0.0
+				_charge_cd -= delta
+				if _charge_cd <= 0.0 and dist < 160.0:
+					_charge_dir = offset.normalized() if dist > 1.0 else Vector2.RIGHT
+					_lunge_wind = 0.28
+					modulate = Color(1.35, 0.85, 0.55)
+					_spawn_charge_warn()
+					var tw := create_tween()
+					tw.tween_property(self, "modulate", Color.WHITE if not is_elite else Color(1.15, 1.05, 0.65), 0.28)
+				else:
+					velocity = offset.normalized() * def.speed if dist > 1.0 else Vector2.ZERO
+				if offset.length_squared() > 0.01:
+					_visual.flip_h = offset.x < 0.0
 		"chase":
 			# 外门弟子：贴身走位，亮刃前摇后再突刺 — 对位灵兔绕圈。
 			_ai_disciple_lunge(delta, offset, dist)
@@ -399,6 +407,86 @@ func _ai_hare_skittish(delta: float, offset: Vector2, dist: float) -> void:
 			tw.tween_property(self, "modulate", Color.WHITE if not is_elite else Color(1.15, 1.05, 0.65), 0.26)
 		elif hop:
 			_do_hare_hop()
+
+func _ai_guard_patrol(delta: float, offset: Vector2, dist: float) -> void:
+	if offset.length_squared() > 0.01:
+		_visual.flip_h = offset.x < 0.0
+	# Shield plant — amber arc tell, then step-in (not steel blade / jade peck).
+	if _lunge_wind > 0.0:
+		_lunge_wind -= delta
+		velocity = offset.normalized() * def.speed * 0.08
+		if _visual and def:
+			var plant := 0.9 + 0.05 * sin(Time.get_ticks_msec() * 0.05)
+			_visual.scale = Vector2(_base_scale.x * (2.05 - plant), _base_scale.y * plant)
+		if _lunge_wind <= 0.0:
+			_lunging = true
+			_lunge_dir = offset.normalized() if dist > 1.0 else Vector2.RIGHT
+			_lunge_cd = 0.28
+			if _visual and def:
+				_visual.scale = _base_scale
+		return
+	if _lunging:
+		velocity = _lunge_dir * def.speed * 1.85
+		_lunge_cd -= delta
+		if _lunge_cd <= 0.0:
+			_lunging = false
+			_lunge_cd = randf_range(1.2, 1.9)
+		return
+	_lunge_cd -= delta
+	if dist < 48.0:
+		velocity = -offset.normalized() * def.speed * 0.9
+	elif dist > 95.0:
+		velocity = offset.normalized() * def.speed
+	else:
+		velocity = offset.normalized().orthogonal() * def.speed * 0.65
+		if _lunge_cd <= 0.0 and dist < 88.0 and dist > 40.0:
+			_lunge_wind = 0.22
+			_lunge_dir = offset.normalized() if dist > 1.0 else Vector2.RIGHT
+			_spawn_guard_step_warn()
+			modulate = Color(1.2, 0.95, 0.55)
+			var tw := create_tween()
+			tw.tween_property(self, "modulate", Color.WHITE if not is_elite else Color(1.15, 1.05, 0.65), 0.26)
+
+func _spawn_guard_step_warn() -> void:
+	# Amber shield tap — patrol step-in tell, warmer than steel 亮刃.
+	var n := _lunge_dir
+	if n.length_squared() < 0.01:
+		n = Vector2.RIGHT
+	else:
+		n = n.normalized()
+	var side := n.orthogonal()
+	var arc := Line2D.new()
+	arc.width = 3.2
+	arc.default_color = Color(1.0, 0.82, 0.35, 0.92)
+	arc.z_index = 7
+	var pts := PackedVector2Array()
+	for i in 9:
+		var u := float(i) / 8.0
+		var ang := -0.7 + 1.4 * u
+		pts.append(n.rotated(ang) * (12.0 + 22.0 * u))
+	arc.points = pts
+	add_child(arc)
+	var plate := Polygon2D.new()
+	plate.color = Color(1.0, 0.78, 0.3, 0.28)
+	plate.z_index = 6
+	plate.polygon = PackedVector2Array([
+		side * -10.0, n * 8.0 + side * -6.0, n * 28.0, n * 8.0 + side * 6.0, side * 10.0
+	])
+	add_child(plate)
+	var outline := get_node_or_null("Outline") as Sprite2D
+	if outline:
+		outline.modulate = Color(1.0, 0.82, 0.35, 0.8)
+		var otw := create_tween()
+		otw.tween_property(outline, "modulate", Color(0.04, 0.05, 0.08, 0.4), 0.28)
+	var tw := create_tween()
+	tw.tween_property(arc, "modulate:a", 0.4, 0.07)
+	tw.tween_property(arc, "modulate:a", 1.0, 0.08)
+	tw.tween_property(arc, "modulate:a", 0.0, 0.12)
+	tw.parallel().tween_property(plate, "modulate:a", 0.0, 0.27)
+	tw.tween_callback(func() -> void:
+		arc.queue_free()
+		plate.queue_free()
+	)
 
 func _ai_disciple_lunge(delta: float, offset: Vector2, dist: float) -> void:
 	if offset.length_squared() > 0.01:
@@ -610,24 +698,69 @@ func _spawn_lunge_warn() -> void:
 	)
 
 func _spawn_charge_warn() -> void:
+	# Orange bolt road — wider than steel 亮刃, hotter than amber guard shield.
+	var n := _charge_dir
+	if n.length_squared() < 0.01:
+		n = Vector2.RIGHT
+	else:
+		n = n.normalized()
+	var side := n.orthogonal()
+	var length := 88.0
+	var road := Line2D.new()
+	road.width = 11.0
+	road.default_color = Color(1.0, 0.45, 0.2, 0.32)
+	road.add_point(Vector2.ZERO)
+	road.add_point(n * length)
+	road.z_index = 6
+	add_child(road)
 	var line := Line2D.new()
-	line.width = 4.0
-	line.default_color = Color(1.0, 0.55, 0.3, 0.85)
+	line.width = 4.2
+	line.default_color = Color(1.0, 0.58, 0.28, 0.95)
 	line.add_point(Vector2.ZERO)
-	line.add_point(_charge_dir * 85.0)
+	line.add_point(n * length)
+	line.z_index = 7
 	add_child(line)
 	var tip := Polygon2D.new()
-	tip.color = Color(1.0, 0.75, 0.35, 0.9)
-	tip.polygon = [Vector2(-5, -4), Vector2(7, 0), Vector2(-5, 4)]
-	tip.position = _charge_dir * 85.0
-	tip.rotation = _charge_dir.angle()
+	tip.color = Color(1.0, 0.78, 0.35, 0.95)
+	tip.polygon = [Vector2(-6, -5), Vector2(9, 0), Vector2(-6, 5)]
+	tip.position = n * length
+	tip.rotation = n.angle()
+	tip.z_index = 8
 	add_child(tip)
-	var tw := line.create_tween()
-	tw.tween_property(line, "modulate:a", 0.0, 0.32)
-	tw.parallel().tween_property(tip, "modulate:a", 0.0, 0.32)
+	# Side chevrons — charge identity vs straight steel blade.
+	var chev_a := Line2D.new()
+	chev_a.width = 2.0
+	chev_a.default_color = Color(1.0, 0.7, 0.35, 0.75)
+	chev_a.add_point(n * 28.0 + side * 8.0)
+	chev_a.add_point(n * 42.0)
+	chev_a.z_index = 7
+	add_child(chev_a)
+	var chev_b := Line2D.new()
+	chev_b.width = 2.0
+	chev_b.default_color = Color(1.0, 0.7, 0.35, 0.75)
+	chev_b.add_point(n * 28.0 - side * 8.0)
+	chev_b.add_point(n * 42.0)
+	chev_b.z_index = 7
+	add_child(chev_b)
+	var outline := get_node_or_null("Outline") as Sprite2D
+	if outline:
+		outline.modulate = Color(1.0, 0.55, 0.28, 0.85)
+		var otw := create_tween()
+		otw.tween_property(outline, "modulate", Color(0.04, 0.05, 0.08, 0.4), 0.36)
+	var tw := create_tween()
+	tw.tween_property(line, "modulate:a", 0.4, 0.08)
+	tw.tween_property(line, "modulate:a", 1.0, 0.1)
+	tw.tween_property(line, "modulate:a", 0.0, 0.18)
+	tw.parallel().tween_property(road, "modulate:a", 0.0, 0.36)
+	tw.parallel().tween_property(tip, "modulate:a", 0.0, 0.36)
+	tw.parallel().tween_property(chev_a, "modulate:a", 0.0, 0.36)
+	tw.parallel().tween_property(chev_b, "modulate:a", 0.0, 0.36)
 	tw.tween_callback(func() -> void:
+		road.queue_free()
 		line.queue_free()
 		tip.queue_free()
+		chev_a.queue_free()
+		chev_b.queue_free()
 	)
 
 func _fire_at(player: Node2D) -> void:
@@ -813,6 +946,16 @@ func _enter_recover(skill: Dictionary) -> void:
 		if radar and radar.has_method("radar_ping"):
 			var ping_life := recover + (0.25 if early_boss else 0.15)
 			radar.call("radar_ping", global_position, "break", ping_life)
+		# Mid-window second shout — early bosses teach the punish clock.
+		if early_boss and recover >= 0.7:
+			get_tree().create_timer(recover * 0.45).timeout.connect(func() -> void:
+				if not is_instance_valid(self) or not _recovering:
+					return
+				FloatTextManager.show_message(global_position + Vector2(0, -48), "破", Color(1.0, 0.92, 0.5))
+				var hud2 := get_tree().get_first_node_in_group("hud")
+				if hud2 and hud2.has_method("flash_recover_edges"):
+					hud2.call("flash_recover_edges")
+			)
 	else:
 		FloatTextManager.show_message(global_position + Vector2(0, -52), "破绽", Color(0.55, 1.0, 0.85))
 		# Cool cyan breath — opposite of warm telegraph.
@@ -1291,7 +1434,8 @@ func _die() -> void:
 	elif def != null and def.is_boss:
 		FloatTextManager.show_message(global_position + Vector2(0, -36), "斩Boss", Color(1.0, 0.72, 0.35))
 	elif is_elite:
-		FloatTextManager.show_message(global_position + Vector2(0, -28), "精英", Color(1.0, 0.88, 0.45))
+		FloatTextManager.show_message(global_position + Vector2(0, -28), "斩精", Color(1.0, 0.88, 0.45))
+		_flash_elite_kill()
 	GameState.register_kill(def.id)
 	var stage_now := GameState.current_stage()
 	var shoudao := GameState.stage_id == "country" and stage_now != null and GameState.stage_kills() == stage_now.kill_target
@@ -1388,6 +1532,22 @@ func _flash_break_kill() -> void:
 	if radar and radar.has_method("radar_ping"):
 		radar.call("radar_ping", global_position, "yard" if yard else "gold")
 
+## Elite down — warm-gold punch, quieter than boss, louder than trash 斩.
+func _flash_elite_kill() -> void:
+	var hud := get_tree().get_first_node_in_group("hud")
+	if hud:
+		if hud.has_method("flash_elite_kill_edges"):
+			hud.call("flash_elite_kill_edges")
+		elif hud.has_method("flash_elite_spawn_edges"):
+			hud.call("flash_elite_spawn_edges")
+		if hud.has_method("show_clear"):
+			hud.call("show_clear", "斩精")
+		if hud.has_method("flash_elite_dock"):
+			hud.call("flash_elite_dock")
+	var radar := get_tree().get_first_node_in_group("game_world")
+	if radar and radar.has_method("radar_ping"):
+		radar.call("radar_ping", global_position, "gold")
+
 func _spawn_drops() -> void:
 	if def == null or not is_inside_tree():
 		return
@@ -1421,6 +1581,9 @@ func _spawn_burst() -> void:
 	if parent == null:
 		return
 	var combo := GameState.combo
+	# Cap concurrent kill FX — multi-kill waves must not spike overdraw.
+	var live_fx := get_tree().get_nodes_in_group("kill_burst_fx").size()
+	var lean := live_fx >= 3
 	# Cap flecks — bright few beats read better and avoid overdraw spikes.
 	var count := 6 if (def != null and def.is_boss) else (5 if is_elite else 4)
 	if combo >= 6:
@@ -1429,7 +1592,7 @@ func _spawn_burst() -> void:
 		count += 1
 	if GameState.early_kill_hook() and not (def != null and def.is_boss):
 		count += 1
-	count = mini(count, 8)
+	count = mini(count, 8 if not lean else 5)
 	# Outer gold ring — one bright beat, then expand; sits above auto-hit sparks.
 	var gold := Color(1.0, 0.92, 0.45, 1.0)
 	if def != null and def.is_boss:
@@ -1443,25 +1606,28 @@ func _spawn_burst() -> void:
 		gold = Color(1.0, 0.7, 0.32, 1.0)
 	elif combo >= 4:
 		gold = Color(1.0, 0.9, 0.42, 1.0)
-	# Soft fill flash under the rim.
-	var fill := Polygon2D.new()
-	fill.z_index = 10
-	fill.color = Color(gold.r, gold.g, gold.b, 0.45)
-	var fpts: PackedVector2Array = []
-	for i in 18:
-		var a0 := TAU * float(i) / 18.0
-		fpts.append(Vector2(cos(a0), sin(a0)) * 8.0)
-	fill.polygon = fpts
-	parent.add_child(fill)
-	fill.global_position = global_position
-	fill.scale = Vector2(0.6, 0.6)
-	var ftw := fill.create_tween()
-	ftw.tween_property(fill, "scale", Vector2(1.55, 1.55), 0.05)
-	ftw.tween_property(fill, "scale", Vector2(2.6, 2.6), 0.14)
-	ftw.parallel().tween_property(fill, "modulate:a", 0.0, 0.14)
-	ftw.tween_callback(fill.queue_free)
+	# Soft fill flash under the rim — skip when FX budget is tight.
+	if not lean:
+		var fill := Polygon2D.new()
+		fill.add_to_group("kill_burst_fx")
+		fill.z_index = 10
+		fill.color = Color(gold.r, gold.g, gold.b, 0.45)
+		var fpts: PackedVector2Array = []
+		for i in 18:
+			var a0 := TAU * float(i) / 18.0
+			fpts.append(Vector2(cos(a0), sin(a0)) * 8.0)
+		fill.polygon = fpts
+		parent.add_child(fill)
+		fill.global_position = global_position
+		fill.scale = Vector2(0.6, 0.6)
+		var ftw := fill.create_tween()
+		ftw.tween_property(fill, "scale", Vector2(1.55, 1.55), 0.05)
+		ftw.tween_property(fill, "scale", Vector2(2.6, 2.6), 0.14)
+		ftw.parallel().tween_property(fill, "modulate:a", 0.0, 0.14)
+		ftw.tween_callback(fill.queue_free)
 	# Bright rim — holds opaque a beat then blooms out.
 	var ring := Line2D.new()
+	ring.add_to_group("kill_burst_fx")
 	ring.width = 3.6 if combo >= 6 else 3.0
 	ring.default_color = gold
 	ring.z_index = 12
@@ -1476,9 +1642,10 @@ func _spawn_burst() -> void:
 	rtw.tween_property(ring, "scale", Vector2(2.45, 2.45), 0.16).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	rtw.parallel().tween_property(ring, "modulate:a", 0.0, 0.16)
 	rtw.tween_callback(ring.queue_free)
-	# Secondary thinner echo ring — skip on low combo to keep light kills snappy.
-	if combo >= 3 or (def != null and def.is_boss) or is_elite:
+	# Secondary thinner echo ring — skip on low combo / lean budget.
+	if not lean and (combo >= 3 or (def != null and def.is_boss) or is_elite):
 		var echo := Line2D.new()
+		echo.add_to_group("kill_burst_fx")
 		echo.width = 1.6
 		echo.default_color = Color(gold.r, gold.g, gold.b, 0.7)
 		echo.z_index = 11
@@ -1495,6 +1662,7 @@ func _spawn_burst() -> void:
 		etw.tween_callback(echo.queue_free)
 	for i in count:
 		var bit := Polygon2D.new()
+		bit.add_to_group("kill_burst_fx")
 		bit.polygon = [Vector2(-2, -2), Vector2(2, -2), Vector2(2, 2), Vector2(-2, 2)]
 		if def != null and def.is_boss:
 			bit.color = Color(1.0, 0.65, 0.3, 0.95)

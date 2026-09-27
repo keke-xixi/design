@@ -9,28 +9,28 @@
       "order": 1,
       "next_id": "country",
       "kill_target": 12,
-      "spawn_interval": 0.52,
-      "max_alive": 12,
+      "spawn_interval": 0.48,
+      "max_alive": 11,
       "boss_id": "sect_elder",
-      "boss_at_kill": 8,
+      "boss_at_kill": 7,
       "accent": "#7ec8d8",
       "waves": [
         {
           "at_kills": 0,
           "hint": "外门",
-          "spawn_interval_mult": 1.0,
+          "spawn_interval_mult": 1.05,
           "max_alive_bonus": 0
         },
         {
-          "at_kills": 4,
+          "at_kills": 3,
           "hint": "灵潮",
-          "spawn_interval_mult": 0.9,
+          "spawn_interval_mult": 0.88,
           "max_alive_bonus": 2
         },
         {
-          "at_kills": 8,
+          "at_kills": 7,
           "hint": "长老",
-          "spawn_interval_mult": 0.78,
+          "spawn_interval_mult": 0.76,
           "max_alive_bonus": 2
         }
       ],
@@ -140,6 +140,20 @@
             ]
           },
           {
+            "cx": 0.5,
+            "cy": 0.12,
+            "loot": [
+              {
+                "item_id": "spirit_stones",
+                "amount": 6
+              },
+              {
+                "item_id": "spirit_grass",
+                "amount": 2
+              }
+            ]
+          },
+          {
             "cx": 0.9,
             "cy": 0.66,
             "loot": [
@@ -158,11 +172,11 @@
       "spawns": [
         {
           "enemy_id": "outer_disciple",
-          "weight": 62
+          "weight": 58
         },
         {
           "enemy_id": "spirit_hare",
-          "weight": 38
+          "weight": 42
         }
       ],
       "nodes": [
@@ -331,6 +345,20 @@
             ]
           },
           {
+            "cx": 0.12,
+            "cy": 0.78,
+            "loot": [
+              {
+                "item_id": "spirit_stones",
+                "amount": 8
+              },
+              {
+                "item_id": "qi_pill_low",
+                "amount": 1
+              }
+            ]
+          },
+          {
             "cx": 0.7,
             "cy": 0.32,
             "loot": [
@@ -345,11 +373,11 @@
       "spawns": [
         {
           "enemy_id": "patrol_guard",
-          "weight": 65
+          "weight": 55
         },
         {
           "enemy_id": "bandit",
-          "weight": 35
+          "weight": 45
         }
       ],
       "nodes": [

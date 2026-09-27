@@ -432,13 +432,19 @@ func _draw() -> void:
 	if player:
 		var pp := _world_to_mini(player.global_position, inner, sx, sy)
 		# Pulsing hunt arrow toward far unopened chests — keep exploration desire alive.
-		if nearest_d > 80.0 * 80.0 and nearest_d < INF:
+		# 48px world distance ≈ near edge; pull sooner so early yards teach the radar.
+		if nearest_d > 48.0 * 48.0 and nearest_d < INF:
 			var dir := (nearest_chest - pp).normalized()
-			var tip := pp + dir * (11.0 + 2.0 * pulse)
-			var arrow_a := 0.45 + 0.4 * pulse
-			draw_line(pp + dir * 4.5, tip, Color(1.0, 0.9, 0.4, arrow_a), 1.5)
-			draw_line(tip, tip - dir.rotated(0.55) * 3.5, Color(1.0, 0.9, 0.4, arrow_a), 1.3)
-			draw_line(tip, tip - dir.rotated(-0.55) * 3.5, Color(1.0, 0.9, 0.4, arrow_a), 1.3)
+			var tip := pp + dir * (13.0 + 3.0 * pulse)
+			var arrow_a := 0.62 + 0.38 * pulse
+			# Soft trail under the arrow shaft.
+			draw_line(pp + dir * 3.5, tip, Color(1.0, 0.78, 0.28, arrow_a * 0.35), 3.2)
+			draw_line(pp + dir * 4.5, tip, Color(1.0, 0.92, 0.42, arrow_a), 1.85)
+			draw_line(tip, tip - dir.rotated(0.55) * 4.2, Color(1.0, 0.92, 0.42, arrow_a), 1.55)
+			draw_line(tip, tip - dir.rotated(-0.55) * 4.2, Color(1.0, 0.92, 0.42, arrow_a), 1.55)
+			# Soft gold tip mote — reads as loot beckon without clutter.
+			draw_circle(tip, 1.8 + 0.7 * pulse, Color(1.0, 0.96, 0.55, arrow_a))
+			draw_circle(tip, 0.7, Color(1.0, 0.98, 0.85, arrow_a))
 		var near_teal := _pattern == "yard" or GameState.stage_id == "sect"
 		var base_dot := Color(0.45, 0.95, 0.85)
 		# Dash iframe on radar — cyan moon ring while invuln (pairs world land mark).

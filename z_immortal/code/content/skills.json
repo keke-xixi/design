@@ -14,9 +14,9 @@
       "id": "ring_slash",
       "name": "环斩",
       "key": "U",
-      "cooldown": 4.0,
-      "radius": 128,
-      "damage_mult": 1.9,
+      "cooldown": 3.8,
+      "radius": 132,
+      "damage_mult": 2.0,
       "description": "以自身为中心释放剑气，伤害周围敌人。"
     },
     {
@@ -34,9 +34,9 @@
       "id": "spirit_burst",
       "name": "灵爆",
       "key": "O",
-      "cooldown": 6.8,
+      "cooldown": 6.4,
       "projectiles": 12,
-      "damage_mult": 1.0,
+      "damage_mult": 1.05,
       "description": "向八方同时射出剑气。"
     }
   ]

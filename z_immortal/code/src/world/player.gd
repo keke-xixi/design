@@ -1110,58 +1110,78 @@ func _spawn_spirit_burst_fx() -> void:
 	var parent := get_parent()
 	if parent == null:
 		return
-	# Gold-ember nova — distinct from cyan auto and gold ring-slash disc.
+	# Ember star-nova — spikes + hot core, not a closed gold ring-slash disc.
 	var fill := Polygon2D.new()
 	fill.z_index = 6
-	fill.color = Color(1.0, 0.65, 0.3, 0.35)
+	fill.color = Color(1.0, 0.45, 0.18, 0.42)
 	var fpts: PackedVector2Array = []
-	for i in 20:
-		var a0 := TAU * float(i) / 20.0
-		fpts.append(Vector2(cos(a0), sin(a0)) * 10.0)
+	for i in 16:
+		var a0 := TAU * float(i) / 16.0
+		# Star lobes — burst identity vs smooth ring-slash circle.
+		var rr := 11.0 if i % 2 == 0 else 6.0
+		fpts.append(Vector2(cos(a0), sin(a0)) * rr)
 	fill.polygon = fpts
 	parent.add_child(fill)
 	fill.global_position = global_position
 	var ftw := fill.create_tween()
-	ftw.tween_property(fill, "scale", Vector2(3.2, 3.2), 0.16)
-	ftw.parallel().tween_property(fill, "modulate:a", 0.0, 0.16)
+	ftw.tween_property(fill, "scale", Vector2(2.8, 2.8), 0.14)
+	ftw.parallel().tween_property(fill, "modulate:a", 0.0, 0.14)
 	ftw.tween_callback(fill.queue_free)
-	var ring := Line2D.new()
-	ring.width = 3.4
-	ring.default_color = Color(1.0, 0.82, 0.4, 0.95)
-	ring.z_index = 8
-	for i in 25:
-		var a := TAU * float(i) / 24.0
-		ring.add_point(Vector2(cos(a), sin(a)) * 14.0)
-	parent.add_child(ring)
-	ring.global_position = global_position
-	var tw := ring.create_tween()
-	tw.tween_property(ring, "scale", Vector2(3.8, 3.8), 0.22).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tw.parallel().tween_property(ring, "modulate:a", 0.0, 0.22)
-	tw.tween_callback(ring.queue_free)
-	for i in 12:
+	# Broken ember rim segments — never a continuous kill/ring circle.
+	for s in 8:
+		var seg := Line2D.new()
+		seg.width = 2.6
+		seg.default_color = Color(1.0, 0.7, 0.28, 0.95)
+		seg.z_index = 8
+		var start := TAU * float(s) / 8.0 + 0.12
+		var span := TAU / 8.0 * 0.42
+		for i in 5:
+			var a := start + span * float(i) / 4.0
+			seg.add_point(Vector2(cos(a), sin(a)) * 16.0)
+		parent.add_child(seg)
+		seg.global_position = global_position
+		var stw := seg.create_tween()
+		stw.tween_property(seg, "scale", Vector2(3.4, 3.4), 0.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		stw.parallel().tween_property(seg, "modulate:a", 0.0, 0.2)
+		stw.tween_callback(seg.queue_free)
+	# Radial ember spears — the "爆" read.
+	for i in 10:
 		var ray := Line2D.new()
-		ray.width = 2.0
-		ray.default_color = Color(1.0, 0.85, 0.4, 0.9)
+		ray.width = 2.4
+		ray.default_color = Color(1.0, 0.78, 0.32, 0.95)
 		ray.z_index = 7
-		var ang := TAU * float(i) / 12.0
-		ray.add_point(Vector2.ZERO)
-		ray.add_point(Vector2.from_angle(ang) * 32.0)
+		var ang := TAU * float(i) / 10.0 + 0.08
+		ray.add_point(Vector2.from_angle(ang) * 4.0)
+		ray.add_point(Vector2.from_angle(ang) * 38.0)
 		parent.add_child(ray)
 		ray.global_position = global_position
 		var rtw := ray.create_tween()
-		rtw.tween_property(ray, "scale", Vector2(2.4, 2.4), 0.18)
-		rtw.parallel().tween_property(ray, "modulate:a", 0.0, 0.18)
+		rtw.tween_property(ray, "scale", Vector2(2.6, 2.6), 0.16)
+		rtw.parallel().tween_property(ray, "modulate:a", 0.0, 0.16)
 		rtw.tween_callback(ray.queue_free)
+	# Hot flecks outward — punchier than ring-slash tick marks.
+	for i in 8:
+		var bit := Polygon2D.new()
+		bit.polygon = PackedVector2Array([Vector2(-2, -2), Vector2(2, -2), Vector2(2, 2), Vector2(-2, 2)])
+		bit.color = Color(1.0, 0.7, 0.28, 0.95)
+		bit.z_index = 9
+		parent.add_child(bit)
+		bit.global_position = global_position
+		var dir := Vector2.from_angle(TAU * float(i) / 8.0 + randf() * 0.2)
+		var btw := bit.create_tween()
+		btw.tween_property(bit, "global_position", global_position + dir * randf_range(28, 46), 0.18)
+		btw.parallel().tween_property(bit, "modulate:a", 0.0, 0.18)
+		btw.tween_callback(bit.queue_free)
 	# Gold-orange outline flash — skill identity on the body, not only the nova.
 	# ~0.32s pairs HUD KeyO ember cast lock so dock + silhouette share one beat.
 	_burst_flash_t = 0.32
 	if _outline:
-		_outline.modulate = Color(1.0, 0.72, 0.25, 0.95)
-		_outline.scale = _visual.scale * 1.14
+		_outline.modulate = Color(1.0, 0.55, 0.18, 0.95)
+		_outline.scale = _visual.scale * 1.16
 	if _aura:
-		_aura.modulate = Color(1.0, 0.75, 0.3, 0.75)
+		_aura.modulate = Color(1.0, 0.6, 0.22, 0.8)
 	if _visual:
-		_visual.modulate = Color(1.35, 0.95, 0.5)
+		_visual.modulate = Color(1.4, 0.85, 0.4)
 		var vtw := create_tween()
 		vtw.tween_property(_visual, "modulate", Color.WHITE, 0.26)
 

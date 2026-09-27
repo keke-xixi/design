@@ -40,7 +40,8 @@ func _ensure_beacon() -> void:
 	_beacon.default_color = Color(1.0, 0.88, 0.45, 0.55)
 	_beacon.z_index = 4
 	_beacon.add_point(Vector2(0, -8))
-	var beam_h := -52.0 if GameState.stage_id == "sect" else -36.0
+	var beam_h := -58.0 if GameState.stage_id == "sect" else (-44.0 if GameState.stage_id == "country" else -36.0)
+	# Early yards/city: taller beacon so chests read over tall sprites / foliage.
 	_beacon.add_point(Vector2(0, beam_h))
 	add_child(_beacon)
 	# Gold diamond pad — chests must not read as circular 愈地.

@@ -24,6 +24,8 @@ var last_clear_first: bool = false
 var last_clear_stage_id: String = ""
 var hub_celebrate_stones: int = 0
 var last_death_pity: int = 0
+## Transient: death pity return → hub shows「抚恤到手 · 花石」(not saved).
+var hub_pity_enter: bool = false
 ## Transient: hub「炼丹 · 花」→ alchemy shows「花石炼丹」tip (not saved).
 var alchemy_flower_enter: bool = false
 ## Transient: hub「坊市 · 花」→ market shows「花石坊市」tip (not saved).
@@ -382,6 +384,7 @@ func apply_hurt(amount: int) -> void:
 			# Early deaths still feed the hub spend loop — purse flash on return.
 			if stage_id in ["sect", "country"]:
 				hub_celebrate_stones = maxi(hub_celebrate_stones, pity)
+				hub_pity_enter = true
 			EventBus.death_pity_gained.emit(pity)
 		EventBus.player_died.emit()
 

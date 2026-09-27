@@ -902,6 +902,11 @@ func flash_elite_spawn_edges() -> void:
 	_spawn_edge_flash(Color(1.0, 0.84, 0.4, 0.4), 11.0, 0.28)
 	_spawn_edge_flash(Color(1.0, 0.94, 0.62, 0.18), 5.0, 0.18)
 
+## Elite kill — hotter than spawn flash, cooler than boss 斩; pairs「斩精」shout.
+func flash_elite_kill_edges() -> void:
+	_spawn_edge_flash(Color(1.0, 0.8, 0.32, 0.5), 13.0, 0.3)
+	_spawn_edge_flash(Color(1.0, 0.95, 0.55, 0.22), 6.0, 0.18)
+
 ## 愈后外门近身 — warm steel rim (cooler than 破绽 gold, hotter than 愈地 green).
 func flash_steel_edges() -> void:
 	_spawn_edge_flash(Color(0.95, 0.72, 0.38, 0.44), 12.0, 0.32)

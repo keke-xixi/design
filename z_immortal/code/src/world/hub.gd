@@ -57,8 +57,11 @@ func _maybe_celebrate_return() -> void:
 	var gained := GameState.hub_celebrate_stones
 	if gained <= 0:
 		return
-	var sect_return := GameState.last_clear_stage_id == "sect"
-	var country_return := GameState.last_clear_stage_id == "country"
+	var pity_return := GameState.hub_pity_enter
+	GameState.hub_pity_enter = false
+	# Pity return must not reuse clear-stage toasts (外门已通 / 收刀).
+	var sect_return := (not pity_return) and GameState.last_clear_stage_id == "sect"
+	var country_return := (not pity_return) and GameState.last_clear_stage_id == "country"
 	GameState.hub_celebrate_stones = 0
 	# Fresh purse flash — closes clear → hub spend loop without a modal.
 	if _stone_badge:
@@ -71,11 +74,16 @@ func _maybe_celebrate_return() -> void:
 	if _spend_hint:
 		var alch := _cheapest_alchemy()
 		var mkt := _cheapest_market()
-		if country_return:
+		if pity_return:
+			_spend_hint.text = "抚恤 · 花石 炼丹%d / 坊市%d" % [alch, mkt]
+		elif country_return:
 			_spend_hint.text = "收刀 · 花石 炼丹%d / 坊市%d" % [alch, mkt]
 		else:
 			_spend_hint.text = "石到手 · 炼丹%d / 坊市%d" % [alch, mkt]
-		_spend_hint.add_theme_color_override("font_color", Color(0.85, 1.0, 0.7) if not country_return else Color(1.0, 0.92, 0.55))
+		_spend_hint.add_theme_color_override(
+			"font_color",
+			Color(1.0, 0.9, 0.5) if pity_return else (Color(0.85, 1.0, 0.7) if not country_return else Color(1.0, 0.92, 0.55))
+		)
 		_spend_hint.modulate = Color(1.2, 1.15, 0.95)
 		var tw2 := create_tween()
 		tw2.tween_property(_spend_hint, "modulate", Color.WHITE, 1.0)
@@ -86,8 +94,11 @@ func _maybe_celebrate_return() -> void:
 	elif _alchemy_btn and GameState.spirit_stones >= _cheapest_alchemy():
 		_UiStyle.apply_cta_button(_alchemy_btn)
 		_alchemy_btn.text = "炼丹 · 花"
+	if pity_return:
+		_flash_pity_toast(gained)
+		_flash_stage_gate(false)
 	# Outer-sect clear → shout once, then dynasty CTA stays warm-gold.
-	if sect_return:
+	elif sect_return:
 		_flash_outer_cleared_toast()
 		# Kick challenge breath half a beat louder after 外门已通.
 		_dynasty_boost_t = 1.4
@@ -107,6 +118,27 @@ func _maybe_celebrate_return() -> void:
 		_highlight_alchemy_if_can_buy()
 	get_tree().create_timer(2.2, true).timeout.connect(_refresh_status)
 	_refresh_status()
+
+func _flash_pity_toast(gained: int) -> void:
+	# Distinct from 外门已通 / 收刀 — death pity must still pull hub spend.
+	_ensure_gate_toast()
+	if _gate_toast == null:
+		return
+	_gate_toast.visible = true
+	_gate_toast.text = "抚恤 +%d石" % gained
+	_gate_toast.modulate = Color(1.4, 1.2, 0.7)
+	_gate_toast.scale = Vector2(0.86, 0.86)
+	_gate_toast.pivot_offset = _gate_toast.size * 0.5
+	var tw := create_tween()
+	tw.tween_property(_gate_toast, "scale", Vector2(1.12, 1.12), 0.12).set_trans(Tween.TRANS_BACK)
+	tw.tween_property(_gate_toast, "scale", Vector2.ONE, 0.16)
+	tw.tween_interval(1.35)
+	tw.tween_property(_gate_toast, "modulate:a", 0.0, 0.35)
+	tw.tween_callback(func() -> void:
+		if _gate_toast:
+			_gate_toast.visible = false
+			_gate_toast.modulate = Color.WHITE
+	)
 
 func _flash_outer_cleared_toast() -> void:
 	_ensure_gate_toast()
@@ -441,6 +473,23 @@ func _process(_delta: float) -> void:
 	# Soft hero float + glow/shadow breathe with the CTA pulse.
 	if _hero:
 		_hero.position.y = -18.0 + sin(t * 0.8) * 4.0
+		# Gentle scale breath — hub portrait presence without fighting CTA.
+		var hero_s := 1.0 + 0.012 * sin(t * 0.55)
+		_hero.scale = Vector2(hero_s, hero_s)
+		_hero.pivot_offset = _hero.size * 0.5
+	if has_node("Shade"):
+		var shade := $Shade as ColorRect
+		# Soft vignette breath — courtyard air, not a static wash.
+		var sa := 0.18 + 0.05 * sin(t * 0.45)
+		if gate_a > 0.0 and _gate_flash_teal:
+			shade.color = Color(0.02, 0.06, 0.08, sa + 0.04 * gate_a)
+		elif gate_a > 0.0 or _dynasty_pull:
+			shade.color = Color(0.06, 0.03, 0.02, sa + 0.04 * gate_a)
+		else:
+			shade.color = Color(0.02, 0.04, 0.08, sa)
+	if has_node("LeftWash"):
+		var wash := $LeftWash as ColorRect
+		wash.color = Color(0.02, 0.04, 0.07, 0.58 + 0.06 * sin(t * 0.5))
 	if has_node("HeroGlow"):
 		var hg := $HeroGlow as ColorRect
 		if gate_a > 0.0:

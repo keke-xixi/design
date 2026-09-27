@@ -317,8 +317,8 @@
       "boss_skill": {
         "id": "aoe_ring",
         "cooldown": 3.8,
-        "telegraph": 1.45,
-        "recover": 0.9,
+        "telegraph": 1.5,
+        "recover": 1.05,
         "radius": 92,
         "damage": 14
       },
@@ -359,8 +359,8 @@
       "boss_skill": {
         "id": "dash_strike",
         "cooldown": 3.8,
-        "telegraph": 1.35,
-        "recover": 0.85,
+        "telegraph": 1.4,
+        "recover": 1.0,
         "range": 145,
         "damage": 18
       },
