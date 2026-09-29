@@ -1221,8 +1221,8 @@ func _on_enter() -> void:
 	if stage == null or not GameState.can_enter(stage):
 		return
 	_enter_handoff_busy = true
-	# Carry teal/gold into combat start wipe — skip hub_fight tip redo.
-	if _selected_id == "sect" or _selected_id == "country":
+	# Carry teal/gold/ash into combat start wipe — skip hub_fight tip redo.
+	if _selected_id in ["sect", "country", "planet"]:
 		GameState.combat_enter_handoff = _selected_id
 	else:
 		GameState.combat_enter_handoff = ""
@@ -1235,10 +1235,11 @@ func _on_enter() -> void:
 		SceneManager.go_combat(sid)
 	)
 
-## Teal/gold sweep + 开战 punch before scene cut (pairs combat start wipe).
+## Teal/gold/ash sweep + 开战 punch before scene cut (pairs combat start wipe).
 func _play_enter_handoff(sid: String) -> void:
 	var teal := sid == "sect"
 	var gold := sid == "country"
+	var ash := sid == "planet"
 	if _enter_btn and not _enter_btn.disabled:
 		_enter_btn.pivot_offset = _enter_btn.size * 0.5
 		_enter_btn.scale = Vector2(0.9, 0.9)
@@ -1249,16 +1250,24 @@ func _play_enter_handoff(sid: String) -> void:
 			_enter_btn.modulate = Color(1.45, 1.2, 0.7)
 			_enter_btn.add_theme_color_override("font_color", Color(1.0, 0.92, 0.45))
 			_enter_gold_pop_t = maxf(_enter_gold_pop_t, 0.4)
+		elif ash:
+			_enter_btn.modulate = Color(1.4, 0.95, 0.6)
+			_enter_btn.add_theme_color_override("font_color", Color(1.0, 0.78, 0.4))
 		var etw := create_tween()
 		etw.tween_property(_enter_btn, "scale", Vector2(1.12, 1.12), 0.1).set_trans(Tween.TRANS_BACK)
 		etw.tween_property(_enter_btn, "scale", Vector2.ONE, 0.12)
-	# Full-bleed wipe — same family as run_overlay `_wipe_teal/gold_flash`.
-	if not teal and not gold:
+	# Full-bleed wipe — same family as run_overlay `_wipe_teal/gold/ash_flash`.
+	if not teal and not gold and not ash:
 		return
 	var wipe := ColorRect.new()
 	wipe.name = "EnterHandoffWipe"
 	wipe.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	wipe.color = Color(0.35, 0.92, 0.85, 0.5) if teal else Color(1.0, 0.82, 0.35, 0.55)
+	if teal:
+		wipe.color = Color(0.35, 0.92, 0.85, 0.5)
+	elif gold:
+		wipe.color = Color(1.0, 0.82, 0.35, 0.55)
+	else:
+		wipe.color = Color(1.0, 0.48, 0.18, 0.52)
 	wipe.set_anchors_preset(Control.PRESET_FULL_RECT)
 	wipe.z_index = 80
 	add_child(wipe)

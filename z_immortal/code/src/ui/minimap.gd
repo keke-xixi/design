@@ -18,6 +18,8 @@ var _combo_teal := false
 var _combo_flash_tier := 0
 var _clear_flash_t := 0.0
 var _clear_flash_max := 0.42
+## Accumulators for throttled queue_redraw — combo/clear flashes still redraw immediately.
+var _redraw_acc := 0.0
 var _clear_teal := true
 ## Dynasty「收刀」clear — warmer/longer gold frame than generic city wipe.
 var _clear_sheath := false
@@ -105,6 +107,11 @@ func _refresh_stage_look() -> void:
 		_fill_col = Color(0.02, 0.08, 0.07, 0.88)
 		_obs_col = Color(0.22, 0.38, 0.3, 0.92)
 		_frame_col = Color(0.45, 0.88, 0.82, 0.78)
+	elif _pattern == "crater":
+		# Ash-orange basin — 荒星 vs courtyard teal / city gold.
+		_fill_col = Color(0.1, 0.05, 0.03, 0.88)
+		_obs_col = Color(0.38, 0.22, 0.14, 0.92)
+		_frame_col = Color(0.85, 0.52, 0.28, 0.76)
 	else:
 		_fill_col = Color(0.04, 0.06, 0.09, 0.82)
 		_obs_col = Color(0.28, 0.24, 0.2, 0.9)
@@ -123,6 +130,11 @@ func _process(delta: float) -> void:
 			_combo_flash_tier = 0
 	if _clear_flash_t > 0.0:
 		_clear_flash_t = maxf(_clear_flash_t - delta, 0.0)
+	# ~18fps radar — full Combat redraw every frame was GPU waste on 640×360.
+	_redraw_acc += delta
+	if _redraw_acc < 0.055 and _combo_flash_t <= 0.0 and _clear_flash_t <= 0.0:
+		return
+	_redraw_acc = 0.0
 	queue_redraw()
 
 func _draw() -> void:
@@ -300,6 +312,8 @@ func _draw() -> void:
 		_draw_yard_lanes(inner)
 	elif _pattern == "city":
 		_draw_city_grid(inner)
+	elif _pattern == "crater":
+		_draw_crater_rings(inner)
 	# Zones first — 煞地 / 灵泉 pulse so map motives read mid-fight.
 	for raw in _zones:
 		if typeof(raw) != TYPE_DICTIONARY:
@@ -321,8 +335,13 @@ func _draw() -> void:
 					col = Color(0.55, 0.42, 0.95, 0.5)
 				pulse_speed = 2.4
 			"damage":
-				col = Color(0.98, 0.38, 0.32, 0.55)
-				pulse_speed = 4.2
+				# Crater 陨坑 — hotter ash pulse so risk loot reads on the radar.
+				if _pattern == "crater":
+					col = Color(1.0, 0.42, 0.2, 0.62)
+					pulse_speed = 4.8
+				else:
+					col = Color(0.98, 0.38, 0.32, 0.55)
+					pulse_speed = 4.2
 		var cp := _world_to_mini(c, inner, sx, sy)
 		var rr := maxf(r * minf(sx, sy), 3.4)
 		var breath := 0.55 + 0.45 * sin(t * pulse_speed)
@@ -574,6 +593,14 @@ func _draw_city_grid(inner: Rect2) -> void:
 	var mid := inner.get_center()
 	draw_line(Vector2(mid.x, inner.position.y + 2.0), Vector2(mid.x, inner.end.y - 2.0), street, 2.4)
 	draw_line(Vector2(inner.position.x + 2.0, mid.y), Vector2(inner.end.x - 2.0, mid.y), street, 2.4)
+
+func _draw_crater_rings(inner: Rect2) -> void:
+	# Nested ash rings — basin reads as 荒星, not a courtyard cross.
+	var mid := inner.get_center()
+	var dust := Color(0.95, 0.55, 0.28, 0.22)
+	draw_arc(mid, mini(inner.size.x, inner.size.y) * 0.18, 0.0, TAU, 20, dust, 1.4)
+	draw_arc(mid, mini(inner.size.x, inner.size.y) * 0.32, 0.0, TAU, 22, Color(0.9, 0.48, 0.22, 0.16), 1.2)
+	draw_circle(mid, 2.2, Color(1.0, 0.45, 0.2, 0.35))
 
 func _draw_spawn_pings(inner: Rect2, sx: float, sy: float, t: float) -> void:
 	var world := get_tree().get_first_node_in_group("game_world")

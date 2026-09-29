@@ -43,6 +43,9 @@ var _heal_pressure_fired := false
 ## Early-stage unopened-chest radar nudge — keeps exploration desire alive.
 var _chest_hunt_acc := 0.0
 var _chest_hint_kills := -1
+## Crater 陨坑 risk-reward: dwell → temp damage; toast once per stand.
+var _ash_risk_acc := 0.0
+var _ash_risk_toasted := false
 
 func _ready() -> void:
 	_pickups.add_to_group("pickups")
@@ -216,21 +219,51 @@ func _apply_zone_effects(delta: float) -> void:
 				label = "山雾·减速" if _map_pattern == "yard" else "市井·减速"
 				col = Color(0.65, 0.55, 0.95)
 			"damage":
-				label = "煞地·伤血" if _map_pattern != "city" else "刑场·伤血"
+				label = "煞地·伤血" if _map_pattern == "yard" else ("陨坑·伤血" if _map_pattern == "crater" else "刑场·伤血")
 				col = Color(1.0, 0.5, 0.4)
+				if _map_pattern == "crater":
+					# Teach risk-reward without a lecture — short second line.
+					FloatTextManager.show_message(_player.global_position + Vector2(0, -42), "站·伤+", Color(1.0, 0.72, 0.35))
 		FloatTextManager.show_message(_player.global_position + Vector2(0, -28), label, col)
 		# HUD ping + rim flash so zone motive lands even mid-fight.
 		var hud := get_node_or_null("HUD")
-		if hud and hud.has_method("show_clear") and GameState.stage_id in ["sect", "country"]:
+		if hud and hud.has_method("show_clear") and GameState.stage_id in ["sect", "country", "planet"]:
 			hud.call("show_clear", label)
 		_flash_zone_enter(effect)
+		if effect == "damage":
+			_ash_risk_acc = 0.0
+			_ash_risk_toasted = false
 	elif effect.is_empty() and not _last_zone_effect.is_empty() and _zone_edge_t <= 0.0:
 		_restore_zone_edge()
 	_last_zone_effect = effect
 	if dps > 0.0:
 		_player.take_hit(maxi(int(dps * 0.25), 1))
+		_tick_ash_risk_reward()
+	elif effect != "damage":
+		_ash_risk_acc = 0.0
 	if hps > 0.0:
 		GameState.heal_amount(maxi(int(hps * 0.25), 1))
+
+## Stand in 陨坑/煞地 — bleed HP for a small temp damage stack (once per stand).
+## Re-enter after leave resets toast so risk can stack again until the 0.3 cap.
+func _tick_ash_risk_reward() -> void:
+	if _player == null or GameState.dead:
+		return
+	_ash_risk_acc += 0.25 # matches zone tick interval
+	if _ash_risk_acc < 0.75 or _ash_risk_toasted:
+		return
+	var cur := float(GameState.run.run_buffs.get("temp_damage", 0.0))
+	# Cap so crater camping can't snowball past early-stage feel.
+	if cur >= 0.3:
+		return
+	_ash_risk_toasted = true
+	GameState.run.apply_effect({ "temp_damage": 0.04 })
+	FloatTextManager.show_message(_player.global_position + Vector2(0, -48), "陨火·伤+4%", Color(1.0, 0.65, 0.3))
+	var hud := get_node_or_null("HUD")
+	if hud and hud.has_method("show_clear") and GameState.stage_id == "planet":
+		hud.call("show_clear", "陨火 · 伤+")
+	if _player.has_method("pulse_camera"):
+		_player.pulse_camera(0.06)
 
 func _flash_zone_enter(effect: String) -> void:
 	var nearest_mark: Label = null
@@ -529,6 +562,8 @@ func _apply_stage(stage_id: String) -> void:
 	_heal_pressure_fired = false
 	_chest_hunt_acc = 0.0
 	_chest_hint_kills = -1
+	_ash_risk_acc = 0.0
+	_ash_risk_toasted = false
 	var map: Dictionary = stage.map
 	_map_size = Vector2i(int(map.get("width", 48)), int(map.get("height", 30)))
 	var pixel := Vector2(_map_size) * float(TILE)
@@ -622,6 +657,9 @@ func _tint_vignette_for_stage() -> void:
 		"city":
 			# Warm amber rim — dynasty street dusk.
 			edge_col = Color(0.16, 0.08, 0.03, 0.4)
+		"crater":
+			# Scorched orange — 荒星 basin heat.
+			edge_col = Color(0.18, 0.07, 0.02, 0.42)
 	_base_edge_col = edge_col
 	for edge_name in ["EdgeTop", "EdgeBottom", "EdgeLeft", "EdgeRight"]:
 		var edge := root.get_node_or_null(edge_name) as ColorRect
@@ -630,7 +668,7 @@ func _tint_vignette_for_stage() -> void:
 
 ## Slow color-temp breath — sect cool cyan vs dynasty warm gold (idle vignette only).
 func _tick_atmosphere(_delta: float) -> void:
-	if _map_pattern != "yard" and _map_pattern != "city":
+	if _map_pattern not in ["yard", "city", "crater"]:
 		return
 	# Slow clock — presence, not combat noise (~0.7Hz half-cycle).
 	var breath := 0.5 + 0.5 * sin(Time.get_ticks_msec() * 0.00115)
@@ -640,6 +678,13 @@ func _tick_atmosphere(_delta: float) -> void:
 				_bg_base_mod.r * (1.0 - 0.05 * breath),
 				_bg_base_mod.g * (1.0 + 0.03 * breath),
 				_bg_base_mod.b * (1.0 + 0.06 * breath),
+				1.0
+			)
+		elif _map_pattern == "crater":
+			_bg.modulate = Color(
+				_bg_base_mod.r * (1.0 + 0.06 * breath),
+				_bg_base_mod.g * (1.0 + 0.01 * breath),
+				_bg_base_mod.b * (1.0 - 0.06 * breath),
 				1.0
 			)
 		else:
@@ -658,6 +703,13 @@ func _tick_atmosphere(_delta: float) -> void:
 				_tiles_base_mod.b * (1.0 + 0.05 * breath),
 				ta
 			)
+		elif _map_pattern == "crater":
+			_tiles.modulate = Color(
+				_tiles_base_mod.r * (1.0 + 0.05 * breath),
+				_tiles_base_mod.g * (1.0 + 0.01 * breath),
+				_tiles_base_mod.b * (1.0 - 0.05 * breath),
+				ta
+			)
 		else:
 			_tiles.modulate = Color(
 				_tiles_base_mod.r * (1.0 + 0.045 * breath),
@@ -669,6 +721,8 @@ func _tick_atmosphere(_delta: float) -> void:
 	if bands:
 		if _map_pattern == "yard":
 			bands.modulate = Color(0.95 + 0.02 * breath, 1.0 + 0.04 * breath, 1.05 + 0.05 * breath, 0.9 + 0.1 * breath)
+		elif _map_pattern == "crater":
+			bands.modulate = Color(1.1 + 0.06 * breath, 0.95, 0.85 - 0.04 * breath, 0.88 + 0.1 * breath)
 		else:
 			bands.modulate = Color(1.08 + 0.06 * breath, 1.0 + 0.02 * breath, 0.92 - 0.04 * breath, 0.9 + 0.1 * breath)
 	# Vignette breath only when zone/crisis aren't owning the edges.
@@ -758,6 +812,14 @@ func _build_ground_bands(pixel: Vector2, pattern: String, stage: StageDef) -> vo
 				lerpf(0.14, 0.1, t),
 				0.12 + t * 0.07
 			)
+		elif pattern == "crater":
+			# Burnt umber→ember — basin floor heat.
+			band.color = Color(
+				lerpf(0.38, 0.58, t),
+				lerpf(0.18, 0.22, t),
+				lerpf(0.08, 0.06, t),
+				0.11 + t * 0.06
+			)
 		else:
 			band.color = Color(accent.r * 0.2, accent.g * 0.2, accent.b * 0.22, 0.08)
 		root.add_child(band)
@@ -835,8 +897,11 @@ func _spawn_ambient_motes(pixel: Vector2, stage: StageDef = null) -> void:
 		accent = Color.from_string(stage.accent, accent)
 	var count := 18
 	var city := _map_pattern == "city"
+	var crater := _map_pattern == "crater"
 	if city:
 		count = 14
+	elif crater:
+		count = 12
 	for i in count:
 		var mote := Polygon2D.new()
 		if city:
@@ -844,6 +909,11 @@ func _spawn_ambient_motes(pixel: Vector2, stage: StageDef = null) -> void:
 			mote.color = Color(accent.r, accent.g * 0.9, accent.b * 0.7, randf_range(0.14, 0.32))
 			mote.polygon = [Vector2(-1.5, -1), Vector2(1.5, -1), Vector2(1.5, 1), Vector2(-1.5, 1)]
 			mote.set_meta("drift", Vector2(randf_range(10, 22), randf_range(-6, 4)))
+		elif crater:
+			# Ash grit — fewer motes so crater overdraw stays under yard petals.
+			mote.color = Color(1.0, 0.55, 0.28, randf_range(0.12, 0.28))
+			mote.polygon = [Vector2(-1.2, -1.2), Vector2(1.2, -1.2), Vector2(1.2, 1.2), Vector2(-1.2, 1.2)]
+			mote.set_meta("drift", Vector2(randf_range(-16, 16), randf_range(4, 12)))
 		else:
 			# Cool spirit petals rising — mountain-sect air.
 			mote.color = Color(accent.r * 0.85, accent.g, accent.b, randf_range(0.14, 0.34))
@@ -871,6 +941,9 @@ func _tick_ambient_motes(delta: float) -> void:
 		if city:
 			if mote.position.x > pixel.x + 8.0 or mote.position.y < -8.0 or mote.position.y > pixel.y + 8.0:
 				mote.position = Vector2(-8.0, randf() * pixel.y)
+		elif _map_pattern == "crater":
+			if mote.position.y > pixel.y + 8.0 or mote.position.x < -8.0 or mote.position.x > pixel.x + 8.0:
+				mote.position = Vector2(randf() * pixel.x, -8.0)
 		elif mote.position.y < -8.0 or mote.position.x < -8.0 or mote.position.x > pixel.x + 8.0:
 			mote.position = Vector2(randf() * pixel.x, pixel.y + randf() * 20.0)
 
@@ -1345,7 +1418,7 @@ func _hint_chests() -> void:
 
 ## Periodic gold radar pips + mid-run tip while unopened chests remain (sect/country).
 func _tick_chest_hunt(delta: float) -> void:
-	if GameState.stage_id not in ["sect", "country"]:
+	if GameState.stage_id not in ["sect", "country", "planet"]:
 		return
 	if _chests == null or _chests.get_child_count() == 0:
 		return

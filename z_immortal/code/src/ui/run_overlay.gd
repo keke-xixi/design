@@ -223,7 +223,9 @@ func _show_start() -> void:
 	GameState.combat_enter_handoff = ""
 	var yard := GameState.stage_id == "sect"
 	var dynasty := GameState.stage_id == "country"
-	var from_select := (handoff == "sect" and yard) or (handoff == "country" and dynasty)
+	var crater := GameState.stage_id == "planet"
+	var early_open := yard or dynasty or crater
+	var from_select := (handoff == "sect" and yard) or (handoff == "country" and dynasty) or (handoff == "planet" and crater)
 	var accent := Color.from_string(stage.accent, Color(0.55, 0.78, 0.88))
 	if yard:
 		# Same teal as minimap frame / kill-bar — mountain-sect identity.
@@ -231,8 +233,11 @@ func _show_start() -> void:
 	elif dynasty:
 		# Warm gold — streets / hub dynasty CTA language.
 		accent = Color(0.95, 0.78, 0.38)
+	elif crater:
+		# Ash-orange — 荒星 basin (pairs minimap crater rings).
+		accent = Color(0.95, 0.55, 0.28)
 	_UiStyle.apply_ceremony_panel(_panel, Color(accent.r, accent.g, accent.b, 0.94))
-	_title.add_theme_font_size_override("font_size", 26 if yard or dynasty else 24)
+	_title.add_theme_font_size_override("font_size", 26 if early_open else 24)
 	_title.add_theme_color_override("font_color", accent.lightened(0.32))
 	_title.modulate = Color.WHITE
 	_tint_glow(accent)
@@ -242,22 +247,24 @@ func _show_start() -> void:
 			_dim.color = Color(0.02, 0.08, 0.08, 0.36)
 		elif dynasty:
 			_dim.color = Color(0.1, 0.06, 0.02, 0.4)
+		elif crater:
+			_dim.color = Color(0.12, 0.05, 0.02, 0.42)
 		else:
 			_dim.color = Color(0.02, 0.03, 0.06, 0.42)
 	if _title_halo:
-		_title_halo.color = Color(accent.r, accent.g, accent.b, 0.5 if yard or dynasty else 0.45)
+		_title_halo.color = Color(accent.r, accent.g, accent.b, 0.5 if early_open else 0.45)
 		_title_halo.visible = true
-		_title_halo.custom_minimum_size = Vector2(240 if yard or dynasty else 220, 7 if yard or dynasty else 6)
+		_title_halo.custom_minimum_size = Vector2(240 if early_open else 220, 7 if early_open else 6)
 	if _title_rule:
 		_title_rule.color = Color(accent.r, accent.g, accent.b, 0.95).lightened(0.2)
 		_title_rule.visible = true
 	# One short line only — kill count, no lecture.
-	var crib := "外门 · 杀 %d" % stage.kill_target if yard else ("市井 · 杀 %d" % stage.kill_target if dynasty else ("杀 %d" % stage.kill_target))
-	_size_panel(-70 if yard or dynasty else -64, 70 if yard or dynasty else 64)
+	var crib := "外门 · 杀 %d" % stage.kill_target if yard else ("市井 · 杀 %d" % stage.kill_target if dynasty else ("猎场 · 杀 %d" % stage.kill_target if crater else ("杀 %d" % stage.kill_target)))
+	_size_panel(-70 if early_open else -64, 70 if early_open else 64)
 	_open_panel(stage.display_name, crib, [["开战", _close]], true)
 	# Start CTA is taller / louder than death/result heroes.
 	if _hero_btn:
-		_hero_btn.custom_minimum_size = Vector2(0, 42 if yard or dynasty else 40)
+		_hero_btn.custom_minimum_size = Vector2(0, 42 if early_open else 40)
 		_hero_btn.add_theme_font_size_override("font_size", 16)
 		_hero_btn.text = "开战"
 		if yard:
@@ -266,6 +273,9 @@ func _show_start() -> void:
 		elif dynasty:
 			_hero_btn.add_theme_color_override("font_color", Color(1.0, 0.94, 0.7))
 			_hero_btn.add_theme_color_override("font_hover_color", Color(1.0, 0.98, 0.85))
+		elif crater:
+			_hero_btn.add_theme_color_override("font_color", Color(1.0, 0.82, 0.55))
+			_hero_btn.add_theme_color_override("font_hover_color", Color(1.0, 0.92, 0.7))
 	if from_select:
 		# Continuity: fade the select wipe color into the ceremony, then fight.
 		_start_handoff_wiped = true
@@ -273,6 +283,8 @@ func _show_start() -> void:
 			_wipe_teal_flash()
 		elif dynasty:
 			_wipe_gold_flash()
+		elif crater:
+			_wipe_ash_flash()
 		_pop_panel()
 		if _hero_btn:
 			_hero_btn.pivot_offset = _hero_btn.size * 0.5
@@ -281,11 +293,11 @@ func _show_start() -> void:
 			htw.tween_property(_hero_btn, "scale", Vector2(1.1, 1.1), 0.1).set_trans(Tween.TRANS_BACK)
 			htw.tween_property(_hero_btn, "scale", Vector2.ONE, 0.14)
 		# Snappier — handoff already spent a beat on select.
-		_start_auto_timer = get_tree().create_timer(0.82 if yard else 0.78, true)
+		_start_auto_timer = get_tree().create_timer(0.82 if yard else (0.78 if dynasty else 0.8), true)
 	else:
 		_pop_panel()
 		# ~1s auto-enter — click / Space / Esc also skip.
-		_start_auto_timer = get_tree().create_timer(1.05 if yard else (1.0 if dynasty else 0.95), true)
+		_start_auto_timer = get_tree().create_timer(1.05 if yard else (1.0 if dynasty else (0.98 if crater else 0.95)), true)
 	_start_auto_timer.timeout.connect(_on_start_auto_close)
 
 func _on_start_auto_close() -> void:
@@ -552,6 +564,8 @@ func _close() -> void:
 		_burst_sect_enter(not handoff_skip_wipe)
 	elif was_start and GameState.stage_id == "country":
 		_burst_country_enter(not handoff_skip_wipe)
+	elif was_start and GameState.stage_id == "planet":
+		_burst_planet_enter(not handoff_skip_wipe)
 
 func _burst_sect_enter(do_wipe: bool = true) -> void:
 	# One beat of courtyard teal — ritual lands, then fight. Not a cutscene.
@@ -644,6 +658,72 @@ func _burst_country_enter(do_wipe: bool = true) -> void:
 	var world := get_tree().get_first_node_in_group("game_world")
 	if world and world.has_method("radar_ping"):
 		world.call("radar_ping", player.global_position, "gold")
+
+## 荒星 open — ash-orange ring + wipe (not teal courtyard / city gold).
+func _burst_planet_enter(do_wipe: bool = true) -> void:
+	if SfxService:
+		SfxService.play_start()
+	var player := get_tree().get_first_node_in_group("player") as Node2D
+	if player == null:
+		return
+	FloatTextManager.show_message(player.global_position + Vector2(0, -36), "开战", Color(1.0, 0.62, 0.32))
+	FloatTextManager.show_message(player.global_position + Vector2(0, -52), "陨坑有宝", Color(1.0, 0.78, 0.4))
+	if player.has_method("pulse_camera"):
+		player.pulse_camera(0.09)
+	if do_wipe:
+		_wipe_ash_flash()
+	var parent := player.get_parent()
+	if parent:
+		var ring := Line2D.new()
+		ring.width = 2.6
+		ring.default_color = Color(1.0, 0.55, 0.25, 0.92)
+		ring.z_index = 8
+		for i in 25:
+			var a := TAU * float(i) / 24.0
+			ring.add_point(Vector2(cos(a), sin(a)) * 15.0)
+		parent.add_child(ring)
+		ring.global_position = player.global_position
+		var tw := ring.create_tween()
+		tw.tween_property(ring, "scale", Vector2(3.1, 3.1), 0.26).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw.parallel().tween_property(ring, "modulate:a", 0.0, 0.26)
+		tw.tween_callback(ring.queue_free)
+	var outline := player.get_node_or_null("Outline") as Sprite2D
+	if outline:
+		outline.modulate = Color(1.0, 0.55, 0.22, 0.88)
+		outline.scale = Vector2(1.14, 1.14)
+	var hud := get_tree().get_first_node_in_group("hud")
+	if hud and hud.has_method("show_clear"):
+		hud.call("show_clear", "荒星 · 开战")
+	if hud and hud.has_method("flash_ash_top"):
+		hud.call("flash_ash_top")
+	elif hud and hud.has_method("flash_steel_edges"):
+		hud.call("flash_steel_edges")
+	var world := get_tree().get_first_node_in_group("game_world")
+	if world and world.has_method("radar_ping"):
+		world.call("radar_ping", player.global_position, "ash")
+
+func _wipe_ash_flash() -> void:
+	# Full-bleed scorched wash — 荒星 identity vs teal / gold.
+	var host: Control = null
+	var hud := get_tree().get_first_node_in_group("hud")
+	if hud:
+		host = hud.get_node_or_null("Root") as Control
+	if host == null:
+		host = _root
+	if host == null:
+		return
+	var wipe := ColorRect.new()
+	wipe.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	wipe.color = Color(1.0, 0.48, 0.18, 0.5)
+	wipe.set_anchors_preset(Control.PRESET_FULL_RECT)
+	wipe.z_index = 50
+	host.add_child(wipe)
+	wipe.pivot_offset = Vector2(0, maxf(host.size.y, 360.0) * 0.5)
+	wipe.scale = Vector2(0.08, 1.0)
+	var tw := wipe.create_tween()
+	tw.tween_property(wipe, "scale:x", 1.0, 0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.tween_property(wipe, "color:a", 0.0, 0.22).set_trans(Tween.TRANS_SINE)
+	tw.tween_callback(wipe.queue_free)
 
 func _wipe_gold_flash() -> void:
 	# Full-bleed warm gold wash on HUD — survives ceremony panel closing.

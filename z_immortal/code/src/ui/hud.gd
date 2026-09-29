@@ -195,6 +195,36 @@ func flash_dynasty_top() -> void:
 		_refresh()
 	)
 
+## 荒星 open beat — ash-orange top bar (pairs crater wipe).
+func flash_ash_top() -> void:
+	if GameState.stage_id != "planet" or _top_bar == null:
+		return
+	_restyle_top_for_stage()
+	var hot := Color(1.0, 0.58, 0.28, 1.0)
+	var panel_sb := _UiStyle.panel(Color(0.14, 0.06, 0.02, 0.92), hot, 5)
+	panel_sb.set_border_width_all(2)
+	panel_sb.content_margin_left = 6
+	panel_sb.content_margin_right = 6
+	panel_sb.content_margin_top = 4
+	panel_sb.content_margin_bottom = 4
+	_top_bar.add_theme_stylebox_override("panel", panel_sb)
+	_top_bar.modulate = Color(1.35, 1.05, 0.75)
+	if _kill_fill:
+		_kill_fill.color = Color(0.95, 0.5, 0.22)
+		_kill_fill.modulate = Color(1.4, 1.1, 0.75)
+	if _kill_label:
+		_kill_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.55))
+	if _stage_label:
+		_stage_label.add_theme_color_override("font_color", Color(1.0, 0.8, 0.5))
+	var tw := create_tween()
+	tw.tween_property(_top_bar, "modulate", Color.WHITE, 0.45).set_trans(Tween.TRANS_SINE)
+	if _kill_fill:
+		tw.parallel().tween_property(_kill_fill, "modulate", Color.WHITE, 0.4)
+	tw.tween_callback(func() -> void:
+		_restyle_top_for_stage()
+		_refresh()
+	)
+
 ## Sect open beat — top bar teal punch (pairs with courtyard wipe).
 func flash_sect_top() -> void:
 	if not _is_sect_yard() or _top_bar == null:
@@ -422,7 +452,11 @@ func _update_skill_bar() -> void:
 			# Accent-tinted CD wash — each skill's cooldown reads by color, not only height.
 			if not ready:
 				var acc: Color = _SKILL_ACCENTS[i]
-				cd_fill.color = Color(acc.r * 0.55, acc.g * 0.55, acc.b * 0.55, 0.48)
+				# Near-ready: brighter fill so the last beat reads before the flash.
+				var near := cd_left <= 0.55
+				var lift := 0.72 if near else 0.55
+				var a := 0.62 if near else 0.48
+				cd_fill.color = Color(acc.r * lift, acc.g * lift, acc.b * lift, a)
 		# Flash when a skill comes off cooldown — per-accent punch (闪青 / 环金 / 丹翠 / 爆火).
 		if ready and i < _skill_was_ready.size() and not _skill_was_ready[i]:
 			if not (is_pill and pill_empty):
@@ -430,16 +464,28 @@ func _update_skill_bar() -> void:
 		if i < _skill_was_ready.size():
 			_skill_was_ready[i] = ready
 		if not ready:
-			# Sub-2.5s show one decimal so short CDs feel responsive.
-			if cd_left < 2.5:
+			# Sub-3s show one decimal so short CDs feel responsive; last 0.5s stays loud.
+			if cd_left < 3.0:
 				labels[i].text = "%.1f" % cd_left
 			else:
 				labels[i].text = "%.0f" % ceil(cd_left)
 			var acc2: Color = _SKILL_ACCENTS[i]
-			labels[i].modulate = Color(acc2.r * 0.85, acc2.g * 0.85, acc2.b * 0.85, 0.98)
+			var near2 := cd_left <= 0.55
+			var ink := 1.05 if near2 else 0.85
+			labels[i].modulate = Color(minf(acc2.r * ink, 1.2), minf(acc2.g * ink, 1.15), minf(acc2.b * ink, 1.1), 0.98)
 			var casting: bool = int(_skill_cast_flash.get(_KEY_NODES[i], 0)) > 0
 			if key_panel and key_panel.modulate.r < 1.2 and not casting:
-				key_panel.modulate = Color(0.78, 0.8, 0.82, 0.92)
+				if near2:
+					# Soft accent breath on the key — "almost ready" without a full flash.
+					var pulse := 0.55 + 0.45 * sin(Time.get_ticks_msec() * 0.02)
+					key_panel.modulate = Color(
+						0.82 + 0.18 * pulse * acc2.r,
+						0.82 + 0.18 * pulse * acc2.g,
+						0.82 + 0.18 * pulse * acc2.b,
+						0.95
+					)
+				else:
+					key_panel.modulate = Color(0.78, 0.8, 0.82, 0.92)
 		else:
 			labels[i].text = key
 			if labels[i].modulate.g < 0.9:
@@ -916,6 +962,11 @@ func flash_steel_edges() -> void:
 func flash_chest_edges() -> void:
 	_spawn_edge_flash(Color(1.0, 0.86, 0.4, 0.48), 13.0, 0.36)
 	_spawn_edge_flash(Color(1.0, 0.95, 0.65, 0.22), 6.0, 0.22)
+
+## Dash land — cool cyan rim (iframe start; opposite of hurt crimson).
+func flash_dash_land_edges() -> void:
+	_spawn_edge_flash(Color(0.4, 0.9, 1.0, 0.42), 11.0, 0.26)
+	_spawn_edge_flash(Color(0.7, 0.98, 1.0, 0.2), 5.0, 0.16)
 
 ## Boss 突斩 connect — hot orange dual rim (pairs slash burst / directional hurt).
 func flash_dash_strike_edges(dir: Vector2 = Vector2.ZERO) -> void:

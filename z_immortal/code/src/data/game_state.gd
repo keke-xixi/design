@@ -36,8 +36,8 @@ var stage_select_focus_id: String = ""
 var hub_fight_enter: bool = false
 ## Transient: after dynasty「收刀」return → stage select tip echoes 收刀 (not saved).
 var hub_shoudao_enter: bool = false
-## Transient: stage-select「开战」→ combat start teal/gold handoff (not saved).
-## Values: "" | "sect" | "country"
+## Transient: stage-select「开战」→ combat start teal/gold/ash handoff (not saved).
+## Values: "" | "sect" | "country" | "planet"
 var combat_enter_handoff: String = ""
 
 func _ready() -> void:

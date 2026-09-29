@@ -653,6 +653,10 @@ func _do_dash(cfg: Dictionary) -> void:
 	FloatTextManager.show_message(global_position + Vector2(0, -28), "闪", Color(0.55, 0.95, 1.0))
 	# Landing ring + dust — marks invuln start mid-swarm.
 	_spawn_dash_land_ring(dir)
+	# Cyan dock/edge kick — iframe start must read over combat clutter.
+	var hud := get_tree().get_first_node_in_group("hud")
+	if hud and hud.has_method("flash_dash_land_edges"):
+		hud.call("flash_dash_land_edges")
 	modulate = Color(0.65, 0.95, 1.2)
 	pulse_camera(0.06)
 
@@ -693,8 +697,8 @@ func _spawn_dash_trail(from: Vector2, to: Vector2, dir: Vector2) -> void:
 	var parent := get_parent()
 	if parent == null:
 		return
-	# 3 afterimages — enough streak without multi-megapixel overdraw spikes.
-	var steps := 3
+	# Two afterimages — streak reads; extra ghost was GPU overdraw on tall PNGs.
+	var steps := 2
 	for i in steps:
 		var t := float(i) / float(steps)
 		var ghost := Sprite2D.new()

@@ -88,8 +88,8 @@ func _physics_process(delta: float) -> void:
 	position += _dir * _speed * delta
 	_life -= delta
 	_trail_acc += delta
-	# Burst trails denser / longer — skill identity mid-swarm.
-	var interval := 0.018 if _style == "burst" else (0.028 if _style == "scatter" else 0.04)
+	# Sparse trails — 灵爆 volleys must not allocate a node every frame.
+	var interval := 0.04 if _style == "burst" else (0.045 if _style == "scatter" else 0.055)
 	if _trail_acc >= interval:
 		_trail_acc = 0.0
 		_spawn_trail()
@@ -105,9 +105,15 @@ func _spawn_trail() -> void:
 	var parent := get_parent()
 	if parent == null:
 		return
+	# Shared budget across all bolts — 12-way 灵爆 used to spawn 100+ trail nodes.
+	# Cap is global (not per-bolt) so dense autos + 灵爆 share one overdraw budget.
+	var live := get_tree().get_nodes_in_group("bolt_trail_fx").size()
+	if live >= 18:
+		return
 	if _style == "burst":
-		# Streak segment along the path — golden sword-qi ribbon.
+		# Streak only — skip extra glow plate when the volley is already loud.
 		var streak := Line2D.new()
+		streak.add_to_group("bolt_trail_fx")
 		streak.width = 2.8
 		streak.default_color = Color(1.0, 0.82, 0.35, 0.85)
 		streak.z_index = 4
@@ -115,26 +121,15 @@ func _spawn_trail() -> void:
 		streak.add_point(Vector2.ZERO)
 		streak.global_position = global_position
 		parent.add_child(streak)
-		var glow := Polygon2D.new()
-		glow.color = Color(1.0, 0.7, 0.3, 0.45)
-		glow.polygon = PackedVector2Array([
-			Vector2(-4, -2), Vector2(4, -2), Vector2(4, 2), Vector2(-4, 2),
-		])
-		glow.global_position = global_position
-		glow.rotation = _dir.angle()
-		parent.add_child(glow)
 		var tw := streak.create_tween()
-		tw.tween_property(streak, "modulate:a", 0.0, 0.18)
-		tw.parallel().tween_property(streak, "width", 0.6, 0.18)
+		tw.tween_property(streak, "modulate:a", 0.0, 0.14)
+		tw.parallel().tween_property(streak, "width", 0.6, 0.14)
 		tw.tween_callback(streak.queue_free)
-		var twg := glow.create_tween()
-		twg.tween_property(glow, "modulate:a", 0.0, 0.14)
-		twg.parallel().tween_property(glow, "scale", Vector2(0.4, 0.4), 0.14)
-		twg.tween_callback(glow.queue_free)
 		return
 	if _style == "scatter":
 		# Coral ribbon — boss 散矢 identity mid-flight.
 		var streak2 := Line2D.new()
+		streak2.add_to_group("bolt_trail_fx")
 		streak2.width = 2.4
 		streak2.default_color = Color(1.0, 0.5, 0.32, 0.8)
 		streak2.z_index = 4
@@ -148,6 +143,7 @@ func _spawn_trail() -> void:
 		tws.tween_callback(streak2.queue_free)
 		return
 	var bit := Polygon2D.new()
+	bit.add_to_group("bolt_trail_fx")
 	bit.polygon = [Vector2(-2, -2), Vector2(2, -2), Vector2(2, 2), Vector2(-2, 2)]
 	if _hostile:
 		bit.color = Color(1.0, 0.5, 0.45, 0.5)
@@ -201,7 +197,9 @@ func _spawn_auto_hit_spark(at: Vector2) -> void:
 		return
 	# Dense gold flecks — auto-fire must feel crispy, not cyan-only.
 	var combo := GameState.combo
-	var shards := 2 + (1 if combo >= 3 else 0) + (1 if combo >= 6 else 0)
+	var shards := 2 + (1 if combo >= 6 else 0)
+	if get_tree().get_nodes_in_group("bolt_trail_fx").size() >= 14:
+		shards = mini(shards, 2)
 	var base_ang := _dir.angle()
 	for k in shards:
 		var shard := Line2D.new()
@@ -322,16 +320,12 @@ func _on_body_entered(body: Node) -> void:
 			if _style == "burst":
 				_spawn_hit_burst(at, true)
 			else:
-				# Normal auto-attack: gold sparks + micro hitch.
+				# Gold sparks only — skip auto hitstop so 12-way 灵爆 / dense autos don't hitch-stutter.
 				_spawn_auto_hit_spark(at)
-				var world := get_tree().get_first_node_in_group("game_world")
-				if world and world.has_method("hitstop"):
-					var hs := 0.012
-					if GameState.combo >= 5:
-						hs = 0.016
-					if GameState.combo >= 8:
-						hs = 0.02
-					world.hitstop(hs)
+				if GameState.combo >= 8:
+					var world := get_tree().get_first_node_in_group("game_world")
+					if world and world.has_method("hitstop"):
+						world.hitstop(0.016)
 	call_deferred("_retire")
 
 func _retire() -> void:

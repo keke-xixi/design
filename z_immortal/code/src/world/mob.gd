@@ -344,7 +344,8 @@ func _ai_move(delta: float, player: Node2D) -> void:
 				_charge_cd -= delta
 				if _charge_cd <= 0.0 and dist < 160.0:
 					_charge_dir = offset.normalized() if dist > 1.0 else Vector2.RIGHT
-					_lunge_wind = 0.28
+					# Worms plant longer — burrow tell vs star_beast bolt.
+					_lunge_wind = 0.42 if (def and def.id == "dust_worm") else 0.28
 					modulate = Color(1.35, 0.85, 0.55)
 					_spawn_charge_warn()
 					var tw := create_tween()
