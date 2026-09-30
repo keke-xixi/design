@@ -37,16 +37,32 @@ func _on_item_gained(item_id: String, amount: int, rarity: String) -> void:
 func _on_mystic() -> void:
 	var player := get_tree().get_first_node_in_group("player") as Node2D
 	if player:
-		_spawn(player.global_position + Vector2(0, -48), "通玄", Color(0.65, 0.85, 1.0))
+		# Dual float — band crossing must read as a chapter break, not a tick.
+		_spawn(player.global_position + Vector2(0, -48), "通玄之上", Color(0.55, 0.85, 1.0))
+		_spawn(player.global_position + Vector2(0, -64), "攻重置", Color(0.75, 0.95, 1.0))
+		if player.has_method("pulse_camera"):
+			player.pulse_camera(0.16)
 
 func _on_stat_gained(stat: String, value: int) -> void:
 	var player := get_tree().get_first_node_in_group("player") as Node2D
 	if player == null:
 		return
 	var label := "悟性↑%d" % value if stat == "wisdom" else "体魄↑%d" % value
-	_spawn(player.global_position + Vector2(0, -32), label, Color(0.75, 0.92, 1.0))
+	# Stage-tinted growth — sect teal / country gold / default cyan.
+	var col := Color(0.75, 0.92, 1.0)
+	var tag_col := Color(0.95, 0.88, 0.55)
+	if GameState.stage_id == "sect":
+		col = Color(0.5, 0.98, 0.9) if stat == "wisdom" else Color(0.65, 1.0, 0.85)
+		tag_col = Color(0.55, 0.95, 0.88)
+	elif GameState.stage_id == "country":
+		col = Color(1.0, 0.9, 0.5) if stat == "wisdom" else Color(1.0, 0.82, 0.42)
+		tag_col = Color(1.0, 0.88, 0.45)
+	elif GameState.stage_id == "planet":
+		col = Color(1.0, 0.82, 0.5) if stat == "wisdom" else Color(1.0, 0.72, 0.38)
+		tag_col = Color(1.0, 0.78, 0.4)
+	_spawn(player.global_position + Vector2(0, -32), label, col)
 	# Extra beat so growth reads as a power spike.
-	_spawn(player.global_position + Vector2(0, -48), "修为精进", Color(0.95, 0.88, 0.55))
+	_spawn(player.global_position + Vector2(0, -48), "修为精进", tag_col)
 
 func _on_combo(count: int) -> void:
 	# Float on every milestone — HUD carries live count between pops.
@@ -55,11 +71,13 @@ func _on_combo(count: int) -> void:
 		return
 	var col := Color(1.0, 0.82, 0.45)
 	if count == 2:
-		# 二连 — sect teal / dynasty gold short cue.
+		# 二连 — sect teal / dynasty gold / planet ash short cue.
 		if GameState.stage_id == "sect":
 			col = Color(0.45, 0.98, 0.9)
 		elif GameState.stage_id == "country":
 			col = Color(1.0, 0.88, 0.42)
+		elif GameState.stage_id == "planet":
+			col = Color(1.0, 0.72, 0.38)
 		else:
 			col = Color(1.0, 0.94, 0.7)
 	elif count >= 15:
@@ -75,11 +93,13 @@ func _on_combo(count: int) -> void:
 		slash_col = Color(0.5, 0.98, 0.9)
 	elif count == 2 and GameState.stage_id == "country":
 		slash_col = Color(1.0, 0.88, 0.42)
+	elif count == 2 and GameState.stage_id == "planet":
+		slash_col = Color(1.0, 0.72, 0.38)
 	elif count >= 8:
 		slash_col = Color(1.0, 0.58, 0.28)
 	elif count >= 5:
 		slash_col = Color(1.0, 0.86, 0.38)
-	var slash_glyph := "市斩" if GameState.stage_id == "country" else "斩"
+	var slash_glyph := "市斩" if GameState.stage_id == "country" else ("星斩" if GameState.stage_id == "planet" else "斩")
 	_spawn(player.global_position + Vector2(-10, -58), slash_glyph, slash_col)
 	if count >= 5:
 		_spawn(player.global_position + Vector2(12, -70), slash_glyph, Color(slash_col.r, slash_col.g, slash_col.b, 0.85))

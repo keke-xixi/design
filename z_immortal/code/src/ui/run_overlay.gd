@@ -26,6 +26,9 @@ var _dynasty_hub_pulse := false
 ## Clear settle land — sect teal / dynasty gold wrap (pairs start wipe).
 var _result_land_t := 0.0
 var _result_land_teal := false
+## Planet ash / universe cyan clear settle.
+var _result_land_ash := false
+var _result_land_void := false
 ## Stage-select handoff: start already wiped — close burst skips second full wipe.
 var _start_handoff_wiped := false
 
@@ -59,10 +62,10 @@ func _process(_delta: float) -> void:
 			_title.modulate = Color(breathe, breathe, breathe * 0.98, 1.0)
 		if _title_halo:
 			_title_halo.modulate.a = 0.35 + 0.25 * sin(t * 2.6)
-	elif _kind == Kind.RESULT and _title and (land > 0.0 or _result_land_teal or _dynasty_hub_pulse):
-		# Clear settle title — teal/gold punch then soft hold (mirrors start brand).
+	elif _kind == Kind.RESULT and _title and (land > 0.0 or _result_land_teal or _dynasty_hub_pulse or _result_land_ash or _result_land_void):
+		# Clear settle title — teal/gold/ash/void punch then soft hold.
 		var pulse := 0.55 + 0.45 * sin(t * 3.0)
-		if _result_land_teal or (not _dynasty_hub_pulse and GameState.stage_id == "sect"):
+		if _result_land_teal or (not _dynasty_hub_pulse and not _result_land_ash and not _result_land_void and GameState.stage_id == "sect"):
 			var a := maxf(land, 0.35 + 0.15 * pulse)
 			_title.modulate = Color(0.7 + 0.2 * a, 1.05 + 0.1 * a, 1.0 + 0.05 * a)
 			if _title_halo and _title_halo.visible:
@@ -70,6 +73,16 @@ func _process(_delta: float) -> void:
 		elif _dynasty_hub_pulse:
 			var a2 := maxf(land, 0.4 + 0.15 * pulse)
 			_title.modulate = Color(1.05 + 0.2 * a2, 0.9 + 0.1 * a2, 0.55 + 0.12 * a2)
+			if _title_halo and _title_halo.visible:
+				_title_halo.modulate.a = 0.4 + 0.35 * land + 0.2 * pulse
+		elif _result_land_ash:
+			var a3 := maxf(land, 0.38 + 0.15 * pulse)
+			_title.modulate = Color(1.05 + 0.15 * a3, 0.75 + 0.12 * a3, 0.45 + 0.1 * a3)
+			if _title_halo and _title_halo.visible:
+				_title_halo.modulate.a = 0.4 + 0.35 * land + 0.2 * pulse
+		elif _result_land_void:
+			var a4 := maxf(land, 0.38 + 0.15 * pulse)
+			_title.modulate = Color(0.65 + 0.15 * a4, 0.95 + 0.1 * a4, 1.05 + 0.08 * a4)
 			if _title_halo and _title_halo.visible:
 				_title_halo.modulate.a = 0.4 + 0.35 * land + 0.2 * pulse
 	if _hero_btn == null or not is_instance_valid(_hero_btn):
@@ -80,6 +93,9 @@ func _process(_delta: float) -> void:
 	if _dynasty_hub_pulse and _kind == Kind.RESULT:
 		amp = 0.18
 		hz = 6.4
+	elif (_result_land_ash or _result_land_void) and _kind == Kind.RESULT:
+		amp = 0.14
+		hz = 5.4
 	var g := 1.0 + amp * sin(t * hz)
 	if _dynasty_hub_pulse and _kind == Kind.RESULT:
 		# Hotter gold kick — spend loop CTA after 收刀.
@@ -94,6 +110,17 @@ func _process(_delta: float) -> void:
 		var s3 := 1.0 + 0.03 * sin(t * 5.0) + 0.06 * land
 		_hero_btn.scale = Vector2(s3, s3)
 		_hero_btn.pivot_offset = _hero_btn.size * 0.5
+	elif _kind == Kind.RESULT and _result_land_ash:
+		# Ash CTA — 荒星 settle.
+		_hero_btn.modulate = Color(minf(g * 1.15, 1.4), minf(g * 0.85, 1.1), minf(g * 0.55, 0.9))
+		var sa := 1.0 + 0.04 * sin(t * hz)
+		_hero_btn.scale = Vector2(sa, sa)
+		_hero_btn.pivot_offset = _hero_btn.size * 0.5
+	elif _kind == Kind.RESULT and _result_land_void:
+		_hero_btn.modulate = Color(minf(0.75 * g, 1.0), minf(g * 1.05, 1.3), minf(g * 1.15, 1.4))
+		var sv := 1.0 + 0.04 * sin(t * hz)
+		_hero_btn.scale = Vector2(sv, sv)
+		_hero_btn.pivot_offset = _hero_btn.size * 0.5
 	elif _kind == Kind.RESULT or _death_hub_pull:
 		# Warm gold pulse so 「回宗花石」 reads as the spend loop CTA.
 		_hero_btn.modulate = Color(minf(g * 1.08, 1.35), minf(g * 0.98, 1.2), minf(g * 0.72, 1.0))
@@ -104,12 +131,16 @@ func _process(_delta: float) -> void:
 		_hero_btn.modulate = Color(g, g * 0.97, g * 0.88)
 		_hero_btn.scale = Vector2.ONE
 	if _glow:
-		var glow_amp := 0.28 if _dynasty_hub_pulse else (0.22 if _result_land_teal and _kind == Kind.RESULT else (0.18 if _kind == Kind.RESULT or _death_hub_pull else 0.12))
-		_glow.modulate.a = 0.35 + glow_amp * sin(t * (3.4 if _dynasty_hub_pulse or _result_land_teal else 2.8)) + 0.2 * land
+		var glow_amp := 0.28 if _dynasty_hub_pulse else (0.22 if (_result_land_teal or _result_land_ash or _result_land_void) and _kind == Kind.RESULT else (0.18 if _kind == Kind.RESULT or _death_hub_pull else 0.12))
+		_glow.modulate.a = 0.35 + glow_amp * sin(t * (3.4 if _dynasty_hub_pulse or _result_land_teal or _result_land_ash or _result_land_void else 2.8)) + 0.2 * land
 		if _dynasty_hub_pulse:
 			_glow.color = Color(1.0, 0.78, 0.35, 0.22)
 		elif _result_land_teal and _kind == Kind.RESULT:
 			_glow.color = Color(0.4, 0.9, 0.85, 0.22)
+		elif _result_land_ash and _kind == Kind.RESULT:
+			_glow.color = Color(1.0, 0.55, 0.28, 0.22)
+		elif _result_land_void and _kind == Kind.RESULT:
+			_glow.color = Color(0.45, 0.85, 0.95, 0.22)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not visible:
@@ -259,7 +290,7 @@ func _show_start() -> void:
 		_title_rule.color = Color(accent.r, accent.g, accent.b, 0.95).lightened(0.2)
 		_title_rule.visible = true
 	# One short line only — kill count, no lecture.
-	var crib := "外门 · 杀 %d" % stage.kill_target if yard else ("市井 · 杀 %d" % stage.kill_target if dynasty else ("猎场 · 杀 %d" % stage.kill_target if crater else ("杀 %d" % stage.kill_target)))
+	var crib := "外门 · 杀 %d" % stage.kill_target if yard else ("市井 · 杀 %d" % stage.kill_target if dynasty else ("猎场 · 杀 %d" % stage.kill_target if crater else ("星海 · 杀 %d" % stage.kill_target if GameState.stage_id == "universe" else ("杀 %d" % stage.kill_target))))
 	_size_panel(-70 if early_open else -64, 70 if early_open else 64)
 	_open_panel(stage.display_name, crib, [["开战", _close]], true)
 	# Start CTA is taller / louder than death/result heroes.
@@ -319,7 +350,7 @@ func _show_death() -> void:
 	var stage := GameState.current_stage()
 	var target := stage.kill_target if stage else 0
 	var pity := GameState.last_death_pity
-	var early := GameState.stage_id in ["sect", "country"]
+	var early := GameState.stage_id in ["sect", "country", "planet"]
 	# Soft consolation palette when pity lands — death must not feel empty.
 	var soft := pity > 0
 	if _title_halo:
@@ -396,7 +427,9 @@ func _show_result(stage_id: String, stones: int) -> void:
 	_kind = Kind.RESULT
 	_dynasty_hub_pulse = stage_id == "country"
 	_result_land_teal = stage_id == "sect"
-	_result_land_t = 0.55 if (stage_id == "sect" or stage_id == "country") else 0.0
+	_result_land_ash = stage_id == "planet"
+	_result_land_void = stage_id == "universe"
+	_result_land_t = 0.55 if stage_id in ["sect", "country", "planet", "universe"] else 0.0
 	_title.add_theme_font_size_override("font_size", 22)
 	_title.modulate = Color.WHITE
 	if _dim:
@@ -408,6 +441,8 @@ func _show_result(stage_id: String, stones: int) -> void:
 		_title_rule.color = Color(0.95, 0.88, 0.55, 0.85)
 	var gold := Color(0.92, 0.78, 0.42)
 	var teal := Color(0.45, 0.88, 0.82)
+	var ash := Color(0.95, 0.55, 0.28)
+	var void_c := Color(0.45, 0.85, 0.9)
 	if stage_id == "sect":
 		# Courtyard teal settle — pairs dynasty gold「收刀」wrap.
 		_UiStyle.apply_ceremony_panel(_panel, Color(teal.r, teal.g, teal.b, 0.94))
@@ -421,16 +456,40 @@ func _show_result(stage_id: String, stones: int) -> void:
 			_title_halo.custom_minimum_size = Vector2(220, 6)
 		if _title_rule:
 			_title_rule.color = Color(0.5, 0.95, 0.88, 0.9)
+	elif stage_id == "planet":
+		_UiStyle.apply_ceremony_panel(_panel, Color(ash.r, ash.g, ash.b, 0.94))
+		_title.add_theme_color_override("font_color", Color(1.0, 0.88, 0.65))
+		_tint_glow(ash)
+		if _dim:
+			_dim.color = Color(0.1, 0.04, 0.02, 0.55)
+		if _title_halo:
+			_title_halo.visible = true
+			_title_halo.color = Color(1.0, 0.55, 0.28, 0.45)
+			_title_halo.custom_minimum_size = Vector2(220, 6)
+		if _title_rule:
+			_title_rule.color = Color(1.0, 0.65, 0.35, 0.9)
+	elif stage_id == "universe":
+		_UiStyle.apply_ceremony_panel(_panel, Color(void_c.r, void_c.g, void_c.b, 0.94))
+		_title.add_theme_color_override("font_color", Color(0.75, 0.98, 1.0))
+		_tint_glow(void_c)
+		if _dim:
+			_dim.color = Color(0.02, 0.06, 0.1, 0.55)
+		if _title_halo:
+			_title_halo.visible = true
+			_title_halo.color = Color(0.4, 0.85, 0.95, 0.45)
+			_title_halo.custom_minimum_size = Vector2(220, 6)
+		if _title_rule:
+			_title_rule.color = Color(0.5, 0.9, 0.95, 0.9)
 	else:
 		_UiStyle.apply_ceremony_panel(_panel, Color(gold.r, gold.g, gold.b, 0.94))
 		_title.add_theme_color_override("font_color", Color(1.0, 0.95, 0.72))
 		_tint_glow(gold)
 	_size_panel(-100, 100)
 	var actions: Array = []
-	var early := stage != null and stage.id in ["sect", "country"]
+	var early := stage != null and stage.id in ["sect", "country", "planet"]
 	# Early first clear → hub spend is the loud desire; next layer stays secondary.
 	# Dynasty always prefers 回宗花石 as hero after 收刀.
-	var pull_hub := early and (first or payout >= 18 or stage_id == "country")
+	var pull_hub := early and (first or payout >= 18 or stage_id == "country" or stage_id == "planet")
 	if pull_hub:
 		actions.append(["回宗花石", _hub])
 		if stage and not stage.next_id.is_empty():
@@ -468,15 +527,31 @@ func _show_result(stage_id: String, stones: int) -> void:
 			_title_rule.color = Color(1.0, 0.86, 0.42, 0.9)
 		if _dim:
 			_dim.color = Color(0.08, 0.05, 0.02, 0.58)
+	elif stage_id == "planet":
+		title = "陨星 · 荒星"
+		_title.add_theme_font_size_override("font_size", 24)
+	elif stage_id == "universe":
+		title = "通关 · 星海"
+		_title.add_theme_font_size_override("font_size", 24)
 	_open_panel(title, desc, actions, true)
 	_pop_panel()
-	if (pull_hub or _dynasty_hub_pulse or _result_land_teal) and _hero_btn:
-		_hero_btn.add_theme_font_size_override("font_size", 16 if _dynasty_hub_pulse else 15)
-		_hero_btn.custom_minimum_size = Vector2(0, 42 if _dynasty_hub_pulse else 40)
+	if (pull_hub or _dynasty_hub_pulse or _result_land_teal or _result_land_ash or _result_land_void) and _hero_btn:
+		_hero_btn.add_theme_font_size_override("font_size", 16 if _dynasty_hub_pulse or _result_land_ash else 15)
+		_hero_btn.custom_minimum_size = Vector2(0, 42 if _dynasty_hub_pulse or _result_land_ash else 40)
 		if _result_land_teal:
 			_hero_btn.add_theme_color_override("font_color", Color(0.75, 1.0, 0.94))
 			_hero_btn.add_theme_color_override("font_hover_color", Color(0.9, 1.0, 0.98))
 			_hero_btn.add_theme_color_override("font_pressed_color", Color(0.45, 0.88, 0.8))
+		elif _result_land_ash:
+			_hero_btn.add_theme_color_override("font_color", Color(1.0, 0.82, 0.45))
+			_hero_btn.add_theme_color_override("font_hover_color", Color(1.0, 0.92, 0.65))
+			_hero_btn.add_theme_color_override("font_pressed_color", Color(0.95, 0.6, 0.3))
+			_hero_btn.text = "回宗花石"
+			_UiStyle.apply_cta_button(_hero_btn)
+		elif _result_land_void:
+			_hero_btn.add_theme_color_override("font_color", Color(0.7, 0.95, 1.0))
+			_hero_btn.add_theme_color_override("font_hover_color", Color(0.85, 1.0, 1.0))
+			_hero_btn.add_theme_color_override("font_pressed_color", Color(0.4, 0.75, 0.9))
 		else:
 			_hero_btn.add_theme_color_override("font_color", Color(1.0, 0.94, 0.55) if _dynasty_hub_pulse else Color(1.0, 0.94, 0.62))
 			_hero_btn.add_theme_color_override("font_hover_color", Color(1.0, 0.98, 0.78) if _dynasty_hub_pulse else Color(1.0, 0.98, 0.8))
@@ -553,6 +628,8 @@ func _close() -> void:
 	_dynasty_hub_pulse = false
 	_result_land_t = 0.0
 	_result_land_teal = false
+	_result_land_ash = false
+	_result_land_void = false
 	_start_handoff_wiped = false
 	visible = false
 	if _hero_btn and is_instance_valid(_hero_btn):
@@ -780,7 +857,7 @@ func _do_revive() -> void:
 		if player.has_method("soft_revive_guard"):
 			player.call("soft_revive_guard", 1.15)
 		var tip := "再起"
-		if GameState.stage_id in ["sect", "country"]:
+		if GameState.stage_id in ["sect", "country", "planet"]:
 			tip = "再起 · 伤↑"
 		FloatTextManager.show_message(player.global_position + Vector2(0, -36), tip, Color(0.55, 0.98, 0.85))
 		if player.has_method("pulse_camera"):

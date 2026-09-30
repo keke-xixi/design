@@ -345,7 +345,13 @@ func _ai_move(delta: float, player: Node2D) -> void:
 				if _charge_cd <= 0.0 and dist < 160.0:
 					_charge_dir = offset.normalized() if dist > 1.0 else Vector2.RIGHT
 					# Worms plant longer — burrow tell vs star_beast bolt.
-					_lunge_wind = 0.42 if (def and def.id == "dust_worm") else 0.28
+					# Bandits plant shorter so dynasty 刀客 wave stays snappy but still readable.
+					if def and def.id == "dust_worm":
+						_lunge_wind = 0.42
+					elif def and def.id == "bandit":
+						_lunge_wind = 0.24
+					else:
+						_lunge_wind = 0.28
 					modulate = Color(1.35, 0.85, 0.55)
 					_spawn_charge_warn()
 					var tw := create_tween()
@@ -812,9 +818,9 @@ func _start_skill(player: Node2D) -> void:
 			callout = "虚引"
 			call_col = Color(0.7, 0.55, 1.0)
 	FloatTextManager.show_message(global_position + Vector2(0, -48), callout, call_col)
-	# HUD shout on early bosses — pattern must read over combat clutter.
+	# HUD shout — early + mid bosses must teach patterns over combat clutter.
 	var hud := get_tree().get_first_node_in_group("hud")
-	if def != null and def.is_boss and GameState.stage_id in ["sect", "country"]:
+	if def != null and def.is_boss and GameState.stage_id in ["sect", "country", "planet", "galaxy"]:
 		if hud and hud.has_method("show_clear"):
 			hud.call("show_clear", callout)
 	# Orange telegraph warn — distinct from gold 破绽 enter chime.
@@ -897,7 +903,8 @@ func _enter_recover(skill: Dictionary) -> void:
 		return
 	_recovering = true
 	var as_boss := def != null and def.is_boss
-	var early_boss := as_boss and GameState.stage_id in ["sect", "country"]
+	# Loud 破绽 teach through 荒星 — galaxy stays quieter "破".
+	var early_boss := as_boss and GameState.stage_id in ["sect", "country", "planet"]
 	_show_recover_fx(as_boss, early_boss)
 	if as_boss:
 		# Gold punish window — opposite of red telegraph, same language as combo dopamine.
@@ -1430,7 +1437,7 @@ func _die() -> void:
 		EventBus.boss_hp_cleared.emit()
 	if SfxService:
 		SfxService.play_kill()
-	if break_kill and GameState.stage_id in ["sect", "country"]:
+	if break_kill and GameState.stage_id in ["sect", "country", "planet"]:
 		_flash_break_kill()
 	elif def != null and def.is_boss:
 		FloatTextManager.show_message(global_position + Vector2(0, -36), "斩Boss", Color(1.0, 0.72, 0.35))
@@ -1440,14 +1447,21 @@ func _die() -> void:
 	GameState.register_kill(def.id)
 	var stage_now := GameState.current_stage()
 	var shoudao := GameState.stage_id == "country" and stage_now != null and GameState.stage_kills() == stage_now.kill_target
+	var yunxing := GameState.stage_id == "planet" and stage_now != null and GameState.stage_kills() == stage_now.kill_target
 	var early := GameState.early_kill_hook()
-	# Per-kill shout once combo is live — opening minute also shouts the first 斩 / 市斩.
+	# Per-kill shout once combo is live — opening minute also shouts the first 斩 / 市斩 / 星斩.
 	if shoudao:
 		# Dynasty clear blow — punchy「收刀」closes the near-clear gold tension.
 		FloatTextManager.show_message(global_position + Vector2(0, -28), "收刀", Color(1.0, 0.86, 0.4))
 		var world_sd := get_tree().get_first_node_in_group("game_world")
 		if world_sd and world_sd.has_method("hitstop"):
 			world_sd.hitstop(0.032)
+	elif yunxing:
+		# 荒星 clear blow — ash「陨星」closes crater near-clear.
+		FloatTextManager.show_message(global_position + Vector2(0, -28), "陨星", Color(1.0, 0.72, 0.35))
+		var world_yx := get_tree().get_first_node_in_group("game_world")
+		if world_yx and world_yx.has_method("hitstop"):
+			world_yx.hitstop(0.032)
 	elif not break_kill and (GameState.combo >= 2 or early) and not (def != null and def.is_boss):
 		var ccol := Color(0.95, 0.9, 0.55)
 		var shout := "斩"
@@ -1464,6 +1478,10 @@ func _die() -> void:
 				# Sect first blood — courtyard teal (pairs 市斩 gold).
 				shout = "斩"
 				ccol = Color(0.45, 0.98, 0.9)
+			elif GameState.stage_id == "planet" and GameState.combo == 1:
+				# Planet first blood — ash「星斩」.
+				shout = "星斩"
+				ccol = Color(1.0, 0.72, 0.38)
 			else:
 				ccol = Color(1.0, 0.96, 0.72)
 		FloatTextManager.show_message(global_position + Vector2(0, -22), shout, ccol)
@@ -1473,6 +1491,20 @@ func _die() -> void:
 				world_zk.hitstop(0.024)
 			if world_zk and world_zk.has_method("radar_ping"):
 				world_zk.call("radar_ping", global_position, "yard")
+		elif early and GameState.combo == 1 and GameState.stage_id == "country":
+			# Dynasty first「市斩」— soft hitch + gold radar (parity with sect teal 斩).
+			var world_sz := get_tree().get_first_node_in_group("game_world")
+			if world_sz and world_sz.has_method("hitstop"):
+				world_sz.hitstop(0.024)
+			if world_sz and world_sz.has_method("radar_ping"):
+				world_sz.call("radar_ping", global_position, "gold")
+		elif early and GameState.combo == 1 and GameState.stage_id == "planet":
+			# Planet first「星斩」— soft hitch + ash radar (parity with 斩 / 市斩).
+			var world_xz := get_tree().get_first_node_in_group("game_world")
+			if world_xz and world_xz.has_method("hitstop"):
+				world_xz.hitstop(0.024)
+			if world_xz and world_xz.has_method("radar_ping"):
+				world_xz.call("radar_ping", global_position, "ash")
 	_spawn_burst()
 	call_deferred("_spawn_drops")
 	if def.is_boss:
@@ -1491,7 +1523,7 @@ func _die() -> void:
 			shake = 0.1
 		if early and GameState.combo <= 3:
 			shake = maxf(shake, 0.1)
-		if shoudao:
+		if shoudao or yunxing:
 			shake = maxf(shake, 0.14)
 		if break_kill:
 			shake = maxf(shake, 0.11)
@@ -1500,7 +1532,7 @@ func _die() -> void:
 		var world2 := get_tree().get_first_node_in_group("game_world")
 		if world2 and world2.has_method("hitstop"):
 			world2.hitstop(0.04 if is_elite else 0.055)
-	elif break_kill and GameState.stage_id in ["sect", "country"]:
+	elif break_kill and GameState.stage_id in ["sect", "country", "planet"]:
 		var world3 := get_tree().get_first_node_in_group("game_world")
 		if world3 and world3.has_method("hitstop"):
 			world3.hitstop(0.026)
@@ -1584,7 +1616,8 @@ func _spawn_burst() -> void:
 	var combo := GameState.combo
 	# Cap concurrent kill FX — multi-kill waves must not spike overdraw.
 	var live_fx := get_tree().get_nodes_in_group("kill_burst_fx").size()
-	var lean := live_fx >= 3
+	# Lean earlier (was 3) — dense mid/late stages stay fluid.
+	var lean := live_fx >= 2
 	# Cap flecks — bright few beats read better and avoid overdraw spikes.
 	var count := 6 if (def != null and def.is_boss) else (5 if is_elite else 4)
 	if combo >= 6:
@@ -1593,7 +1626,7 @@ func _spawn_burst() -> void:
 		count += 1
 	if GameState.early_kill_hook() and not (def != null and def.is_boss):
 		count += 1
-	count = mini(count, 8 if not lean else 5)
+	count = mini(count, 7 if not lean else 4)
 	# Outer gold ring — one bright beat, then expand; sits above auto-hit sparks.
 	var gold := Color(1.0, 0.92, 0.45, 1.0)
 	if def != null and def.is_boss:
@@ -1603,6 +1636,12 @@ func _spawn_burst() -> void:
 	elif GameState.stage_id == "sect" and combo <= 3:
 		# Sect early kills — teal rim so 斩 language matches courtyard.
 		gold = Color(0.55, 0.98, 0.88, 1.0)
+	elif GameState.stage_id == "country" and combo <= 3:
+		# Dynasty early kills — warm gold rim pairs 市斩 / top-bar city accent.
+		gold = Color(1.0, 0.86, 0.42, 1.0)
+	elif GameState.stage_id == "planet" and combo <= 3:
+		# Planet early kills — ash rim pairs 星斩 / crater combat.
+		gold = Color(1.0, 0.72, 0.35, 1.0)
 	elif combo >= 8:
 		gold = Color(1.0, 0.7, 0.32, 1.0)
 	elif combo >= 4:
@@ -1643,8 +1682,8 @@ func _spawn_burst() -> void:
 	rtw.tween_property(ring, "scale", Vector2(2.45, 2.45), 0.16).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	rtw.parallel().tween_property(ring, "modulate:a", 0.0, 0.16)
 	rtw.tween_callback(ring.queue_free)
-	# Secondary thinner echo ring — skip on low combo / lean budget.
-	if not lean and (combo >= 3 or (def != null and def.is_boss) or is_elite):
+	# Secondary thinner echo ring — skip on lean budget / low combo.
+	if not lean and (combo >= 4 or (def != null and def.is_boss) or is_elite):
 		var echo := Line2D.new()
 		echo.add_to_group("kill_burst_fx")
 		echo.width = 1.6
@@ -1671,6 +1710,8 @@ func _spawn_burst() -> void:
 			bit.color = Color(1.0, 0.88, 0.4, 0.95)
 		elif GameState.stage_id == "sect" and combo <= 3:
 			bit.color = Color(0.55, 0.98, 0.88, 0.95)
+		elif GameState.stage_id == "country" and combo <= 3:
+			bit.color = Color(1.0, 0.86, 0.42, 0.95)
 		elif combo >= 8:
 			bit.color = Color(1.0, 0.6, 0.3, 0.95)
 		elif combo >= 4:

@@ -5,25 +5,25 @@
       "id": "dash",
       "name": "闪避",
       "key": "L",
-      "cooldown": 2.3,
-      "dash_distance": 105,
-      "iframe": 0.36,
+      "cooldown": 2.15,
+      "dash_distance": 108,
+      "iframe": 0.38,
       "description": "向移动方向瞬移并短暂无敌。"
     },
     {
       "id": "ring_slash",
       "name": "环斩",
       "key": "U",
-      "cooldown": 3.8,
-      "radius": 132,
-      "damage_mult": 2.0,
+      "cooldown": 3.4,
+      "radius": 136,
+      "damage_mult": 2.05,
       "description": "以自身为中心释放剑气，伤害周围敌人。"
     },
     {
       "id": "use_pill",
       "name": "服丹",
       "key": "I",
-      "cooldown": 1.2,
+      "cooldown": 1.15,
       "pill_priority": [
         "white_pill",
         "qi_pill_low"
@@ -34,9 +34,9 @@
       "id": "spirit_burst",
       "name": "灵爆",
       "key": "O",
-      "cooldown": 6.4,
-      "projectiles": 12,
-      "damage_mult": 1.05,
+      "cooldown": 5.8,
+      "projectiles": 10,
+      "damage_mult": 1.15,
       "description": "向八方同时射出剑气。"
     }
   ]

@@ -23,6 +23,12 @@ var _dynasty_pull_ids: Dictionary = {}
 var _dynasty_replay_ids: Dictionary = {}
 ## Sect row after courtyard clear — teal「再战」bait (mirrors dynasty gold replay).
 var _sect_replay_ids: Dictionary = {}
+## Planet row after 王朝 clear — ash「首通」bait.
+var _planet_pull_ids: Dictionary = {}
+## Planet row after 荒星 clear — ash「再战」bait.
+var _planet_replay_ids: Dictionary = {}
+## Galaxy row after 荒星 clear — violet「首通」bait.
+var _galaxy_pull_ids: Dictionary = {}
 var _thumb_hover := false
 var _thumb_push := 0.0
 var _thumb_locked := false
@@ -30,30 +36,39 @@ var _thumb_base_mod := Color.WHITE
 ## 「外门已通 · 王朝首通」hint — flash once then warm-gold breath.
 var _dynasty_hint := false
 var _dynasty_hint_flash_t := 0.0
+## 「收刀已通 · 荒星首通」hint — ash breath.
+var _planet_hint := false
+var _planet_hint_flash_t := 0.0
 ## Brief punch on 开战 when preview frame flashes (doesn't replace breath).
 var _enter_gold_pop_t := 0.0
 ## Guard: handoff wipe in flight — ignore double-tap 开战.
 var _enter_handoff_busy := false
-## Focus-row entry flash — sect teal / dynasty gold.
+## Focus-row entry flash — sect teal / dynasty gold / planet ash.
 var _row_flash_t := 0.0
 var _row_flash_teal := false
+var _row_flash_ash := false
 var _row_flash_id := ""
-## 开战 CTA land flash — sect teal / dynasty gold.
+## 开战 CTA land flash — sect teal / dynasty gold / planet ash.
 var _enter_land_t := 0.0
 var _enter_land_teal := false
+var _enter_land_ash := false
 var _mapframe_lock_t := 0.0
 ## Sect thumbnail teal lift — courtyard air on the preview art.
 var _thumb_teal_t := 0.0
 var _thumb_gold_t := 0.0
-## Detail title land flash — sect teal / dynasty gold.
+var _thumb_ash_t := 0.0
+## Detail title land flash — sect teal / dynasty gold / planet ash.
 var _title_flash_t := 0.0
 var _title_flash_teal := false
+var _title_flash_ash := false
 ## Detail stats land flash — softer echo of the title.
 var _stats_flash_t := 0.0
 var _stats_flash_teal := false
-## Hint bar land flash — sect teal / dynasty gold (defers to dynasty pull breath).
+var _stats_flash_ash := false
+## Hint bar land flash — sect teal / dynasty gold / planet ash (defers to pull breath).
 var _hint_land_t := 0.0
 var _hint_land_teal := false
+var _hint_land_ash := false
 
 func _process(_delta: float) -> void:
 	if _enter_btn == null:
@@ -70,6 +85,8 @@ func _process(_delta: float) -> void:
 		_thumb_teal_t = maxf(_thumb_teal_t - _delta, 0.0)
 	if _thumb_gold_t > 0.0:
 		_thumb_gold_t = maxf(_thumb_gold_t - _delta, 0.0)
+	if _thumb_ash_t > 0.0:
+		_thumb_ash_t = maxf(_thumb_ash_t - _delta, 0.0)
 	if _title_flash_t > 0.0:
 		_title_flash_t = maxf(_title_flash_t - _delta, 0.0)
 	if _stats_flash_t > 0.0:
@@ -82,9 +99,11 @@ func _process(_delta: float) -> void:
 	var t := Time.get_ticks_msec() * 0.002
 	var dynasty_enter := (_dynasty_pull_ids.has(_selected_id) or _dynasty_replay_ids.has(_selected_id)) and not _enter_btn.disabled
 	var sect_replay := _sect_replay_ids.has(_selected_id) and not _enter_btn.disabled
+	var planet_enter := (_planet_pull_ids.has(_selected_id) or _planet_replay_ids.has(_selected_id)) and not _enter_btn.disabled
 	var pop := clampf(_enter_gold_pop_t / 0.38, 0.0, 1.0)
 	var land := clampf(_enter_land_t / 0.55, 0.0, 1.0)
 	var replay := _dynasty_replay_ids.has(_selected_id)
+	var planet_replay := _planet_replay_ids.has(_selected_id)
 	if land > 0.0 and _enter_land_teal and not _enter_btn.disabled:
 		# Courtyard teal pop on 开战 — pairs focus-row teal, not gold dynasty.
 		var pulse := 0.55 + 0.45 * sin(Time.get_ticks_msec() * 0.02)
@@ -93,6 +112,14 @@ func _process(_delta: float) -> void:
 		var st := 1.0 + 0.08 * land * pulse
 		_enter_btn.scale = Vector2(st, st)
 		_enter_btn.add_theme_color_override("font_color", Color(0.4, 0.98, 0.9, 0.75 + 0.25 * land))
+	elif land > 0.0 and _enter_land_ash and not _enter_btn.disabled:
+		# Ash-orange land punch — 荒星 crater CTA (pairs focus-row ash).
+		var pulse_a := 0.55 + 0.45 * sin(Time.get_ticks_msec() * 0.02)
+		_enter_btn.modulate = Color(1.15 + 0.2 * pulse_a, 0.82 + 0.1 * pulse_a, 0.48 + 0.06 * pulse_a)
+		_enter_btn.pivot_offset = _enter_btn.size * 0.5
+		var sa := 1.0 + 0.075 * land * pulse_a
+		_enter_btn.scale = Vector2(sa, sa)
+		_enter_btn.add_theme_color_override("font_color", Color(1.0, 0.78, 0.4, 0.75 + 0.25 * land))
 	elif dynasty_enter:
 		# Warm-gold breath — 首通 louder; 再战 slightly quieter settle.
 		var hz := 2.05 if not replay else 1.75
@@ -106,6 +133,16 @@ func _process(_delta: float) -> void:
 			"font_color",
 			Color(1.0, 0.9 + 0.06 * pop, 0.48 + 0.1 * pop)
 		)
+	elif planet_enter:
+		# Ash-orange breath — 荒星首通 / 再战 (pairs crater combat).
+		var hz_p := 1.95 if not planet_replay else 1.7
+		var amp_p := 0.13 if not planet_replay else 0.09
+		var gp := 1.0 + amp_p * sin(t * hz_p) + 0.16 * land
+		_enter_btn.modulate = Color(minf(gp * 1.22, 1.5), minf(gp * 0.82, 1.15), minf(gp * 0.5, 0.9))
+		_enter_btn.pivot_offset = _enter_btn.size * 0.5
+		var sp := 1.0 + (0.038 if not planet_replay else 0.028) * sin(t * hz_p) + 0.07 * land
+		_enter_btn.scale = Vector2(sp, sp)
+		_enter_btn.add_theme_color_override("font_color", Color(1.0, 0.78, 0.4))
 	elif sect_replay:
 		# Courtyard teal breath — 宗门再战 mirrors dynasty 再战 gold.
 		var hz_t := 1.75
@@ -118,7 +155,7 @@ func _process(_delta: float) -> void:
 			"font_color",
 			Color(0.4, 0.96, 0.88)
 		)
-	elif land > 0.0 and not _enter_land_teal and not _enter_btn.disabled:
+	elif land > 0.0 and not _enter_land_teal and not _enter_land_ash and not _enter_btn.disabled:
 		# Dynasty land punch when not in first-clear breath (再战).
 		var gp := 1.0 + 0.2 * land
 		_enter_btn.modulate = Color(minf(gp * 1.2, 1.5), minf(gp * 0.95, 1.22), minf(gp * 0.55, 1.0))
@@ -131,8 +168,9 @@ func _process(_delta: float) -> void:
 	else:
 		_enter_btn.scale = Vector2.ONE
 		_enter_btn.modulate = Color(0.55, 0.55, 0.58)
-	# Dynasty hint bar: warm-gold flash → soft breath (don't touch enter CTA).
+	# Dynasty / planet hint bar: flash → soft breath (don't touch enter CTA).
 	_tick_dynasty_hint(_delta, t)
+	_tick_planet_hint(_delta, t)
 	# Thumbnail: idle drift, hover brightens + eases toward the eye.
 	var want_push := 1.0 if _thumb_hover and not _thumb_locked else 0.0
 	_thumb_push = lerpf(_thumb_push, want_push, clampf(_delta * 8.0, 0.0, 1.0))
@@ -142,17 +180,23 @@ func _process(_delta: float) -> void:
 		var shove := Vector2(-5.0, -3.5) * _thumb_push
 		var teal_pop := clampf(_thumb_teal_t / 0.7, 0.0, 1.0)
 		var gold_pop := clampf(_thumb_gold_t / 0.7, 0.0, 1.0)
+		var ash_pop := clampf(_thumb_ash_t / 0.7, 0.0, 1.0)
 		var sect_idle := 0.0
 		var city_idle := 0.0
+		var planet_idle := 0.0
 		if _selected_id == "sect" and not _thumb_locked:
 			# Soft courtyard lift — teal air vs dynasty gold hover shove.
 			sect_idle = 0.2 + 0.18 * (0.5 + 0.5 * sin(t * 1.15))
 		elif _selected_id == "country" and not _thumb_locked:
 			# Soft city gold lift — counterpart to courtyard teal.
 			city_idle = 0.2 + 0.18 * (0.5 + 0.5 * sin(t * 1.25))
+		elif _selected_id == "planet" and not _thumb_locked:
+			# Soft crater ash lift — third early-map identity.
+			planet_idle = 0.2 + 0.18 * (0.5 + 0.5 * sin(t * 1.2))
 		var teal_n := maxf(teal_pop, sect_idle)
 		var gold_n := maxf(gold_pop, city_idle)
-		var lift_n := maxf(teal_n, gold_n)
+		var ash_n := maxf(ash_pop, planet_idle)
+		var lift_n := maxf(teal_n, maxf(gold_n, ash_n))
 		_thumb.position = _thumb_base + drift + shove + Vector2(0.0, -4.5 * lift_n)
 		_thumb.scale = Vector2.ONE * (1.0 + 0.022 * _thumb_push + 0.035 * lift_n)
 		var lift := 1.0 + 0.14 * _thumb_push
@@ -162,7 +206,9 @@ func _process(_delta: float) -> void:
 			minf(_thumb_base_mod.b * lift * 0.98, 1.1),
 			_thumb_base_mod.a
 		)
-		if gold_n > 0.0 and gold_n >= teal_n:
+		if ash_n > 0.0 and ash_n >= gold_n and ash_n >= teal_n:
+			tm = tm.lerp(Color(1.1, 0.78, 0.48, _thumb_base_mod.a), 0.22 + 0.28 * ash_n)
+		elif gold_n > 0.0 and gold_n >= teal_n:
 			tm = tm.lerp(Color(1.08, 0.92, 0.62, _thumb_base_mod.a), 0.22 + 0.28 * gold_n)
 		elif teal_n > 0.0:
 			tm = tm.lerp(Color(0.72, 1.08, 1.02, _thumb_base_mod.a), 0.22 + 0.28 * teal_n)
@@ -183,6 +229,12 @@ func _process(_delta: float) -> void:
 			continue
 		if _dynasty_pull_ids.has(sid) or _dynasty_replay_ids.has(sid):
 			_pulse_dynasty_row(b, t, sid == _selected_id)
+			continue
+		if _planet_pull_ids.has(sid) or _planet_replay_ids.has(sid):
+			_pulse_planet_row(b, t, sid == _selected_id)
+			continue
+		if _galaxy_pull_ids.has(sid):
+			_pulse_galaxy_row(b, t, sid == _selected_id)
 			continue
 		if _sect_replay_ids.has(sid):
 			_pulse_sect_row(b, t, sid == _selected_id)
@@ -233,7 +285,7 @@ func _ready() -> void:
 	# Prefer an early uncleared stage so first-clear bait is selected by default.
 	if not picked:
 		for stage in stages:
-			if stage.id in ["sect", "country"] and GameState.can_enter(stage) and not GameState.is_stage_cleared(stage.id):
+			if stage.id in ["sect", "country", "planet"] and GameState.can_enter(stage) and not GameState.is_stage_cleared(stage.id):
 				_select_stage(stage.id)
 				picked = true
 				break
@@ -249,6 +301,7 @@ func _ready() -> void:
 	_arm_enter_land_flash(_selected_id)
 	_arm_sect_thumb_lift()
 	_arm_dynasty_thumb_lift()
+	_arm_planet_thumb_lift()
 	_arm_detail_title_flash(_selected_id)
 	_arm_detail_stats_flash(_selected_id)
 	# Hub challenge / 收刀回流 → tip on stage select.
@@ -305,7 +358,7 @@ func _flash_hub_fight_tip(shoudao: bool = false) -> void:
 	var saved_hint := ""
 	var saved_hint_col := Color(0.75, 0.82, 0.86)
 	var hint_shout := "收刀 · 点开战" if shoudao else "开战到手 · 点开战"
-	if _hint and not _dynasty_hint:
+	if _hint and not _dynasty_hint and not _planet_hint:
 		saved_hint = _hint.text
 		saved_hint_col = _hint.get_theme_color("font_color")
 		_hint.text = hint_shout
@@ -344,13 +397,13 @@ func _flash_hub_fight_tip(shoudao: bool = false) -> void:
 		)
 	tw.tween_interval(1.05 if shoudao else 1.0)
 	tw.tween_property(tip, "modulate:a", 0.0, 0.28)
-	if _hint and not _dynasty_hint:
+	if _hint and not _dynasty_hint and not _planet_hint:
 		tw.parallel().tween_property(_hint, "modulate", Color.WHITE, 0.28)
 	tw.tween_callback(func() -> void:
 		if tip:
 			tip.visible = false
 			tip.modulate = Color.WHITE
-		if _hint and not _dynasty_hint and (_hint.text.begins_with("开战到手") or _hint.text.begins_with("收刀")):
+		if _hint and not _dynasty_hint and not _planet_hint and (_hint.text.begins_with("开战到手") or _hint.text.begins_with("收刀")):
 			_hint.text = saved_hint
 			_hint.add_theme_color_override("font_color", saved_hint_col)
 			_hint.modulate = Color.WHITE
@@ -358,21 +411,22 @@ func _flash_hub_fight_tip(shoudao: bool = false) -> void:
 			_UiStyle.apply_panel(_left_panel)
 	)
 
-## Hint bar land — soft teal/gold pop (pairs left panel; skips dynasty pull breath).
+## Hint bar land — soft teal/gold/ash pop (pairs left panel; skips pull breath).
 func _arm_hint_land_flash(sid: String) -> void:
-	if sid != "sect" and sid != "country":
+	if sid != "sect" and sid != "country" and sid != "planet":
 		return
 	if _hint == null:
 		return
-	# Dynasty pull tip already has warm-gold flash → breath; don't double.
-	if _dynasty_hint:
+	# Pull tip already has flash → breath; don't double.
+	if _dynasty_hint or _planet_hint:
 		_hint_land_t = 0.0
 		return
 	_hint_land_teal = sid == "sect"
+	_hint_land_ash = sid == "planet"
 	_hint_land_t = 0.45
 
 func _tick_hint_land() -> void:
-	if _hint == null or _dynasty_hint:
+	if _hint == null or _dynasty_hint or _planet_hint:
 		return
 	var a := clampf(_hint_land_t / 0.45, 0.0, 1.0)
 	if a <= 0.0:
@@ -389,6 +443,12 @@ func _tick_hint_land() -> void:
 			"font_color",
 			Color(0.45, 0.95, 0.88).lerp(Color(0.75, 0.82, 0.86), 1.0 - a)
 		)
+	elif _hint_land_ash:
+		_hint.modulate = Color(1.15 + 0.15 * pulse, 0.88 + 0.08 * pulse, 0.55 + 0.06 * pulse)
+		_hint.add_theme_color_override(
+			"font_color",
+			Color(1.0, 0.78, 0.4).lerp(Color(0.9, 0.75, 0.5), 1.0 - a)
+		)
 	else:
 		_hint.modulate = Color(1.18 + 0.15 * pulse, 1.0 + 0.08 * pulse, 0.68 + 0.08 * pulse)
 		_hint.add_theme_color_override(
@@ -396,26 +456,28 @@ func _tick_hint_land() -> void:
 			Color(1.0, 0.9, 0.42).lerp(Color(1.0, 0.9, 0.55), 1.0 - a)
 		)
 
-## Left list panel — soft teal/gold rim glow on land (pairs detail text).
+## Left list panel — soft teal/gold/ash rim glow on land (pairs detail text).
 func _arm_left_panel_flash(sid: String) -> void:
-	if sid != "sect" and sid != "country":
+	if sid != "sect" and sid != "country" and sid != "planet":
 		return
-	call_deferred("_flash_left_panel", sid == "sect")
+	call_deferred("_flash_left_panel", sid)
 
-func _flash_left_panel(teal: bool) -> void:
+func _flash_left_panel(sid: String) -> void:
 	if _left_panel == null:
 		return
+	var teal := sid == "sect"
+	var ash := sid == "planet"
 	var sb := _left_panel.get_theme_stylebox("panel")
 	var flat: StyleBoxFlat = null
 	if sb is StyleBoxFlat:
 		flat = (sb as StyleBoxFlat).duplicate() as StyleBoxFlat
 		_left_panel.add_theme_stylebox_override("panel", flat)
-	var punch := Color(0.42, 0.98, 0.9, 1.0) if teal else Color(1.0, 0.88, 0.4, 1.0)
-	var settle := Color(0.45, 0.82, 0.78, 0.72) if teal else Color(0.95, 0.78, 0.4, 0.72)
+	var punch := Color(0.42, 0.98, 0.9, 1.0) if teal else (Color(1.0, 0.72, 0.35, 1.0) if ash else Color(1.0, 0.88, 0.4, 1.0))
+	var settle := Color(0.45, 0.82, 0.78, 0.72) if teal else (Color(0.95, 0.7, 0.38, 0.72) if ash else Color(0.95, 0.78, 0.4, 0.72))
 	if flat:
 		flat.border_color = punch
 		flat.set_border_width_all(2)
-	_left_panel.modulate = Color(0.8, 1.18, 1.12) if teal else Color(1.28, 1.12, 0.82)
+	_left_panel.modulate = Color(0.8, 1.18, 1.12) if teal else (Color(1.28, 1.02, 0.78) if ash else Color(1.28, 1.12, 0.82))
 	var tw := create_tween()
 	tw.tween_property(_left_panel, "modulate", Color.WHITE, 0.42)
 	if flat:
@@ -429,13 +491,14 @@ func _flash_left_panel(teal: bool) -> void:
 			0.45
 		)
 
-## Detail title land — courtyard teal vs city gold (pairs thumbnail lift).
+## Detail title land — courtyard teal / city gold / crater ash.
 func _arm_detail_title_flash(sid: String) -> void:
-	if sid != "sect" and sid != "country":
+	if sid != "sect" and sid != "country" and sid != "planet":
 		return
 	if _detail_title == null:
 		return
 	_title_flash_teal = sid == "sect"
+	_title_flash_ash = sid == "planet"
 	_title_flash_t = 0.55
 	call_deferred("_pop_detail_title")
 
@@ -464,6 +527,12 @@ func _tick_detail_title_flash() -> void:
 			"font_color",
 			Color(0.42, 0.98, 0.9).lerp(Color(0.55, 0.88, 0.82), 1.0 - a)
 		)
+	elif _title_flash_ash:
+		_detail_title.modulate = Color(1.18 + 0.15 * pulse, 0.9 + 0.08 * pulse, 0.62 + 0.06 * pulse)
+		_detail_title.add_theme_color_override(
+			"font_color",
+			Color(1.0, 0.78, 0.4).lerp(Color(0.92, 0.72, 0.45), 1.0 - a)
+		)
 	else:
 		_detail_title.modulate = Color(1.2 + 0.15 * pulse, 1.0 + 0.08 * pulse, 0.7 + 0.08 * pulse)
 		_detail_title.add_theme_color_override(
@@ -471,13 +540,14 @@ func _tick_detail_title_flash() -> void:
 			Color(1.0, 0.9, 0.42).lerp(Color(0.95, 0.82, 0.45), 1.0 - a)
 		)
 
-## Detail stats land — softer teal/gold echo under the title.
+## Detail stats land — softer teal/gold/ash echo under the title.
 func _arm_detail_stats_flash(sid: String) -> void:
-	if sid != "sect" and sid != "country":
+	if sid != "sect" and sid != "country" and sid != "planet":
 		return
 	if _detail_stats == null:
 		return
 	_stats_flash_teal = sid == "sect"
+	_stats_flash_ash = sid == "planet"
 	_stats_flash_t = 0.48
 	call_deferred("_pop_detail_stats")
 
@@ -507,6 +577,12 @@ func _tick_detail_stats_flash() -> void:
 			"font_color",
 			Color(0.5, 0.95, 0.88).lerp(Color(0.72, 0.86, 0.88), 1.0 - a)
 		)
+	elif _stats_flash_ash:
+		_detail_stats.modulate = Color(1.12 + 0.12 * pulse, 0.88 + 0.06 * pulse, 0.62 + 0.05 * pulse)
+		_detail_stats.add_theme_color_override(
+			"font_color",
+			Color(1.0, 0.8, 0.45).lerp(Color(0.88, 0.78, 0.58), 1.0 - a)
+		)
 	else:
 		_detail_stats.modulate = Color(1.12 + 0.12 * pulse, 0.98 + 0.06 * pulse, 0.72 + 0.06 * pulse)
 		_detail_stats.add_theme_color_override(
@@ -514,15 +590,16 @@ func _tick_detail_stats_flash() -> void:
 			Color(1.0, 0.9, 0.5).lerp(Color(0.88, 0.84, 0.72), 1.0 - a)
 		)
 
-## 开战 CTA land — courtyard teal vs city gold (pairs list-row flash).
+## 开战 CTA land — courtyard teal / city gold / crater ash (pairs list-row flash).
 func _arm_enter_land_flash(sid: String) -> void:
-	if sid != "sect" and sid != "country":
+	if sid != "sect" and sid != "country" and sid != "planet":
 		return
 	if _enter_btn == null or _enter_btn.disabled:
 		return
 	_enter_land_teal = sid == "sect"
+	_enter_land_ash = sid == "planet"
 	_enter_land_t = 0.55
-	if not _enter_land_teal:
+	if not _enter_land_teal and not _enter_land_ash:
 		_enter_gold_pop_t = maxf(_enter_gold_pop_t, 0.45)
 	call_deferred("_pop_enter_land")
 
@@ -547,11 +624,18 @@ func _arm_dynasty_thumb_lift() -> void:
 		return
 	_thumb_gold_t = 0.7
 
-## Focus list row: courtyard teal vs city gold — hub CTA echo on 选关.
+## Planet thumbnail — brief ash lift on land (mirrors teal/gold).
+func _arm_planet_thumb_lift() -> void:
+	if _selected_id != "planet" or _thumb == null or _thumb_locked:
+		return
+	_thumb_ash_t = 0.7
+
+## Focus list row: courtyard teal / city gold / crater ash — hub CTA echo on 选关.
 func _arm_focus_row_flash(sid: String) -> void:
-	if sid != "sect" and sid != "country":
+	if sid != "sect" and sid != "country" and sid != "planet":
 		return
 	_row_flash_teal = sid == "sect"
+	_row_flash_ash = sid == "planet"
 	_row_flash_id = sid
 	_row_flash_t = 0.72
 	call_deferred("_pop_focus_row")
@@ -583,6 +667,11 @@ func _paint_focus_row_flash(b: Button, a: float) -> void:
 		b.add_theme_color_override("font_color", Color(0.4, 0.98, 0.9, 0.75 + 0.25 * a))
 		var bar := _ensure_dynasty_side_bar(b)
 		bar.color = Color(0.4, 0.95, 0.88, 0.55 + 0.45 * a)
+	elif _row_flash_ash:
+		b.modulate = Color(1.2 + 0.18 * pulse, 0.85 + 0.1 * pulse, 0.5 + 0.06 * pulse)
+		b.add_theme_color_override("font_color", Color(1.0, 0.78, 0.4, 0.75 + 0.25 * a))
+		var bar_a := _ensure_planet_side_bar(b)
+		bar_a.color = Color(1.0, 0.72, 0.35, 0.55 + 0.45 * a)
 	else:
 		b.modulate = Color(1.25 + 0.2 * pulse, 0.98 + 0.1 * pulse, 0.5 + 0.08 * pulse)
 		b.add_theme_color_override("font_color", Color(1.0, 0.9, 0.42, 0.75 + 0.25 * a))
@@ -590,7 +679,7 @@ func _paint_focus_row_flash(b: Button, a: float) -> void:
 		bar2.color = Color(1.0, 0.84, 0.38, 0.6 + 0.4 * a)
 	b.queue_redraw()
 
-## Preview MapFrame idle — courtyard teal rim breath vs soft generic/city gold.
+## Preview MapFrame idle — courtyard teal / city gold / crater ash rim breath.
 func _tick_mapframe_identity(t: float) -> void:
 	var frame := $Root/MapFrame as PanelContainer
 	if frame == null:
@@ -614,6 +703,15 @@ func _tick_mapframe_identity(t: float) -> void:
 			var flat_g := sb_g as StyleBoxFlat
 			flat_g.border_color = Color(1.0, 0.84, 0.38, 0.52 + 0.38 * breath_g)
 			flat_g.set_border_width_all(2)
+	elif _selected_id == "planet":
+		# Soft crater ash border — third early-map identity.
+		var breath_a := 0.5 + 0.5 * sin(t * 1.3)
+		frame.modulate = Color(1.05 + 0.1 * breath_a + push, 0.88 + 0.06 * breath_a + push * 0.5, 0.62 + 0.04 * breath_a)
+		var sb_a := frame.get_theme_stylebox("panel")
+		if sb_a is StyleBoxFlat:
+			var flat_a := sb_a as StyleBoxFlat
+			flat_a.border_color = Color(1.0, 0.72, 0.35, 0.52 + 0.38 * breath_a)
+			flat_a.set_border_width_all(2)
 	else:
 		frame.modulate = Color(1.0 + push, 1.0 + push * 0.75, 1.0 + push * 0.25)
 
@@ -689,11 +787,46 @@ func _flash_sect_preview_frame() -> void:
 	# Sync 开战 teal pop with MapFrame — pairs dynasty gold preview punch.
 	_pop_enter_teal_with_preview()
 
+## Preview MapFrame: ash-orange border punch when landing on 荒星.
+func _flash_planet_preview_frame() -> void:
+	if not has_node("Root/MapFrame"):
+		return
+	var frame := $Root/MapFrame as PanelContainer
+	if frame == null:
+		return
+	_mapframe_lock_t = 0.52
+	var sb := frame.get_theme_stylebox("panel")
+	var flat: StyleBoxFlat = null
+	if sb is StyleBoxFlat:
+		flat = (sb as StyleBoxFlat).duplicate() as StyleBoxFlat
+		frame.add_theme_stylebox_override("panel", flat)
+	var ash := Color(1.0, 0.72, 0.32, 1.0)
+	var settle := Color(0.95, 0.68, 0.35, 0.78)
+	if flat:
+		flat.border_color = ash
+		flat.set_border_width_all(4)
+		flat.bg_color = Color(0.16, 0.1, 0.06, 0.55)
+	frame.modulate = Color(1.4, 1.05, 0.7)
+	var tw := create_tween()
+	tw.tween_property(frame, "modulate", Color(1.08, 0.95, 0.82), 0.4)
+	if flat:
+		tw.parallel().tween_method(
+			func(a: float) -> void:
+				if flat:
+					flat.border_color = ash.lerp(settle, a)
+					flat.set_border_width_all(4 if a < 0.35 else 2),
+			0.0,
+			1.0,
+			0.48
+		)
+	_pop_enter_ash_with_preview()
+
 ## One courtyard-teal land kick on 开战 — pairs MapFrame flash.
 func _pop_enter_teal_with_preview() -> void:
 	if _enter_btn == null or _enter_btn.disabled:
 		return
 	_enter_land_teal = true
+	_enter_land_ash = false
 	_enter_land_t = maxf(_enter_land_t, 0.42)
 	_enter_btn.pivot_offset = _enter_btn.size * 0.5
 	_enter_btn.scale = Vector2(0.9, 0.9)
@@ -705,9 +838,24 @@ func _pop_enter_teal_with_preview() -> void:
 func _pop_enter_gold_with_preview() -> void:
 	if _enter_btn == null or _enter_btn.disabled:
 		return
+	_enter_land_ash = false
 	_enter_gold_pop_t = 0.38
 	# Half-second label shout — hub CTA language lands on the fight button.
 	_flash_enter_dynasty_label()
+
+## One ash land kick on 开战 — pairs MapFrame crater flash.
+func _pop_enter_ash_with_preview() -> void:
+	if _enter_btn == null or _enter_btn.disabled:
+		return
+	_enter_land_teal = false
+	_enter_land_ash = true
+	_enter_land_t = maxf(_enter_land_t, 0.42)
+	_flash_enter_planet_label()
+	_enter_btn.pivot_offset = _enter_btn.size * 0.5
+	_enter_btn.scale = Vector2(0.9, 0.9)
+	var tw := create_tween()
+	tw.tween_property(_enter_btn, "scale", Vector2(1.1, 1.1), 0.1).set_trans(Tween.TRANS_BACK)
+	tw.tween_property(_enter_btn, "scale", Vector2.ONE, 0.15)
 
 ## 「王朝首通」/「王朝再战」for ~0.5s then settle back.
 func _flash_enter_dynasty_label() -> void:
@@ -751,12 +899,35 @@ func _flash_enter_sect_replay_label() -> void:
 			_enter_btn.text = "再战"
 	get_tree().create_timer(0.5, true).timeout.connect(restore)
 
+## 「荒星首通」/「荒星再战」for ~0.5s then settle.
+func _flash_enter_planet_label() -> void:
+	if _enter_btn == null or _enter_btn.disabled:
+		return
+	if _selected_id != "planet":
+		return
+	var cleared := GameState.is_stage_cleared("planet")
+	_enter_btn.text = "荒星再战" if cleared else "荒星首通"
+	_enter_btn.add_theme_color_override("font_color", Color(1.0, 0.78, 0.4))
+	var restore := func() -> void:
+		if _enter_btn == null or _enter_btn.disabled:
+			return
+		if _selected_id != "planet":
+			return
+		var st := ContentDB.get_stage("planet")
+		if st == null or not GameState.can_enter(st):
+			return
+		if GameState.is_stage_cleared("planet"):
+			_enter_btn.text = "再战"
+		else:
+			_enter_btn.text = "首通"
+	get_tree().create_timer(0.5, true).timeout.connect(restore)
+
 func _should_push_hub_spend() -> bool:
 	var stones := GameState.spirit_stones
 	if stones < 5:
 		return false
 	# After clearing an early stage, pull back to hub shops.
-	for sid in ["sect", "country"]:
+	for sid in ["sect", "country", "planet"]:
 		if GameState.is_stage_cleared(sid):
 			return true
 	return GameState.hub_celebrate_stones > 0 or GameState.last_clear_first
@@ -765,10 +936,23 @@ func _estimate_clear_stones(stage: StageDef) -> int:
 	var g := ContentDB.section("growth")
 	var stones := int(g.get("stage_clear_stones_base", 15)) + stage.order * int(g.get("stage_clear_stones_per_order", 8))
 	stones += int(g.get("stage_clear_first_bonus", 8))
-	if stage.id in ["sect", "country"]:
+	if stage.id in ["sect", "country", "planet"]:
 		stones += int(g.get("early_clear_stones_bonus", 8))
 		stones += int(g.get("early_first_clear_extra", 10))
 	return stones
+
+## Growth teaser for detail panel — early maps shout kill→stat cadence.
+func _growth_teaser_line(stage_id: String) -> String:
+	var g := ContentDB.section("growth")
+	var w_every := int(g.get("kills_per_wisdom", 8))
+	var d_every := int(g.get("kills_per_defense", 10))
+	if stage_id == "sect":
+		w_every = maxi(w_every - 1, 3)
+		d_every = maxi(d_every - 1, 4)
+	elif stage_id == "country":
+		w_every = maxi(w_every - 1, 4)
+		d_every = maxi(d_every - 1, 5)
+	return "杀%d悟↑ · 杀%d体↑" % [w_every, d_every]
 
 func _pulse_dynasty_row(b: Button, t: float, selected: bool) -> void:
 	# Warm-gold outline breath — half-beat snappier, matches hub dynasty CTA.
@@ -819,6 +1003,54 @@ func _pulse_sect_row(b: Button, t: float, selected: bool) -> void:
 	bar.offset_bottom = -7.0 + 2.0 * pulse
 	b.queue_redraw()
 
+func _pulse_planet_row(b: Button, t: float, selected: bool) -> void:
+	# Ash-orange outline breath — 荒星首通 / 再战 (pairs crater combat).
+	var pulse := 0.55 + 0.45 * sin(t * 1.9)
+	var ash := Color(1.0, 0.7 + 0.12 * pulse, 0.3, 0.72 + 0.25 * pulse)
+	if selected:
+		ash = Color(1.0, 0.82, 0.42, 0.95)
+	for key in ["normal", "hover", "pressed"]:
+		var sb := b.get_theme_stylebox(key)
+		if sb is StyleBoxFlat:
+			var flat := sb as StyleBoxFlat
+			flat.border_color = ash
+			flat.set_border_width_all(3 if selected else 2)
+			flat.bg_color = Color(0.2, 0.12, 0.07, 0.96) if selected else Color(0.16, 0.1, 0.06, 0.94)
+	var lift := 1.08 + 0.11 * pulse
+	b.modulate = Color(minf(lift * 1.15, 1.4), minf(lift * 0.85, 1.18), minf(lift * 0.55, 0.95))
+	var bar := _ensure_planet_side_bar(b)
+	var a := 0.52 + 0.38 * pulse
+	if selected:
+		a = 0.82 + 0.15 * pulse
+	bar.color = Color(1.0, 0.72 + 0.1 * pulse, 0.32 + 0.08 * pulse, a)
+	bar.offset_top = 7.0 - 2.0 * pulse
+	bar.offset_bottom = -7.0 + 2.0 * pulse
+	b.queue_redraw()
+
+func _pulse_galaxy_row(b: Button, t: float, selected: bool) -> void:
+	# Violet outline breath — 星域首通 after 陨星.
+	var pulse := 0.55 + 0.45 * sin(t * 1.85)
+	var vio := Color(0.7 + 0.1 * pulse, 0.65 + 0.08 * pulse, 1.0, 0.72 + 0.25 * pulse)
+	if selected:
+		vio = Color(0.82, 0.78, 1.0, 0.95)
+	for key in ["normal", "hover", "pressed"]:
+		var sb := b.get_theme_stylebox(key)
+		if sb is StyleBoxFlat:
+			var flat := sb as StyleBoxFlat
+			flat.border_color = vio
+			flat.set_border_width_all(3 if selected else 2)
+			flat.bg_color = Color(0.12, 0.1, 0.2, 0.96) if selected else Color(0.1, 0.08, 0.16, 0.94)
+	var lift := 1.08 + 0.1 * pulse
+	b.modulate = Color(minf(lift * 0.95, 1.25), minf(lift * 0.9, 1.2), minf(lift * 1.15, 1.4))
+	var bar := _ensure_galaxy_side_bar(b)
+	var a := 0.52 + 0.38 * pulse
+	if selected:
+		a = 0.82 + 0.15 * pulse
+	bar.color = Color(0.75 + 0.1 * pulse, 0.7 + 0.08 * pulse, 1.0, a)
+	bar.offset_top = 7.0 - 2.0 * pulse
+	bar.offset_bottom = -7.0 + 2.0 * pulse
+	b.queue_redraw()
+
 func _is_dynasty_pull(stage: StageDef) -> bool:
 	if stage == null or stage.id != "country":
 		return false
@@ -840,10 +1072,36 @@ func _is_sect_replay(stage: StageDef) -> bool:
 		return false
 	return GameState.can_enter(stage) and GameState.is_stage_cleared("sect")
 
+## Planet after 王朝 clear — ash「首通」bait.
+func _is_planet_pull(stage: StageDef) -> bool:
+	if stage == null or stage.id != "planet":
+		return false
+	if not GameState.is_stage_cleared("country"):
+		return false
+	if GameState.is_stage_cleared("planet"):
+		return false
+	return GameState.can_enter(stage)
+
+## Planet cleared — ash「再战」bait.
+func _is_planet_replay(stage: StageDef) -> bool:
+	if stage == null or stage.id != "planet":
+		return false
+	return GameState.can_enter(stage) and GameState.is_stage_cleared("planet")
+
+## Galaxy after 荒星 clear — violet「首通」bait.
+func _is_galaxy_pull(stage: StageDef) -> bool:
+	if stage == null or stage.id != "galaxy":
+		return false
+	if not GameState.is_stage_cleared("planet"):
+		return false
+	if GameState.is_stage_cleared("galaxy"):
+		return false
+	return GameState.can_enter(stage)
+
 func _refresh_hint() -> void:
 	var early_open := 0
 	var early_done := 0
-	for sid in ["sect", "country"]:
+	for sid in ["sect", "country", "planet"]:
 		var st := ContentDB.get_stage(sid)
 		if st == null:
 			continue
@@ -852,7 +1110,39 @@ func _refresh_hint() -> void:
 		if GameState.is_stage_cleared(sid):
 			early_done += 1
 	var country := ContentDB.get_stage("country")
-	if _is_dynasty_pull(country):
+	var planet := ContentDB.get_stage("planet")
+	var galaxy := ContentDB.get_stage("galaxy")
+	if _is_galaxy_pull(galaxy):
+		_clear_dynasty_hint_state()
+		_clear_planet_hint_state()
+		_hint.text = "陨星已通 · 星域首通"
+		_hint.add_theme_color_override("font_color", Color(0.75, 0.7, 1.0))
+		if _back_btn:
+			_back_btn.text = "回宗门"
+			_UiStyle.apply_button(_back_btn)
+	elif _is_planet_pull(planet):
+		# Prefer 荒星首通 over dynasty replay when both unlocked.
+		_clear_dynasty_hint_state()
+		_hint.text = "收刀已通 · 荒星首通"
+		_hint.add_theme_color_override("font_color", Color(1.0, 0.78, 0.4))
+		if not _planet_hint:
+			_planet_hint = true
+			_planet_hint_flash_t = 0.48
+		if _back_btn:
+			_back_btn.text = "回宗门"
+			_UiStyle.apply_button(_back_btn)
+	elif _is_planet_replay(planet) and _selected_id == "planet":
+		_clear_dynasty_hint_state()
+		_hint.text = "陨星已通 · 荒星再战"
+		_hint.add_theme_color_override("font_color", Color(1.0, 0.76, 0.42))
+		if not _planet_hint:
+			_planet_hint = true
+			_planet_hint_flash_t = 0.36
+		if _back_btn:
+			_back_btn.text = "回宗门"
+			_UiStyle.apply_button(_back_btn)
+	elif _is_dynasty_pull(country):
+		_clear_planet_hint_state()
 		_hint.text = "外门已通 · 王朝首通"
 		_hint.add_theme_color_override("font_color", Color(1.0, 0.88, 0.42))
 		if not _dynasty_hint:
@@ -863,6 +1153,7 @@ func _refresh_hint() -> void:
 			_UiStyle.apply_button(_back_btn)
 	elif _is_dynasty_replay(country):
 		# Soft gold hint — 再战 loop after 收刀, quieter than 首通 pull.
+		_clear_planet_hint_state()
 		_hint.text = "收刀已通 · 王朝再战"
 		_hint.add_theme_color_override("font_color", Color(1.0, 0.86, 0.45))
 		if not _dynasty_hint:
@@ -874,6 +1165,7 @@ func _refresh_hint() -> void:
 	elif _selected_id == "sect" and _is_sect_replay(ContentDB.get_stage("sect")):
 		# Teal hint when focusing cleared 宗门 — doesn't steal dynasty bait copy.
 		_clear_dynasty_hint_state()
+		_clear_planet_hint_state()
 		_hint.text = "庭院已通 · 宗门再战"
 		_hint.add_theme_color_override("font_color", Color(0.45, 0.95, 0.88))
 		if _back_btn:
@@ -881,6 +1173,7 @@ func _refresh_hint() -> void:
 			_UiStyle.apply_button(_back_btn)
 	elif _should_push_hub_spend():
 		_clear_dynasty_hint_state()
+		_clear_planet_hint_state()
 		_hint.text = "石 %d · 回宗花石" % GameState.spirit_stones
 		_hint.add_theme_color_override("font_color", Color(1.0, 0.92, 0.55))
 		if _back_btn:
@@ -888,6 +1181,7 @@ func _refresh_hint() -> void:
 			_UiStyle.apply_primary_button(_back_btn)
 	elif early_done < early_open:
 		_clear_dynasty_hint_state()
+		_clear_planet_hint_state()
 		_hint.text = "首通有石 · 开至第 %d 层" % GameState.unlocked_order
 		_hint.add_theme_color_override("font_color", Color(1.0, 0.9, 0.55))
 		if _back_btn:
@@ -895,6 +1189,7 @@ func _refresh_hint() -> void:
 			_UiStyle.apply_button(_back_btn)
 	else:
 		_clear_dynasty_hint_state()
+		_clear_planet_hint_state()
 		_hint.text = "开至第 %d 层" % GameState.unlocked_order
 		_hint.add_theme_color_override("font_color", Color(0.75, 0.82, 0.86))
 		if _back_btn:
@@ -905,7 +1200,14 @@ func _refresh_hint() -> void:
 func _clear_dynasty_hint_state() -> void:
 	_dynasty_hint = false
 	_dynasty_hint_flash_t = 0.0
-	if _hint:
+	if _hint and not _planet_hint:
+		_hint.scale = Vector2.ONE
+		_hint.modulate = Color.WHITE
+
+func _clear_planet_hint_state() -> void:
+	_planet_hint = false
+	_planet_hint_flash_t = 0.0
+	if _hint and not _dynasty_hint:
 		_hint.scale = Vector2.ONE
 		_hint.modulate = Color.WHITE
 
@@ -926,11 +1228,31 @@ func _tick_dynasty_hint(delta: float, t: float) -> void:
 		Color(1.0, 0.82 + 0.14 * g, 0.35 + 0.18 * g)
 	)
 
+## Hint bar: ash flash → soft breath (pairs hub 陨星到手 / 荒星首通).
+func _tick_planet_hint(delta: float, t: float) -> void:
+	if _hint == null or not _planet_hint:
+		return
+	if _planet_hint_flash_t > 0.0:
+		_planet_hint_flash_t = maxf(_planet_hint_flash_t - delta, 0.0)
+	var flash := clampf(_planet_hint_flash_t / 0.48, 0.0, 1.0)
+	var breath := 0.5 + 0.5 * sin(t * 1.95)
+	var g := breath * (1.0 - flash * 0.35) + flash
+	_hint.pivot_offset = _hint.size * 0.5
+	_hint.modulate = Color(minf(1.2 + 0.3 * g, 1.5), minf(0.85 + 0.15 * g, 1.15), minf(0.45 + 0.12 * g, 0.95))
+	_hint.scale = Vector2.ONE * (1.0 + 0.08 * flash + 0.03 * breath)
+	_hint.add_theme_color_override(
+		"font_color",
+		Color(1.0, 0.72 + 0.12 * g, 0.32 + 0.14 * g)
+	)
+
 func _build_list() -> void:
 	_pulse_ids.clear()
 	_dynasty_pull_ids.clear()
 	_dynasty_replay_ids.clear()
 	_sect_replay_ids.clear()
+	_planet_pull_ids.clear()
+	_planet_replay_ids.clear()
+	_galaxy_pull_ids.clear()
 	while _list.get_child_count() > 0:
 		var child := _list.get_child(0)
 		_list.remove_child(child)
@@ -941,16 +1263,30 @@ func _build_list() -> void:
 func _make_map_button(stage: StageDef) -> Control:
 	var unlocked := GameState.can_enter(stage)
 	var cleared := GameState.is_stage_cleared(stage.id)
-	var early := stage.id in ["sect", "country"]
+	var early := stage.id in ["sect", "country", "planet"]
 	var dynasty_pull := _is_dynasty_pull(stage)
 	var dynasty_replay := _is_dynasty_replay(stage)
 	var sect_replay := _is_sect_replay(stage)
+	var planet_pull := _is_planet_pull(stage)
+	var planet_replay := _is_planet_replay(stage)
+	var galaxy_pull := _is_galaxy_pull(stage)
 	var btn := Button.new()
 	btn.custom_minimum_size = Vector2(0, 36)
 	btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	var mark := "·"
 	if not unlocked:
 		mark = "·"
+	elif galaxy_pull:
+		mark = "河"
+		_pulse_ids[stage.id] = true
+		_galaxy_pull_ids[stage.id] = true
+	elif planet_pull:
+		mark = "陨"
+		_pulse_ids[stage.id] = true
+		_planet_pull_ids[stage.id] = true
+	elif planet_replay:
+		mark = "再"
+		_planet_replay_ids[stage.id] = true
 	elif dynasty_pull:
 		mark = "金"
 		_pulse_ids[stage.id] = true
@@ -971,7 +1307,13 @@ func _make_map_button(stage: StageDef) -> Control:
 	else:
 		mark = "○"
 	btn.text = "%s  %s" % [mark, stage.display_name]
-	if dynasty_pull:
+	if galaxy_pull:
+		btn.text = "河  星域 · 首通"
+	elif planet_pull:
+		btn.text = "陨  荒星 · 首通"
+	elif planet_replay:
+		btn.text = "再  荒星 · 再战"
+	elif dynasty_pull:
 		btn.text = "金  王朝 · 首通"
 	elif dynasty_replay:
 		btn.text = "再  王朝 · 再战"
@@ -980,7 +1322,11 @@ func _make_map_button(stage: StageDef) -> Control:
 	btn.disabled = not unlocked
 	btn.set_meta("stage_id", stage.id)
 	var accent := stage.accent
-	if dynasty_pull or dynasty_replay:
+	if galaxy_pull:
+		accent = "#a090e8"
+	elif planet_pull or planet_replay:
+		accent = "#e8904a"
+	elif dynasty_pull or dynasty_replay:
 		accent = "#f0c45a"
 	elif sect_replay:
 		accent = "#55e8d0"
@@ -988,8 +1334,15 @@ func _make_map_button(stage: StageDef) -> Control:
 	btn.set_meta("dynasty_pull", dynasty_pull)
 	btn.set_meta("dynasty_replay", dynasty_replay)
 	btn.set_meta("sect_replay", sect_replay)
+	btn.set_meta("planet_pull", planet_pull)
+	btn.set_meta("planet_replay", planet_replay)
+	btn.set_meta("galaxy_pull", galaxy_pull)
 	_UiStyle.apply_button(btn)
-	if dynasty_pull or dynasty_replay:
+	if galaxy_pull:
+		_apply_galaxy_row_style(btn)
+	elif planet_pull or planet_replay:
+		_apply_planet_row_style(btn)
+	elif dynasty_pull or dynasty_replay:
 		_apply_dynasty_row_style(btn)
 	elif sect_replay:
 		_apply_sect_row_style(btn)
@@ -1037,6 +1390,40 @@ func _apply_sect_row_style(btn: Button) -> void:
 	btn.add_theme_color_override("font_hover_color", Color(0.7, 1.0, 0.95))
 	_ensure_sect_side_bar(btn)
 
+## Ash-orange row — 荒星首通 / 再战 (pairs crater combat language).
+func _apply_planet_row_style(btn: Button) -> void:
+	var n := _UiStyle.button_normal()
+	n.bg_color = Color(0.16, 0.1, 0.06, 0.96)
+	n.border_color = Color(1.0, 0.72, 0.35, 0.95)
+	n.set_border_width_all(2)
+	var h := _UiStyle.button_hover()
+	h.bg_color = Color(0.24, 0.14, 0.08, 1.0)
+	h.border_color = Color(1.0, 0.85, 0.48, 1.0)
+	h.set_border_width_all(2)
+	btn.add_theme_stylebox_override("normal", n)
+	btn.add_theme_stylebox_override("hover", h)
+	btn.add_theme_stylebox_override("pressed", h)
+	btn.add_theme_color_override("font_color", Color(1.0, 0.82, 0.45))
+	btn.add_theme_color_override("font_hover_color", Color(1.0, 0.92, 0.65))
+	_ensure_planet_side_bar(btn)
+
+## Violet row — 星域首通 after 陨星.
+func _apply_galaxy_row_style(btn: Button) -> void:
+	var n := _UiStyle.button_normal()
+	n.bg_color = Color(0.1, 0.08, 0.16, 0.96)
+	n.border_color = Color(0.78, 0.72, 1.0, 0.95)
+	n.set_border_width_all(2)
+	var h := _UiStyle.button_hover()
+	h.bg_color = Color(0.16, 0.12, 0.24, 1.0)
+	h.border_color = Color(0.9, 0.85, 1.0, 1.0)
+	h.set_border_width_all(2)
+	btn.add_theme_stylebox_override("normal", n)
+	btn.add_theme_stylebox_override("hover", h)
+	btn.add_theme_stylebox_override("pressed", h)
+	btn.add_theme_color_override("font_color", Color(0.82, 0.78, 1.0))
+	btn.add_theme_color_override("font_hover_color", Color(0.95, 0.92, 1.0))
+	_ensure_galaxy_side_bar(btn)
+
 ## Short warm-gold rail on the left — breathes with dynasty row pulse.
 func _ensure_dynasty_side_bar(btn: Button) -> ColorRect:
 	var bar := btn.get_node_or_null("DynastyBar") as ColorRect
@@ -1079,6 +1466,48 @@ func _ensure_sect_side_bar(btn: Button) -> ColorRect:
 	btn.add_child(bar)
 	return bar
 
+## Short ash rail — breathes with 荒星 row pulse.
+func _ensure_planet_side_bar(btn: Button) -> ColorRect:
+	var bar := btn.get_node_or_null("PlanetBar") as ColorRect
+	if bar:
+		return bar
+	bar = ColorRect.new()
+	bar.name = "PlanetBar"
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bar.anchor_left = 0.0
+	bar.anchor_right = 0.0
+	bar.anchor_top = 0.0
+	bar.anchor_bottom = 1.0
+	bar.offset_left = 3.0
+	bar.offset_right = 6.0
+	bar.offset_top = 7.0
+	bar.offset_bottom = -7.0
+	bar.color = Color(1.0, 0.72, 0.35, 0.9)
+	bar.z_index = 1
+	btn.add_child(bar)
+	return bar
+
+## Short violet rail — breathes with 星域首通 row pulse.
+func _ensure_galaxy_side_bar(btn: Button) -> ColorRect:
+	var bar := btn.get_node_or_null("GalaxyBar") as ColorRect
+	if bar:
+		return bar
+	bar = ColorRect.new()
+	bar.name = "GalaxyBar"
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bar.anchor_left = 0.0
+	bar.anchor_right = 0.0
+	bar.anchor_top = 0.0
+	bar.anchor_bottom = 1.0
+	bar.offset_left = 3.0
+	bar.offset_right = 6.0
+	bar.offset_top = 7.0
+	bar.offset_bottom = -7.0
+	bar.color = Color(0.78, 0.72, 1.0, 0.9)
+	bar.z_index = 1
+	btn.add_child(bar)
+	return bar
+
 func _select_stage(stage_id: String) -> void:
 	_selected_id = stage_id
 	var stage := ContentDB.get_stage(stage_id)
@@ -1086,11 +1515,13 @@ func _select_stage(stage_id: String) -> void:
 		return
 	var accent_col := Color.from_string(stage.accent, Color(0.55, 0.78, 0.88))
 	if has_node("Root/MapFrame"):
-		# Courtyard teal / city gold panel base so idle rim reads as identity, not generic accent.
+		# Identity panel base so idle rim reads as map family, not generic accent.
 		if stage_id == "sect":
 			_UiStyle.apply_panel($Root/MapFrame, Color(0.38, 0.9, 0.84, 0.58))
 		elif stage_id == "country":
 			_UiStyle.apply_panel($Root/MapFrame, Color(0.95, 0.78, 0.38, 0.58))
+		elif stage_id == "planet":
+			_UiStyle.apply_panel($Root/MapFrame, Color(0.95, 0.68, 0.35, 0.58))
 		else:
 			_UiStyle.apply_panel($Root/MapFrame, Color(accent_col.r, accent_col.g, accent_col.b, 0.55))
 	for child in _list.get_children():
@@ -1112,7 +1543,7 @@ func _select_stage(stage_id: String) -> void:
 			b.modulate = acc
 	var unlocked := GameState.can_enter(stage)
 	var cleared := GameState.is_stage_cleared(stage.id)
-	var early := stage.id in ["sect", "country"]
+	var early := stage.id in ["sect", "country", "planet"]
 	_detail_title.text = stage.display_name
 	_detail_title.add_theme_color_override("font_color", accent_col.lightened(0.15))
 	var boss_name := "—"
@@ -1128,7 +1559,10 @@ func _select_stage(stage_id: String) -> void:
 		status = "可进入"
 	elif early and cleared:
 		status = "已通 · 可花石"
-	_detail_stats.text = "杀 %d · %s\n%s" % [stage.kill_target, boss_name, status]
+	var growth_line := ""
+	if early and unlocked:
+		growth_line = "\n" + _growth_teaser_line(stage.id)
+	_detail_stats.text = "杀 %d · %s\n%s%s" % [stage.kill_target, boss_name, status, growth_line]
 	_detail_stats.add_theme_color_override(
 		"font_color",
 		Color(1.0, 0.92, 0.55) if (early and not cleared and unlocked) else Color(0.84, 0.88, 0.92, 0.95)
@@ -1160,6 +1594,11 @@ func _select_stage(stage_id: String) -> void:
 			_enter_btn.text = "再战"
 			_enter_btn.add_theme_color_override("font_color", Color(0.42, 0.96, 0.88))
 			_enter_btn.add_theme_color_override("font_hover_color", Color(0.65, 1.0, 0.95))
+		elif stage_id == "planet" and cleared:
+			# Ash「再战」— crater clear loop CTA.
+			_enter_btn.text = "再战"
+			_enter_btn.add_theme_color_override("font_color", Color(1.0, 0.78, 0.4))
+			_enter_btn.add_theme_color_override("font_hover_color", Color(1.0, 0.9, 0.6))
 		elif cleared:
 			_enter_btn.text = "再战"
 		else:
@@ -1192,6 +1631,14 @@ func _select_stage(stage_id: String) -> void:
 		# Cleared dynasty — shout「王朝再战」once on land (pairs 收刀回流).
 		if GameState.is_stage_cleared("country"):
 			call_deferred("_flash_enter_dynasty_label")
+	elif stage_id == "planet" and unlocked:
+		_thumb_ash_t = maxf(_thumb_ash_t, 0.45)
+		_arm_detail_title_flash("planet")
+		_arm_detail_stats_flash("planet")
+		_arm_left_panel_flash("planet")
+		_arm_hint_land_flash("planet")
+		call_deferred("_flash_planet_preview_frame")
+		call_deferred("_flash_enter_planet_label")
 	else:
 		_title_flash_t = 0.0
 		_stats_flash_t = 0.0
@@ -1202,7 +1649,7 @@ func _select_stage(stage_id: String) -> void:
 		if _detail_stats:
 			_detail_stats.modulate = Color.WHITE
 			_detail_stats.scale = Vector2.ONE
-		if _hint and not _dynasty_hint:
+		if _hint and not _dynasty_hint and not _planet_hint:
 			_hint.modulate = Color.WHITE
 			_hint.scale = Vector2.ONE
 		if _left_panel:
@@ -1253,6 +1700,8 @@ func _play_enter_handoff(sid: String) -> void:
 		elif ash:
 			_enter_btn.modulate = Color(1.4, 0.95, 0.6)
 			_enter_btn.add_theme_color_override("font_color", Color(1.0, 0.78, 0.4))
+			_enter_land_ash = true
+			_enter_land_t = maxf(_enter_land_t, 0.4)
 		var etw := create_tween()
 		etw.tween_property(_enter_btn, "scale", Vector2(1.12, 1.12), 0.1).set_trans(Tween.TRANS_BACK)
 		etw.tween_property(_enter_btn, "scale", Vector2.ONE, 0.12)

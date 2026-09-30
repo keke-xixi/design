@@ -230,8 +230,8 @@ func cycle_stage(delta_order: int) -> bool:
 	return enter_stage(next.id)
 
 func early_kill_hook() -> bool:
-	# First minute of 宗门/王朝 — punchy kill read for early retention.
-	return run_time < 60.0 and stage_id in ["sect", "country"]
+	# First ~75s of 宗门/王朝/荒星 — punchy kill read for early retention.
+	return run_time < 75.0 and stage_id in ["sect", "country", "planet"]
 
 func register_kill(enemy_id: String) -> void:
 	kills[stage_id] = stage_kills() + 1
@@ -288,7 +288,8 @@ func _grant_stage_clear_reward(stage: StageDef, first_clear: bool = true) -> voi
 	last_clear_first = first_clear
 	last_clear_stage_id = stage.id
 	# Flag hub to flash spend CTAs when player returns with a fresh purse.
-	if stage.id in ["sect", "country"] or first_clear:
+	# Early + mid clears still feed the hub spend loop.
+	if stage.id in ["sect", "country", "planet"] or first_clear:
 		hub_celebrate_stones = stones
 	add_spirit_stones(stones)
 	EventBus.stage_reward.emit(stones)
@@ -321,10 +322,14 @@ func _apply_kill_growth() -> void:
 	var kill_n := stage_kills()
 	var w_every := int(g.get("kills_per_wisdom", 8))
 	var d_every := int(g.get("kills_per_defense", 10))
-	# Sect first: slightly faster visible growth.
+	# Early maps: slightly faster visible growth (sect > country > default).
 	if stage_id == "sect":
 		w_every = maxi(w_every - 1, 3)
 		d_every = maxi(d_every - 1, 4)
+	elif stage_id == "country":
+		# Dynasty slightly faster than default, quieter than sect courtyard.
+		w_every = maxi(w_every - 1, 4)
+		d_every = maxi(d_every - 1, 5)
 	var w_max := int(ContentDB.section("wisdom").get("max_rank", 100))
 	var d_max := int(ContentDB.section("defense").get("max", 100))
 	if w_every > 0 and kill_n % w_every == 0 and cultivation.wisdom_rank < w_max:
@@ -346,8 +351,8 @@ func revive() -> void:
 	combo = 0
 	_last_kill_time = -999.0
 	refill_hp()
-	# Early stages: soft power + free pill so retry feels hopeful, not punished.
-	if stage_id in ["sect", "country"]:
+	# Early + 荒星: soft power + free pill so retry feels hopeful, not punished.
+	if stage_id in ["sect", "country", "planet"]:
 		var g := ContentDB.section("growth")
 		var dmg := float(g.get("early_revive_temp_damage", 0.08))
 		var reduce := int(g.get("early_revive_hurt_reduce", 1))
@@ -374,7 +379,7 @@ func apply_hurt(amount: int) -> void:
 		# Tiny pity once per stage entry — makes retry feel less empty.
 		var g := ContentDB.section("growth")
 		var pity := int(g.get("death_pity_stones", 2))
-		if stage_id in ["sect", "country"]:
+		if stage_id in ["sect", "country", "planet"]:
 			pity += int(g.get("early_death_pity_bonus", 3))
 		last_death_pity = 0
 		if pity > 0 and not run.death_pity_given:
@@ -382,7 +387,7 @@ func apply_hurt(amount: int) -> void:
 			last_death_pity = pity
 			add_spirit_stones(pity)
 			# Early deaths still feed the hub spend loop — purse flash on return.
-			if stage_id in ["sect", "country"]:
+			if stage_id in ["sect", "country", "planet"]:
 				hub_celebrate_stones = maxi(hub_celebrate_stones, pity)
 				hub_pity_enter = true
 			EventBus.death_pity_gained.emit(pity)

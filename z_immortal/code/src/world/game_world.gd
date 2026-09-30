@@ -164,6 +164,9 @@ func _tick_heal_breath_ring(z: Dictionary, hbreath: float, phase: float) -> void
 
 func _on_wave_banner(hint: String) -> void:
 	_spawn_pause = float(ContentDB.section("combat").get("wave_pause", 0.85))
+	# Dynasty wants snappier wave beats — less freeze between 巡城→刀客→将军.
+	if GameState.stage_id == "country":
+		_spawn_pause = minf(_spawn_pause, 0.08)
 	if SfxService:
 		SfxService.play_wave()
 	var banner := get_node_or_null("HUD")
@@ -180,6 +183,9 @@ func _on_wave_banner(hint: String) -> void:
 				"伤+3%",
 				Color(0.95, 0.85, 0.5)
 			)
+	# Dynasty mid-wave: gold float so 刀客 beat reads as a stage turn, not only HUD banner.
+	if GameState.stage_id == "country" and hint == "刀客" and _player:
+		FloatTextManager.show_message(_player.global_position + Vector2(0, -52), "刀客来袭", Color(0.98, 0.78, 0.42))
 	if _player and _player.has_method("pulse_camera"):
 		_player.pulse_camera(0.07)
 
@@ -213,21 +219,46 @@ func _apply_zone_effects(delta: float) -> void:
 		var col := Color(0.9, 0.9, 0.95)
 		match effect:
 			"heal":
-				label = "灵脉·回血" if _map_pattern == "yard" else "药铺·回血"
+				if _map_pattern == "yard":
+					label = "灵脉·回血"
+				elif _map_pattern == "nebula":
+					label = "星憩·回血"
+				elif _map_pattern == "void":
+					label = "虚息·回血"
+				else:
+					label = "药铺·回血"
 				col = Color(0.55, 0.95, 0.7)
 			"slow":
-				label = "山雾·减速" if _map_pattern == "yard" else "市井·减速"
+				if _map_pattern == "yard":
+					label = "山雾·减速"
+				elif _map_pattern == "nebula":
+					label = "星雾·减速"
+				elif _map_pattern == "void":
+					label = "潮滞·减速"
+				else:
+					label = "市井·减速"
 				col = Color(0.65, 0.55, 0.95)
 			"damage":
-				label = "煞地·伤血" if _map_pattern == "yard" else ("陨坑·伤血" if _map_pattern == "crater" else "刑场·伤血")
+				if _map_pattern == "yard":
+					label = "煞地·伤血"
+				elif _map_pattern == "crater":
+					label = "陨坑·伤血"
+				elif _map_pattern == "nebula":
+					label = "虚蚀·伤血"
+				elif _map_pattern == "void":
+					label = "星骸·伤血"
+				else:
+					label = "刑场·伤血"
 				col = Color(1.0, 0.5, 0.4)
 				if _map_pattern == "crater":
 					# Teach risk-reward without a lecture — short second line.
 					FloatTextManager.show_message(_player.global_position + Vector2(0, -42), "站·伤+", Color(1.0, 0.72, 0.35))
+				elif _map_pattern == "void":
+					FloatTextManager.show_message(_player.global_position + Vector2(0, -42), "空·慎入", Color(0.55, 0.9, 1.0))
 		FloatTextManager.show_message(_player.global_position + Vector2(0, -28), label, col)
 		# HUD ping + rim flash so zone motive lands even mid-fight.
 		var hud := get_node_or_null("HUD")
-		if hud and hud.has_method("show_clear") and GameState.stage_id in ["sect", "country", "planet"]:
+		if hud and hud.has_method("show_clear") and GameState.stage_id in ["sect", "country", "planet", "galaxy"]:
 			hud.call("show_clear", label)
 		_flash_zone_enter(effect)
 		if effect == "damage":
@@ -502,8 +533,8 @@ func _on_boss_spawned(boss_id: String) -> void:
 		if hud and hud.has_method("show_clear"):
 			hud.call("show_clear", tip)
 		FloatTextManager.show_message(pos + Vector2(0, -40), tip, Color(1.0, 0.7, 0.4))
-		# Early stages: teach that gold window after the tell is the punish beat.
-		if GameState.stage_id in ["sect", "country"]:
+		# Early + mid stages: teach that gold window after the tell is the punish beat.
+		if GameState.stage_id in ["sect", "country", "planet"]:
 			var tip_timer := get_tree().create_timer(0.55, true)
 			tip_timer.timeout.connect(_teach_recover_tip)
 
@@ -638,6 +669,9 @@ func _set_background(stage: StageDef, pixel: Vector2) -> void:
 			_bg.modulate = Color(0.78 + accent.r * 0.08, 0.9 + accent.g * 0.1, 0.98 + accent.b * 0.05, 1.0)
 		"country":
 			_bg.modulate = Color(1.0 + accent.r * 0.05, 0.88 + accent.g * 0.06, 0.72 + accent.b * 0.04, 1.0)
+		"universe":
+			# Cool cyan void wash — 混沌星海 chapter identity.
+			_bg.modulate = Color(0.72 + accent.r * 0.1, 0.88 + accent.g * 0.08, 0.98 + accent.b * 0.06, 1.0)
 		_:
 			_bg.modulate = Color(0.88 + accent.r * 0.08, 0.9 + accent.g * 0.06, 0.92 + accent.b * 0.05, 1.0)
 	_bg_base_mod = _bg.modulate if _bg.texture else Color.WHITE
@@ -660,6 +694,15 @@ func _tint_vignette_for_stage() -> void:
 		"crater":
 			# Scorched orange — 荒星 basin heat.
 			edge_col = Color(0.18, 0.07, 0.02, 0.42)
+		"nebula":
+			# Violet void rim — 星域.
+			edge_col = Color(0.1, 0.05, 0.18, 0.4)
+		"rift":
+			# Crimson fracture rim — 界域.
+			edge_col = Color(0.16, 0.04, 0.05, 0.42)
+		"void":
+			# Deep cyan — 混沌星海.
+			edge_col = Color(0.02, 0.1, 0.14, 0.4)
 	_base_edge_col = edge_col
 	for edge_name in ["EdgeTop", "EdgeBottom", "EdgeLeft", "EdgeRight"]:
 		var edge := root.get_node_or_null(edge_name) as ColorRect
@@ -668,7 +711,7 @@ func _tint_vignette_for_stage() -> void:
 
 ## Slow color-temp breath — sect cool cyan vs dynasty warm gold (idle vignette only).
 func _tick_atmosphere(_delta: float) -> void:
-	if _map_pattern not in ["yard", "city", "crater"]:
+	if _map_pattern not in ["yard", "city", "crater", "nebula", "rift", "void"]:
 		return
 	# Slow clock — presence, not combat noise (~0.7Hz half-cycle).
 	var breath := 0.5 + 0.5 * sin(Time.get_ticks_msec() * 0.00115)
@@ -685,6 +728,27 @@ func _tick_atmosphere(_delta: float) -> void:
 				_bg_base_mod.r * (1.0 + 0.06 * breath),
 				_bg_base_mod.g * (1.0 + 0.01 * breath),
 				_bg_base_mod.b * (1.0 - 0.06 * breath),
+				1.0
+			)
+		elif _map_pattern == "void":
+			_bg.modulate = Color(
+				_bg_base_mod.r * (1.0 - 0.03 * breath),
+				_bg_base_mod.g * (1.0 + 0.04 * breath),
+				_bg_base_mod.b * (1.0 + 0.07 * breath),
+				1.0
+			)
+		elif _map_pattern == "nebula":
+			_bg.modulate = Color(
+				_bg_base_mod.r * (1.0 + 0.04 * breath),
+				_bg_base_mod.g * (1.0 - 0.02 * breath),
+				_bg_base_mod.b * (1.0 + 0.06 * breath),
+				1.0
+			)
+		elif _map_pattern == "rift":
+			_bg.modulate = Color(
+				_bg_base_mod.r * (1.0 + 0.06 * breath),
+				_bg_base_mod.g * (1.0 - 0.03 * breath),
+				_bg_base_mod.b * (1.0 - 0.04 * breath),
 				1.0
 			)
 		else:
@@ -898,10 +962,14 @@ func _spawn_ambient_motes(pixel: Vector2, stage: StageDef = null) -> void:
 	var count := 18
 	var city := _map_pattern == "city"
 	var crater := _map_pattern == "crater"
+	var voidish := _map_pattern in ["void", "nebula", "rift"]
 	if city:
 		count = 14
 	elif crater:
-		count = 12
+		count = 10
+	elif voidish:
+		# Late maps — lean ambient so combat FX keep the GPU budget.
+		count = 9
 	for i in count:
 		var mote := Polygon2D.new()
 		if city:
@@ -910,10 +978,20 @@ func _spawn_ambient_motes(pixel: Vector2, stage: StageDef = null) -> void:
 			mote.polygon = [Vector2(-1.5, -1), Vector2(1.5, -1), Vector2(1.5, 1), Vector2(-1.5, 1)]
 			mote.set_meta("drift", Vector2(randf_range(10, 22), randf_range(-6, 4)))
 		elif crater:
-			# Ash grit — fewer motes so crater overdraw stays under yard petals.
-			mote.color = Color(1.0, 0.55, 0.28, randf_range(0.12, 0.28))
-			mote.polygon = [Vector2(-1.2, -1.2), Vector2(1.2, -1.2), Vector2(1.2, 1.2), Vector2(-1.2, 1.2)]
-			mote.set_meta("drift", Vector2(randf_range(-16, 16), randf_range(4, 12)))
+			# Ash grit + occasional ember spark — crater air vs yard petals.
+			var ember := randf() < 0.22
+			if ember:
+				mote.color = Color(1.0, 0.72, 0.35, randf_range(0.18, 0.36))
+				mote.polygon = [Vector2(0, -1.6), Vector2(1.1, 1.0), Vector2(-1.1, 1.0)]
+				mote.set_meta("drift", Vector2(randf_range(-10, 10), randf_range(-8, -2)))
+			else:
+				mote.color = Color(1.0, 0.55, 0.28, randf_range(0.12, 0.28))
+				mote.polygon = [Vector2(-1.2, -1.2), Vector2(1.2, -1.2), Vector2(1.2, 1.2), Vector2(-1.2, 1.2)]
+				mote.set_meta("drift", Vector2(randf_range(-16, 16), randf_range(4, 12)))
+		elif _map_pattern == "void":
+			mote.color = Color(0.45, 0.9, 1.0, randf_range(0.1, 0.24))
+			mote.polygon = [Vector2(0, -1.6), Vector2(1.2, 1), Vector2(-1.2, 1)]
+			mote.set_meta("drift", Vector2(randf_range(-8, 8), randf_range(-14, -4)))
 		else:
 			# Cool spirit petals rising — mountain-sect air.
 			mote.color = Color(accent.r * 0.85, accent.g, accent.b, randf_range(0.14, 0.34))
@@ -1260,12 +1338,22 @@ func _build_obstacles(map: Dictionary) -> void:
 		var base_col := Color.from_string(str(raw.get("color", "#4a4038")), Color("4a4038"))
 		var style := str(raw.get("style", "rock"))
 		if style.is_empty():
-			style = "wall" if _map_pattern == "city" else "moss"
+			if _map_pattern == "city":
+				style = "wall"
+			elif _map_pattern == "crater":
+				style = "ash"
+			else:
+				style = "moss"
 		var shadow := Polygon2D.new()
 		shadow.color = Color(0.05, 0.05, 0.07, 0.35)
 		if style == "wall":
 			shadow.polygon = [
 				Vector2(1, h + 1), Vector2(w + 3, h + 1), Vector2(w + 1, h + 4), Vector2(3, h + 4)
+			]
+		elif style == "ash":
+			# Longer ash shadow — crater basalt sits low and wide.
+			shadow.polygon = [
+				Vector2(0, h + 1), Vector2(w + 5, h + 1), Vector2(w + 2, h + 5), Vector2(2, h + 5)
 			]
 		else:
 			shadow.polygon = [
@@ -1279,6 +1367,14 @@ func _build_obstacles(map: Dictionary) -> void:
 			rock.polygon = [
 				Vector2(1, 1), Vector2(w - 1, 1), Vector2(w - 1, h - 1), Vector2(1, h - 1)
 			]
+		elif style == "ash":
+			# Jagged basalt — 荒星 crater rocks ≠ moss garden stones.
+			rock.polygon = [
+				Vector2(1, h * 0.6), Vector2(w * 0.15, h * 0.2), Vector2(w * 0.45, 0),
+				Vector2(w * 0.85, h * 0.25), Vector2(w - 1, h * 0.55),
+				Vector2(w * 0.7, h - 1), Vector2(w * 0.25, h - 1)
+			]
+			rock.color = base_col.darkened(0.06)
 		else:
 			# Soft mossy garden stones — sect yard.
 			rock.polygon = [
@@ -1291,6 +1387,12 @@ func _build_obstacles(map: Dictionary) -> void:
 		if style == "wall":
 			highlight.polygon = [
 				Vector2(2, 2), Vector2(w * 0.55, 2), Vector2(w * 0.4, 5), Vector2(2, 5)
+			]
+		elif style == "ash":
+			# Ember rim fleck — hot crater read.
+			highlight.color = Color(0.95, 0.55, 0.28, 0.55)
+			highlight.polygon = [
+				Vector2(w * 0.2, h * 0.25), Vector2(w * 0.48, h * 0.08), Vector2(w * 0.38, h * 0.32)
 			]
 		else:
 			highlight.polygon = [

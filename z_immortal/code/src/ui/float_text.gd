@@ -11,7 +11,8 @@ func setup(pos: Vector2, text: String, color: Color) -> void:
 	_label.add_theme_constant_override("shadow_offset_y", 1)
 	# Larger pop for chunky hits / combo shouts so early combat reads as punchy.
 	var shizhan := text == "市斩"
-	var slashish := text == "斩" or shizhan or text == "收刀" or text.begins_with("斩") or text.ends_with("斩")
+	var xingzhan := text == "星斩"
+	var slashish := text == "斩" or shizhan or xingzhan or text == "收刀" or text == "陨星" or text.begins_with("斩") or text.ends_with("斩")
 	var breakish := text == "破" or text.begins_with("破")
 	var combo_count := text.ends_with("连") or text.ends_with("连!")
 	var comboish := slashish or breakish or combo_count or text.begins_with("伤+")
@@ -21,15 +22,17 @@ func setup(pos: Vector2, text: String, color: Color) -> void:
 	var gold_trail := shizhan or combo_count or (slashish and text == "斩" and GameState.combo >= 2)
 	# Sect first「斩」— calm teal trail (pairs 市斩 gold; not 破绽).
 	var sect_first_zhan := text == "斩" and GameState.early_kill_hook() and GameState.combo <= 1 and GameState.stage_id == "sect"
+	# Planet first「星斩」— ash trail.
+	var ash_trail := xingzhan or text == "陨星"
 	# 破/破绽 mirror with teal trail — opposite of 市斩 warm gold.
 	var teal_trail := breakish or sect_first_zhan
 	var size := 12
 	if slashish:
 		# 市斩/收刀 are two glyphs — slightly smaller than single 斩 but still loud.
-		if text == "收刀":
+		if text == "收刀" or text == "陨星":
 			size = 25
-		elif shizhan:
-			# Dynasty 市斩 — a touch louder than before so the glyph pops.
+		elif shizhan or xingzhan:
+			# Dynasty 市斩 / planet 星斩 — loud first-blood glyphs.
 			size = 26 if GameState.early_kill_hook() else 22
 		elif sect_first_zhan:
 			# Sect first blood — match 市斩 loudness with teal language.
@@ -59,6 +62,11 @@ func setup(pos: Vector2, text: String, color: Color) -> void:
 		_label.add_theme_color_override("font_shadow_color", Color(1.0, 0.72, 0.28, 0.78))
 		_label.add_theme_constant_override("shadow_offset_x", 3)
 		_label.add_theme_constant_override("shadow_offset_y", 2)
+	elif ash_trail:
+		# Ash-orange shadow — 星斩 / 陨星 crater family.
+		_label.add_theme_color_override("font_shadow_color", Color(1.0, 0.55, 0.22, 0.78))
+		_label.add_theme_constant_override("shadow_offset_x", 3)
+		_label.add_theme_constant_override("shadow_offset_y", 2)
 	elif teal_trail:
 		# Teal-jade shadow — heal/破绽 family vs slash gold.
 		_label.add_theme_color_override("font_shadow_color", Color(0.25, 0.95, 0.78, 0.78))
@@ -66,7 +74,7 @@ func setup(pos: Vector2, text: String, color: Color) -> void:
 		_label.add_theme_constant_override("shadow_offset_y", 2)
 	var rise := 26.0
 	if slashish:
-		rise = 54.0 if shizhan else (56.0 if sect_first_zhan else 52.0)
+		rise = 54.0 if shizhan or xingzhan else (56.0 if sect_first_zhan else 52.0)
 	elif breakish:
 		rise = 50.0
 	elif comboish:
@@ -78,9 +86,9 @@ func setup(pos: Vector2, text: String, color: Color) -> void:
 	var tw := create_tween()
 	tw.set_parallel(true)
 	tw.tween_property(self, "position:y", pos.y - rise, 0.5)
-	if big or comboish or critish or breakish or sect_first_zhan:
+	if big or comboish or critish or breakish or sect_first_zhan or ash_trail:
 		var peak := 1.42 if slashish else (1.35 if breakish else (1.28 if comboish else (1.2 if critish else 1.12)))
-		if shizhan:
+		if shizhan or xingzhan:
 			peak = 1.48
 		elif sect_first_zhan:
 			peak = 1.5

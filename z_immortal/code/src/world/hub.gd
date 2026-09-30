@@ -17,10 +17,14 @@ var _clear_hint: Label
 var _dynasty_pull := false
 ## Outer-sect still open → courtyard teal challenge CTA (vs dynasty gold).
 var _sect_pull := false
+## Dynasty cleared → 荒星 ash CTA (pairs 选关 crater pull).
+var _planet_pull := false
 var _dynasty_boost_t := 0.0  # Extra warm punch after「外门已通」toast.
 var _gate_toast: Label
 var _gate_flash_t := 0.0
 var _gate_flash_teal := false
+## Ash-orange gate flash after 荒星 clear return.
+var _gate_flash_ash := false
 ## MenuFrame stylebox — courtyard teal rim breath (pairs 宗门 · 首通).
 var _menu_flat: StyleBoxFlat
 
@@ -59,9 +63,10 @@ func _maybe_celebrate_return() -> void:
 		return
 	var pity_return := GameState.hub_pity_enter
 	GameState.hub_pity_enter = false
-	# Pity return must not reuse clear-stage toasts (外门已通 / 收刀).
+	# Pity return must not reuse clear-stage toasts (外门已通 / 收刀 / 陨星).
 	var sect_return := (not pity_return) and GameState.last_clear_stage_id == "sect"
 	var country_return := (not pity_return) and GameState.last_clear_stage_id == "country"
+	var planet_return := (not pity_return) and GameState.last_clear_stage_id == "planet"
 	GameState.hub_celebrate_stones = 0
 	# Fresh purse flash — closes clear → hub spend loop without a modal.
 	if _stone_badge:
@@ -78,11 +83,17 @@ func _maybe_celebrate_return() -> void:
 			_spend_hint.text = "抚恤 · 花石 炼丹%d / 坊市%d" % [alch, mkt]
 		elif country_return:
 			_spend_hint.text = "收刀 · 花石 炼丹%d / 坊市%d" % [alch, mkt]
+		elif planet_return:
+			_spend_hint.text = "陨星 · 花石 炼丹%d / 坊市%d" % [alch, mkt]
 		else:
 			_spend_hint.text = "石到手 · 炼丹%d / 坊市%d" % [alch, mkt]
 		_spend_hint.add_theme_color_override(
 			"font_color",
-			Color(1.0, 0.9, 0.5) if pity_return else (Color(0.85, 1.0, 0.7) if not country_return else Color(1.0, 0.92, 0.55))
+			Color(1.0, 0.9, 0.5) if pity_return else (
+				Color(1.0, 0.7, 0.4) if planet_return else (
+					Color(0.85, 1.0, 0.7) if not country_return else Color(1.0, 0.92, 0.55)
+				)
+			)
 		)
 		_spend_hint.modulate = Color(1.2, 1.15, 0.95)
 		var tw2 := create_tween()
@@ -96,7 +107,7 @@ func _maybe_celebrate_return() -> void:
 		_alchemy_btn.text = "炼丹 · 花"
 	if pity_return:
 		_flash_pity_toast(gained)
-		_flash_stage_gate(false)
+		_flash_stage_gate("gold")
 	# Outer-sect clear → shout once, then dynasty CTA stays warm-gold.
 	elif sect_return:
 		_flash_outer_cleared_toast()
@@ -104,13 +115,17 @@ func _maybe_celebrate_return() -> void:
 		_dynasty_boost_t = 1.4
 		call_deferred("_flash_dynasty_waiting_tip")
 		# Courtyard teal pop on the 选关 CTA — radar-clear echo, then gold bait.
-		_flash_stage_gate(true)
+		_flash_stage_gate("teal")
 	elif country_return:
 		# Dynasty clear → 「收刀到手 · 花石」 celebrates the purse.
 		_flash_shoudao_toast(gained)
-		_flash_stage_gate(false)
+		_flash_stage_gate("gold")
 		# Next stage-select visit echoes「收刀」on the fight tip.
 		GameState.hub_shoudao_enter = true
+	elif planet_return:
+		# 荒星 clear → ash purse toast, then 选关 ash kick toward 星域.
+		_flash_planet_toast(gained)
+		_flash_stage_gate("ash")
 	# Loud 1s spend CTA: market when affordable, else alchemy pills.
 	if GameState.spirit_stones >= _cheapest_market():
 		_highlight_market_if_can_buy()
@@ -178,23 +193,56 @@ func _flash_dynasty_waiting_tip() -> void:
 	tw.tween_property(_clear_hint, "scale", Vector2.ONE, 0.16)
 	tw.parallel().tween_property(_clear_hint, "modulate", Color.WHITE, 0.45)
 
-## 选关 CTA pop on hub return — sect teal / dynasty gold (pairs combat radar clear).
-func _flash_stage_gate(teal: bool) -> void:
+## 选关 CTA pop on hub return — sect teal / dynasty gold / planet ash.
+func _flash_stage_gate(mode: String = "gold") -> void:
 	if _challenge == null:
 		return
-	_gate_flash_teal = teal
+	_gate_flash_teal = mode == "teal"
+	_gate_flash_ash = mode == "ash"
 	_gate_flash_t = 0.85
 	_challenge.pivot_offset = _challenge.size * 0.5
 	_challenge.scale = Vector2(0.88, 0.88)
-	if teal:
+	if _gate_flash_teal:
 		_challenge.modulate = Color(0.55, 1.15, 1.05)
 		_challenge.add_theme_color_override("font_color", Color(0.45, 0.98, 0.9))
+	elif _gate_flash_ash:
+		_challenge.modulate = Color(1.35, 0.85, 0.55)
+		_challenge.add_theme_color_override("font_color", Color(1.0, 0.72, 0.38))
 	else:
 		_challenge.modulate = Color(1.4, 1.18, 0.7)
 		_challenge.add_theme_color_override("font_color", Color(1.0, 0.9, 0.45))
 	var tw := create_tween()
 	tw.tween_property(_challenge, "scale", Vector2(1.1, 1.1), 0.12).set_trans(Tween.TRANS_BACK)
 	tw.tween_property(_challenge, "scale", Vector2.ONE, 0.18)
+
+## 荒星 clear return — ash purse toast (pairs crater combat language).
+func _flash_planet_toast(gained: int = 0) -> void:
+	_ensure_gate_toast()
+	if _gate_toast == null:
+		return
+	_gate_toast.visible = true
+	_gate_toast.size = Vector2(220, 34)
+	_gate_toast.position = Vector2(228, 146)
+	_gate_toast.add_theme_font_size_override("font_size", 15)
+	_gate_toast.add_theme_color_override("font_color", Color(1.0, 0.78, 0.42))
+	_gate_toast.text = "陨星到手 · 花石" if gained > 0 else "陨星到手"
+	_gate_toast.modulate = Color(1.4, 1.05, 0.7)
+	_gate_toast.scale = Vector2(0.82, 0.82)
+	_gate_toast.pivot_offset = _gate_toast.size * 0.5
+	var tw := create_tween()
+	tw.tween_property(_gate_toast, "scale", Vector2(1.14, 1.14), 0.12).set_trans(Tween.TRANS_BACK)
+	tw.tween_property(_gate_toast, "scale", Vector2.ONE, 0.16)
+	tw.tween_interval(1.5)
+	tw.tween_property(_gate_toast, "modulate:a", 0.0, 0.35)
+	tw.tween_callback(func() -> void:
+		if _gate_toast:
+			_gate_toast.visible = false
+			_gate_toast.modulate = Color.WHITE
+	)
+	if _spend_hint:
+		_spend_hint.text = "陨星到手 · 花石"
+		_spend_hint.add_theme_color_override("font_color", Color(1.0, 0.75, 0.4))
+	_flash_shoudao_spend_gold()
 
 ## After dynasty「收刀」return — celebrate flower-stones into the spend loop.
 func _flash_shoudao_toast(gained: int = 0) -> void:
@@ -387,6 +435,12 @@ func _tick_menuframe_breath(t: float, gate_a: float) -> void:
 		if _menu_flat:
 			_menu_flat.border_color = Color(1.0, 0.84, 0.4, 0.42 + 0.3 * breath)
 			_menu_flat.set_border_width_all(2)
+	elif _planet_pull:
+		# Soft ash rim while 荒星 owns the CTA.
+		frame.modulate = Color(1.05 + 0.06 * breath, 0.9 + 0.04 * breath, 0.72 + 0.02 * breath)
+		if _menu_flat:
+			_menu_flat.border_color = Color(1.0, 0.72, 0.35, 0.42 + 0.3 * breath)
+			_menu_flat.set_border_width_all(2)
 	else:
 		# Quiet always-on courtyard teal — hub identity without shouting.
 		frame.modulate = Color(0.97 + 0.03 * breath, 1.02 + 0.04 * breath, 1.0 + 0.03 * breath)
@@ -398,7 +452,7 @@ func _estimate_clear_stones(stage: StageDef) -> int:
 	var g := ContentDB.section("growth")
 	var stones := int(g.get("stage_clear_stones_base", 15)) + stage.order * int(g.get("stage_clear_stones_per_order", 8))
 	stones += int(g.get("stage_clear_first_bonus", 8))
-	if stage.id in ["sect", "country"]:
+	if stage.id in ["sect", "country", "planet"]:
 		stones += int(g.get("early_clear_stones_bonus", 8))
 		stones += int(g.get("early_first_clear_extra", 10))
 	return stones
@@ -423,11 +477,14 @@ func _process(_delta: float) -> void:
 	var boost := clampf(_dynasty_boost_t / 1.4, 0.0, 1.0)
 	var gate_a := clampf(_gate_flash_t / 0.85, 0.0, 1.0)
 	if gate_a > 0.0:
-		# Return pop wins the first beat — teal 宗门 / gold 王朝.
+		# Return pop wins the first beat — teal 宗门 / gold 王朝 / ash 荒星.
 		var pulse := 0.55 + 0.45 * sin(Time.get_ticks_msec() * 0.018)
 		if _gate_flash_teal:
 			_challenge.modulate = Color(0.5 + 0.2 * pulse, 1.05 + 0.15 * pulse, 0.95 + 0.1 * pulse)
 			_challenge.add_theme_color_override("font_color", Color(0.42, 0.98, 0.9, 0.7 + 0.3 * gate_a))
+		elif _gate_flash_ash:
+			_challenge.modulate = Color(1.2 + 0.2 * pulse, 0.75 + 0.12 * pulse, 0.4 + 0.08 * pulse)
+			_challenge.add_theme_color_override("font_color", Color(1.0, 0.72, 0.38, 0.7 + 0.3 * gate_a))
 		else:
 			_challenge.modulate = Color(1.25 + 0.2 * pulse, 0.95 + 0.12 * pulse, 0.45 + 0.1 * pulse)
 			_challenge.add_theme_color_override("font_color", Color(1.0, 0.88, 0.4, 0.7 + 0.3 * gate_a))
@@ -458,6 +515,19 @@ func _process(_delta: float) -> void:
 		_challenge.add_theme_color_override(
 			"font_color",
 			Color(0.38 + 0.08 * ink_t, 0.95 + 0.04 * ink_t, 0.88 + 0.06 * ink_t)
+		)
+	elif _planet_pull:
+		# Ash-orange breath — 荒星 · 首通 (pairs crater 选关).
+		var hz_p := 1.9
+		var gp := 1.0 + 0.13 * sin(t * hz_p)
+		_challenge.modulate = Color(minf(gp * 1.22, 1.48), minf(gp * 0.82, 1.12), minf(gp * 0.5, 0.9))
+		var sp := 1.0 + 0.038 * sin(t * hz_p)
+		_challenge.scale = Vector2(sp, sp)
+		_challenge.pivot_offset = _challenge.size * 0.5
+		var ink_p := 0.55 + 0.45 * (0.5 + 0.5 * sin(t * hz_p))
+		_challenge.add_theme_color_override(
+			"font_color",
+			Color(1.0, 0.72 + 0.1 * ink_p, 0.35 + 0.1 * ink_p)
 		)
 	elif first_open:
 		# Soft warm pull for later-stage first clears (not 宗门/王朝).
@@ -504,6 +574,8 @@ func _process(_delta: float) -> void:
 		elif _sect_pull:
 			# Cool courtyard wash — pairs MapFrame teal / 选关庭院.
 			hg.color = Color(0.35, 0.88, 0.82, 0.1 + 0.08 * (0.5 + 0.5 * sin(t * 1.5)))
+		elif _planet_pull:
+			hg.color = Color(0.95, 0.62, 0.32, 0.1 + 0.08 * (0.5 + 0.5 * sin(t * 1.55)))
 		else:
 			hg.color = Color(0.45, 0.75, 0.95, 0.1 + 0.06 * (0.5 + 0.5 * sin(t * 0.9)))
 	if has_node("HeroShadow"):
@@ -516,12 +588,14 @@ func _process(_delta: float) -> void:
 		$Brand.modulate = Color(1.0, 1.0, 1.0, 0.92 + 0.08 * sin(t * 0.6))
 	_tick_menuframe_breath(t, gate_a)
 	# First-clear hint breathes with the challenge CTA.
-	if _clear_hint and _clear_hint.visible and (_dynasty_pull or _sect_pull or first_open):
+	if _clear_hint and _clear_hint.visible and (_dynasty_pull or _sect_pull or _planet_pull or first_open):
 		var g0 := 1.0 + (0.12 + 0.06 * boost) * sin(t * 2.0)
 		if _dynasty_pull:
 			_clear_hint.modulate = Color(minf(g0 * 1.2, 1.45), minf(g0 * 0.94, 1.22), minf(g0 * 0.55, 1.0))
 		elif _sect_pull:
 			_clear_hint.modulate = Color(0.55 + 0.15 * g0, minf(g0 * 1.1, 1.35), minf(g0 * 1.02, 1.25))
+		elif _planet_pull:
+			_clear_hint.modulate = Color(minf(g0 * 1.18, 1.4), minf(g0 * 0.85, 1.15), minf(g0 * 0.5, 0.95))
 		else:
 			_clear_hint.modulate = Color(minf(g0 * 1.08, 1.3), minf(g0 * 0.96, 1.15), minf(g0 * 0.75, 1.0))
 	elif _clear_hint:
@@ -628,6 +702,7 @@ func _refresh_status() -> void:
 	var next_stage := _recommended_stage()
 	var first_target := _next_first_clear_stage()
 	_dynasty_pull = _is_dynasty_pull()
+	_planet_pull = _is_planet_pull()
 	_sect_pull = first_target != null and first_target.id == "sect" and GameState.can_enter(first_target)
 	if _dynasty_pull and first_target and first_target.id == "country":
 		var est := _estimate_clear_stones(first_target)
@@ -641,6 +716,28 @@ func _refresh_status() -> void:
 			# Short bait beside CTA — toast already shouted「外门已通」.
 			_clear_hint.text = "王朝在等"
 			_clear_hint.add_theme_color_override("font_color", Color(1.0, 0.88, 0.42))
+	elif _planet_pull and first_target and first_target.id == "planet":
+		var est_p := _estimate_clear_stones(first_target)
+		_challenge.text = "荒星 · 首通"
+		_challenge.tooltip_text = "收刀已通 · 首通约 +%d 灵石" % est_p
+		_challenge.add_theme_color_override("font_color", Color(1.0, 0.78, 0.4))
+		_challenge.add_theme_color_override("font_hover_color", Color(1.0, 0.9, 0.6))
+		_UiStyle.apply_cta_button(_challenge)
+		if _clear_hint:
+			_clear_hint.visible = true
+			_clear_hint.text = "荒星在等"
+			_clear_hint.add_theme_color_override("font_color", Color(1.0, 0.76, 0.42))
+	elif first_target and first_target.id == "galaxy":
+		var est_g := _estimate_clear_stones(first_target)
+		_challenge.text = "星域 · 首通"
+		_challenge.tooltip_text = "陨星已通 · 首通约 +%d 灵石" % est_g
+		_challenge.add_theme_color_override("font_color", Color(0.82, 0.78, 1.0))
+		_challenge.add_theme_color_override("font_hover_color", Color(0.95, 0.92, 1.0))
+		_UiStyle.apply_cta_button(_challenge)
+		if _clear_hint:
+			_clear_hint.visible = true
+			_clear_hint.text = "星域在等"
+			_clear_hint.add_theme_color_override("font_color", Color(0.78, 0.72, 1.0))
 	elif _sect_pull and first_target:
 		var est_s := _estimate_clear_stones(first_target)
 		_challenge.text = "宗门 · 首通"
@@ -689,9 +786,18 @@ func _is_dynasty_pull() -> bool:
 	var country := ContentDB.get_stage("country")
 	return country != null and GameState.can_enter(country)
 
+## Dynasty cleared + 荒星 unlocked — ash CTA bait (pairs 选关 crater pull).
+func _is_planet_pull() -> bool:
+	if not GameState.is_stage_cleared("country"):
+		return false
+	if GameState.is_stage_cleared("planet"):
+		return false
+	var planet := ContentDB.get_stage("planet")
+	return planet != null and GameState.can_enter(planet)
+
 func _next_first_clear_stage() -> StageDef:
 	# Prefer early uncleared, then any unlocked uncleared by order.
-	for sid in ["sect", "country"]:
+	for sid in ["sect", "country", "planet", "galaxy"]:
 		var st := ContentDB.get_stage(sid)
 		if st and GameState.can_enter(st) and not GameState.is_stage_cleared(st.id):
 			return st
@@ -727,9 +833,13 @@ func _name(item_id: String) -> String:
 func _on_challenge_pressed() -> void:
 	# Carry fight CTA into stage select —「开战到手 · 选关」tip.
 	GameState.hub_fight_enter = true
-	# 「王朝 · 首通」→ 王朝 row；「宗门 · 首通」→ 庭院 row.
+	# 「王朝 · 首通」→ 王朝 row；「宗门 · 首通」→ 庭院；「荒星 · 首通」→ crater.
 	if _dynasty_pull or (_challenge and "王朝" in _challenge.text):
 		GameState.stage_select_focus_id = "country"
+	elif _planet_pull or (_challenge and "荒星" in _challenge.text):
+		GameState.stage_select_focus_id = "planet"
+	elif _challenge and "星域" in _challenge.text:
+		GameState.stage_select_focus_id = "galaxy"
 	elif _sect_pull or (_challenge and "宗门" in _challenge.text):
 		GameState.stage_select_focus_id = "sect"
 	SceneManager.go_stage_select()

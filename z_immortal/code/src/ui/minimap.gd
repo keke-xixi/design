@@ -42,11 +42,15 @@ func _on_stage_cleared(_stage_id: String) -> void:
 	queue_redraw()
 
 func _on_combo_milestone(count: int) -> void:
-	# Match HUD edge — 二连/三连 sect teal; 5/8 hotter gold; soft ticks stay quieter.
+	# Match HUD edge — 二连/三连 sect teal or dynasty gold; 5/8 hotter; soft ticks quieter.
 	var yard := _pattern == "yard" or GameState.stage_id == "sect"
+	var city := _pattern == "city" or GameState.stage_id == "country"
 	_combo_teal = yard and (count == 2 or count == 3)
 	_combo_flash_tier = count
-	if count == 2:
+	# Dynasty 2/3 use tier gold path (not teal) — bump duration so city streak reads.
+	if city and not yard and (count == 2 or count == 3):
+		_combo_flash_max = 0.34 if count == 3 else 0.3
+	elif count == 2:
 		_combo_flash_max = 0.3
 	elif count == 3:
 		_combo_flash_max = 0.36
@@ -112,6 +116,21 @@ func _refresh_stage_look() -> void:
 		_fill_col = Color(0.1, 0.05, 0.03, 0.88)
 		_obs_col = Color(0.38, 0.22, 0.14, 0.92)
 		_frame_col = Color(0.85, 0.52, 0.28, 0.76)
+	elif _pattern == "nebula":
+		# Violet void wash — 星域 vs crater ember / city gold.
+		_fill_col = Color(0.06, 0.04, 0.12, 0.88)
+		_obs_col = Color(0.28, 0.22, 0.48, 0.9)
+		_frame_col = Color(0.72, 0.58, 0.95, 0.74)
+	elif _pattern == "rift":
+		# Crimson fracture — 界域 vs nebula violet.
+		_fill_col = Color(0.1, 0.03, 0.04, 0.88)
+		_obs_col = Color(0.42, 0.16, 0.18, 0.9)
+		_frame_col = Color(0.9, 0.42, 0.38, 0.74)
+	elif _pattern == "void":
+		# Deep cyan void — 混沌星海 vs rift crimson.
+		_fill_col = Color(0.03, 0.05, 0.1, 0.9)
+		_obs_col = Color(0.18, 0.28, 0.45, 0.88)
+		_frame_col = Color(0.45, 0.85, 0.82, 0.72)
 	else:
 		_fill_col = Color(0.04, 0.06, 0.09, 0.82)
 		_obs_col = Color(0.28, 0.24, 0.2, 0.9)
@@ -314,6 +333,12 @@ func _draw() -> void:
 		_draw_city_grid(inner)
 	elif _pattern == "crater":
 		_draw_crater_rings(inner)
+	elif _pattern == "nebula":
+		_draw_nebula_swirl(inner)
+	elif _pattern == "rift":
+		_draw_rift_scar(inner)
+	elif _pattern == "void":
+		_draw_void_core(inner)
 	# Zones first — 煞地 / 灵泉 pulse so map motives read mid-fight.
 	for raw in _zones:
 		if typeof(raw) != TYPE_DICTIONARY:
@@ -589,18 +614,80 @@ func _draw_yard_lanes(inner: Rect2) -> void:
 		draw_circle(g, 1.4, Color(0.45, 0.9, 0.8, 0.4))
 
 func _draw_city_grid(inner: Rect2) -> void:
-	var street := Color(0.7, 0.55, 0.35, 0.16)
+	# Warm masonry cross + gate pips — dynasty radar identity vs courtyard lanes.
+	var street := Color(0.78, 0.58, 0.32, 0.2)
 	var mid := inner.get_center()
-	draw_line(Vector2(mid.x, inner.position.y + 2.0), Vector2(mid.x, inner.end.y - 2.0), street, 2.4)
-	draw_line(Vector2(inner.position.x + 2.0, mid.y), Vector2(inner.end.x - 2.0, mid.y), street, 2.4)
+	draw_line(Vector2(mid.x, inner.position.y + 2.0), Vector2(mid.x, inner.end.y - 2.0), street, 2.5)
+	draw_line(Vector2(inner.position.x + 2.0, mid.y), Vector2(inner.end.x - 2.0, mid.y), street, 2.5)
+	# Soft outer ring — city wall read without cluttering combat pips.
+	var wall := Color(0.85, 0.65, 0.38, 0.14)
+	draw_rect(inner.grow(-1.5), wall, false, 1.1)
+	var gates: Array[Vector2] = [
+		Vector2(mid.x, inner.position.y + 3.0),
+		Vector2(mid.x, inner.end.y - 3.0),
+		Vector2(inner.position.x + 3.0, mid.y),
+		Vector2(inner.end.x - 3.0, mid.y),
+	]
+	for g in gates:
+		draw_circle(g, 1.5, Color(0.95, 0.78, 0.4, 0.42))
+		draw_circle(g, 0.6, Color(1.0, 0.92, 0.6, 0.55))
 
 func _draw_crater_rings(inner: Rect2) -> void:
-	# Nested ash rings — basin reads as 荒星, not a courtyard cross.
+	# Nested ash rings + gate ticks — basin reads as 荒星, not a courtyard cross.
 	var mid := inner.get_center()
 	var dust := Color(0.95, 0.55, 0.28, 0.22)
 	draw_arc(mid, mini(inner.size.x, inner.size.y) * 0.18, 0.0, TAU, 20, dust, 1.4)
 	draw_arc(mid, mini(inner.size.x, inner.size.y) * 0.32, 0.0, TAU, 22, Color(0.9, 0.48, 0.22, 0.16), 1.2)
+	draw_arc(mid, mini(inner.size.x, inner.size.y) * 0.42, 0.0, TAU, 24, Color(0.75, 0.35, 0.18, 0.1), 1.0)
 	draw_circle(mid, 2.2, Color(1.0, 0.45, 0.2, 0.35))
+	# Cardinal ember ticks — rim of the basin.
+	var rr := mini(inner.size.x, inner.size.y) * 0.36
+	for i in 4:
+		var a := float(i) * TAU * 0.25
+		var p := mid + Vector2(cos(a), sin(a)) * rr
+		draw_circle(p, 1.2, Color(1.0, 0.6, 0.3, 0.4))
+
+func _draw_nebula_swirl(inner: Rect2) -> void:
+	# Soft violet arcs — 星域 radar identity vs crater ember rings.
+	var mid := inner.get_center()
+	var r0 := mini(inner.size.x, inner.size.y)
+	draw_arc(mid, r0 * 0.16, 0.2, TAU * 0.72, 18, Color(0.7, 0.55, 1.0, 0.22), 1.3)
+	draw_arc(mid, r0 * 0.28, -0.4, TAU * 0.65, 20, Color(0.55, 0.45, 0.95, 0.16), 1.15)
+	draw_arc(mid, r0 * 0.38, 0.8, TAU * 0.7, 22, Color(0.85, 0.7, 1.0, 0.1), 1.0)
+	draw_circle(mid, 1.8, Color(0.85, 0.75, 1.0, 0.4))
+	# Drift motes — sparse so combat pips stay readable.
+	var motes: Array[Vector2] = [
+		mid + Vector2(r0 * 0.22, -r0 * 0.1),
+		mid + Vector2(-r0 * 0.18, r0 * 0.14),
+		mid + Vector2(r0 * 0.08, r0 * 0.22),
+	]
+	for m in motes:
+		draw_circle(m, 1.0, Color(0.75, 0.65, 1.0, 0.35))
+
+func _draw_rift_scar(inner: Rect2) -> void:
+	# Diagonal crimson scar — 界域 fracture vs nebula swirl / crater rings.
+	var a := inner.position + Vector2(4, 4)
+	var b := inner.end - Vector2(4, 4)
+	draw_line(a, b, Color(0.95, 0.35, 0.32, 0.28), 2.2)
+	draw_line(a + Vector2(3, 0), b + Vector2(3, 0), Color(0.7, 0.2, 0.18, 0.14), 1.2)
+	var mid := inner.get_center()
+	draw_circle(mid, 2.0, Color(1.0, 0.45, 0.38, 0.4))
+	draw_circle(mid + Vector2(-inner.size.x * 0.18, inner.size.y * 0.12), 1.1, Color(0.95, 0.4, 0.35, 0.35))
+	draw_circle(mid + Vector2(inner.size.x * 0.16, -inner.size.y * 0.1), 1.1, Color(0.95, 0.4, 0.35, 0.35))
+
+func _draw_void_core(inner: Rect2) -> void:
+	# Concentric cyan void — 混沌星海 radar identity.
+	var mid := inner.get_center()
+	var r0 := mini(inner.size.x, inner.size.y)
+	draw_arc(mid, r0 * 0.14, 0.0, TAU, 20, Color(0.4, 0.9, 0.88, 0.28), 1.4)
+	draw_arc(mid, r0 * 0.26, 0.0, TAU, 22, Color(0.35, 0.7, 0.95, 0.16), 1.15)
+	draw_arc(mid, r0 * 0.38, 0.0, TAU, 24, Color(0.55, 0.85, 0.9, 0.1), 1.0)
+	draw_circle(mid, 2.0, Color(0.55, 0.95, 0.92, 0.45))
+	# Sparse star flecks.
+	for i in 3:
+		var a := float(i) * 2.1 + 0.4
+		var p := mid + Vector2(cos(a), sin(a)) * (r0 * 0.3)
+		draw_circle(p, 0.9, Color(0.7, 0.95, 1.0, 0.4))
 
 func _draw_spawn_pings(inner: Rect2, sx: float, sy: float, t: float) -> void:
 	var world := get_tree().get_first_node_in_group("game_world")

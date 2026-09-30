@@ -36,6 +36,12 @@ const DAMAGE_PULSE_HZ := 0.009
 ## Attack squash/tween MUST restore `_base_scale` — Vector2.ONE blows 1400px portraits full-screen.
 const TARGET_VISUAL_H := 80.0
 var _base_scale := Vector2(0.056, 0.056)
+## Kill before starting a new attack squash so ring/auto tweens never stack.
+var _visual_scale_tween: Tween
+## Combat JSON cache — avoid ContentDB.section every physics frame.
+var _cached_speed := 96.0
+var _cached_atk_interval := 0.42
+var _cbt_cache_t := 0.0
 
 func _ready() -> void:
 	add_to_group("player")
@@ -58,6 +64,22 @@ func _apply_base_visual_scale() -> void:
 	var s := TARGET_VISUAL_H / maxf(th, 1.0)
 	_base_scale = Vector2(s, s)
 	_visual.scale = _base_scale
+
+## Attack punch relative to fitted base — never tween toward Vector2.ONE.
+## TRANS_BACK overshoot used to briefly inflate past base after 环斩.
+func _punch_visual_scale(mult: Vector2, duration: float = 0.1) -> void:
+	if _visual == null:
+		return
+	if _visual_scale_tween != null and is_instance_valid(_visual_scale_tween):
+		_visual_scale_tween.kill()
+	_visual.scale = Vector2(_base_scale.x * mult.x, _base_scale.y * mult.y)
+	_visual_scale_tween = create_tween()
+	_visual_scale_tween.tween_property(_visual, "scale", _base_scale, duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_visual_scale_tween.finished.connect(_snap_visual_to_base, CONNECT_ONE_SHOT)
+
+func _snap_visual_to_base() -> void:
+	if _visual:
+		_visual.scale = _base_scale
 
 func configure(projectiles: Node2D, map_rect: Rect2) -> void:
 	_projectiles = projectiles
@@ -88,6 +110,11 @@ func _physics_process(delta: float) -> void:
 		return
 	_bob += delta * 6.0
 	_visual.position.y = -8.0 + sin(_bob) * 1.6
+	# Safety: if a tween/race ever leaves us near full-res, snap back immediately.
+	if _visual and _base_scale.x > 0.0:
+		var drift := _visual.scale.x / _base_scale.x
+		if drift > 1.45 or drift < 0.55:
+			_snap_visual_to_base()
 	if _outline:
 		_outline.position.y = _visual.position.y + 1.0
 		_outline.flip_h = _visual.flip_h
@@ -290,8 +317,13 @@ func _physics_process(delta: float) -> void:
 				_outline.scale = _visual.scale * 1.03
 		elif _hurt_cd <= 0.0:
 			modulate = Color.WHITE
-	var cbt := ContentDB.section("combat")
-	var speed := float(cbt.get("player_speed", 96)) * GameState.effective_speed_mult()
+	_cbt_cache_t -= delta
+	if _cbt_cache_t <= 0.0:
+		var cbt := ContentDB.section("combat")
+		_cached_speed = float(cbt.get("player_speed", 96))
+		_cached_atk_interval = float(cbt.get("auto_attack_interval", 0.42))
+		_cbt_cache_t = 0.75
+	var speed := _cached_speed * GameState.effective_speed_mult()
 	var zone_mult := 1.0
 	var world := get_tree().get_first_node_in_group("game_world")
 	if world and world.has_method("zone_mods_at"):
@@ -312,7 +344,7 @@ func _physics_process(delta: float) -> void:
 		_hurt_cd = maxf(_hurt_cd, 0.05)
 	_attack_cd -= delta
 	if _attack_cd <= 0.0 and _try_fire():
-		_attack_cd = float(cbt.get("auto_attack_interval", 0.42))
+		_attack_cd = _cached_atk_interval
 
 func take_hit(amount: int, from_pos: Vector2 = Vector2.INF) -> void:
 	if GameState.dead or (_hurt_cd > 0.0 and _dash_iframe <= 0.0):
@@ -529,11 +561,8 @@ func _spawn_melee_muzzle(dir: Vector2) -> void:
 	tw.tween_property(arc, "modulate:a", 0.0, 0.1)
 	tw.parallel().tween_property(arc, "scale", Vector2(1.35, 1.35), 0.1)
 	tw.tween_callback(arc.queue_free)
-	if _visual:
-		# Squash relative to fitted base — Vector2.ONE would blow tall PNGs full-screen.
-		_visual.scale = _base_scale * Vector2(1.06, 0.94)
-		var vtw := create_tween()
-		vtw.tween_property(_visual, "scale", _base_scale, 0.08)
+	# Squash relative to fitted base — Vector2.ONE would blow tall PNGs full-screen.
+	_punch_visual_scale(Vector2(1.06, 0.94), 0.08)
 
 func _nearest_mob() -> Node2D:
 	var best: Node2D = null
@@ -562,7 +591,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			GameState.revive()
 			soft_revive_guard(1.15)
 			var tip := "再起"
-			if GameState.stage_id in ["sect", "country"]:
+			if GameState.stage_id in ["sect", "country", "planet"]:
 				tip = "再起 · 伤↑"
 			FloatTextManager.show_message(global_position + Vector2(0, -36), tip, Color(0.55, 0.98, 0.85))
 			var hud := get_tree().get_first_node_in_group("hud")
@@ -798,11 +827,8 @@ func _spawn_dash_land_ring(dir: Vector2 = Vector2.RIGHT) -> void:
 func _do_ring_slash(cfg: Dictionary) -> void:
 	var radius := float(cfg.get("radius", 110))
 	var mult := float(cfg.get("damage_mult", 1.6))
-	# Brief wind-up punch so the cut lands as a beat, not a silent AoE.
-	if _visual:
-		_visual.scale = _base_scale * Vector2(0.88, 1.12)
-		var vtw := create_tween()
-		vtw.tween_property(_visual, "scale", _base_scale, 0.14).set_trans(Tween.TRANS_BACK)
+	# Brief wind-up punch — QUAD out (not TRANS_BACK) so 环斩 never overshoots past base.
+	_punch_visual_scale(Vector2(0.88, 1.12), 0.14)
 	# Resolve hits first — gold FX only on connect (whiff stays cool cyan-gray).
 	var hit_mobs: Array[Node2D] = []
 	for node in get_tree().get_nodes_in_group("mobs"):

@@ -24,8 +24,18 @@
         {
           "at_kills": 3,
           "hint": "灵潮",
-          "spawn_interval_mult": 0.88,
-          "max_alive_bonus": 2
+          "spawn_interval_mult": 0.86,
+          "max_alive_bonus": 2,
+          "spawns": [
+            {
+              "enemy_id": "outer_disciple",
+              "weight": 40
+            },
+            {
+              "enemy_id": "spirit_hare",
+              "weight": 60
+            }
+          ]
         },
         {
           "at_kills": 7,
@@ -219,39 +229,39 @@
       "lore": "王朝铁骑巡城，江湖刀客横行。杀伐之中，气运与修为并进。",
       "order": 2,
       "next_id": "planet",
-      "kill_target": 16,
-      "spawn_interval": 0.5,
-      "max_alive": 14,
+      "kill_target": 15,
+      "spawn_interval": 0.45,
+      "max_alive": 13,
       "boss_id": "dynasty_general",
-      "boss_at_kill": 10,
+      "boss_at_kill": 9,
       "accent": "#c9a86a",
       "waves": [
         {
           "at_kills": 0,
           "hint": "巡城",
-          "spawn_interval_mult": 1.0,
+          "spawn_interval_mult": 1.05,
           "max_alive_bonus": 0
         },
         {
-          "at_kills": 5,
+          "at_kills": 4,
           "hint": "刀客",
-          "spawn_interval_mult": 0.88,
+          "spawn_interval_mult": 0.86,
           "max_alive_bonus": 2,
           "spawns": [
             {
               "enemy_id": "patrol_guard",
-              "weight": 50
+              "weight": 40
             },
             {
               "enemy_id": "bandit",
-              "weight": 50
+              "weight": 60
             }
           ]
         },
         {
-          "at_kills": 10,
+          "at_kills": 9,
           "hint": "将军",
-          "spawn_interval_mult": 0.8,
+          "spawn_interval_mult": 0.78,
           "max_alive_bonus": 1
         }
       ],
@@ -280,7 +290,7 @@
             "r": 0.08,
             "color": "#c0605044",
             "effect": "damage",
-            "dps": 4.5
+            "dps": 3.8
           },
           {
             "cx": 0.78,
@@ -288,7 +298,15 @@
             "r": 0.07,
             "color": "#c0605044",
             "effect": "damage",
-            "dps": 3.5
+            "dps": 3.2
+          },
+          {
+            "cx": 0.5,
+            "cy": 0.82,
+            "r": 0.07,
+            "color": "#6ecf8a40",
+            "effect": "heal",
+            "hps": 2.0
           }
         ],
         "obstacles": [
@@ -385,7 +403,7 @@
           "id": "c1",
           "type": "trial",
           "title": "巡城杀伐",
-          "kill_goal": 7
+          "kill_goal": 6
         },
         {
           "id": "c2",
@@ -397,7 +415,7 @@
           "id": "c3",
           "type": "trial",
           "title": "刀客混战",
-          "kill_goal": 9
+          "kill_goal": 8
         },
         {
           "id": "c4",
@@ -420,28 +438,55 @@
       "lore": "坠落在王朝之上的古老星陆。星兽咆哮，沙虫破土，是通玄之下的极限试炼。",
       "order": 3,
       "next_id": "galaxy",
-      "kill_target": 36,
-      "spawn_interval": 0.7,
-      "max_alive": 18,
+      "kill_target": 30,
+      "spawn_interval": 0.62,
+      "max_alive": 16,
       "boss_id": "star_tyrant",
-      "boss_at_kill": 28,
+      "boss_at_kill": 22,
       "accent": "#6db3e0",
       "waves": [
         {
           "at_kills": 0,
           "hint": "猎场",
-          "spawn_interval_mult": 1.0
+          "spawn_interval_mult": 1.05,
+          "max_alive_bonus": 0
         },
         {
-          "at_kills": 15,
+          "at_kills": 8,
+          "hint": "星兽",
+          "spawn_interval_mult": 0.9,
+          "max_alive_bonus": 2,
+          "spawns": [
+            {
+              "enemy_id": "star_beast",
+              "weight": 75
+            },
+            {
+              "enemy_id": "dust_worm",
+              "weight": 25
+            }
+          ]
+        },
+        {
+          "at_kills": 16,
           "hint": "沙虫",
-          "spawn_interval_mult": 0.88,
-          "max_alive_bonus": 3
+          "spawn_interval_mult": 0.82,
+          "max_alive_bonus": 3,
+          "spawns": [
+            {
+              "enemy_id": "star_beast",
+              "weight": 35
+            },
+            {
+              "enemy_id": "dust_worm",
+              "weight": 65
+            }
+          ]
         },
         {
-          "at_kills": 26,
+          "at_kills": 22,
           "hint": "霸主",
-          "spawn_interval_mult": 0.78,
+          "spawn_interval_mult": 0.76,
           "max_alive_bonus": 2
         }
       ],
@@ -459,10 +504,18 @@
           {
             "cx": 0.5,
             "cy": 0.48,
-            "r": 0.13,
+            "r": 0.12,
             "color": "#e08a4a55",
             "effect": "damage",
-            "dps": 4.5
+            "dps": 4.2
+          },
+          {
+            "cx": 0.18,
+            "cy": 0.28,
+            "r": 0.07,
+            "color": "#d0704050",
+            "effect": "damage",
+            "dps": 3.4
           },
           {
             "cx": 0.3,
@@ -475,10 +528,10 @@
           {
             "cx": 0.72,
             "cy": 0.7,
-            "r": 0.07,
+            "r": 0.08,
             "color": "#6ecf8a44",
             "effect": "heal",
-            "hps": 1.8
+            "hps": 2.0
           }
         ],
         "obstacles": [
@@ -487,21 +540,32 @@
             "y": 11,
             "w": 3,
             "h": 3,
-            "color": "#3a2820"
+            "color": "#3a2820",
+            "style": "ash"
           },
           {
             "x": 38,
             "y": 18,
             "w": 4,
             "h": 2,
-            "color": "#3a2820"
+            "color": "#3a2820",
+            "style": "ash"
           },
           {
             "x": 24,
             "y": 8,
             "w": 2,
             "h": 5,
-            "color": "#4a3830"
+            "color": "#4a3830",
+            "style": "ash"
+          },
+          {
+            "x": 42,
+            "y": 6,
+            "w": 2,
+            "h": 2,
+            "color": "#452c20",
+            "style": "ash"
           }
         ],
         "chests": [
@@ -564,7 +628,7 @@
           "id": "p1",
           "type": "trial",
           "title": "星陆猎场",
-          "kill_goal": 8
+          "kill_goal": 7
         },
         {
           "id": "p2",
@@ -576,7 +640,7 @@
           "id": "p3",
           "type": "trial",
           "title": "沙虫潮",
-          "kill_goal": 10
+          "kill_goal": 9
         },
         {
           "id": "p4",
@@ -599,28 +663,55 @@
       "lore": "星河之间的航路。空冥蛾蔽日，陨星灵坠空，凡人不可久留。",
       "order": 4,
       "next_id": "world",
-      "kill_target": 44,
-      "spawn_interval": 0.65,
-      "max_alive": 20,
+      "kill_target": 38,
+      "spawn_interval": 0.58,
+      "max_alive": 18,
       "boss_id": "void_matriarch",
-      "boss_at_kill": 34,
+      "boss_at_kill": 28,
       "accent": "#8a7ad4",
       "waves": [
         {
           "at_kills": 0,
           "hint": "天河",
-          "spawn_interval_mult": 1.0
+          "spawn_interval_mult": 1.05,
+          "max_alive_bonus": 0
         },
         {
-          "at_kills": 18,
+          "at_kills": 10,
+          "hint": "空蛾",
+          "spawn_interval_mult": 0.9,
+          "max_alive_bonus": 2,
+          "spawns": [
+            {
+              "enemy_id": "void_moth",
+              "weight": 70
+            },
+            {
+              "enemy_id": "meteor_sprite",
+              "weight": 30
+            }
+          ]
+        },
+        {
+          "at_kills": 20,
           "hint": "陨星",
-          "spawn_interval_mult": 0.85,
-          "max_alive_bonus": 3
+          "spawn_interval_mult": 0.82,
+          "max_alive_bonus": 3,
+          "spawns": [
+            {
+              "enemy_id": "void_moth",
+              "weight": 40
+            },
+            {
+              "enemy_id": "meteor_sprite",
+              "weight": 60
+            }
+          ]
         },
         {
-          "at_kills": 32,
+          "at_kills": 28,
           "hint": "母神",
-          "spawn_interval_mult": 0.75,
+          "spawn_interval_mult": 0.74,
           "max_alive_bonus": 2
         }
       ],
@@ -649,7 +740,15 @@
             "r": 0.07,
             "color": "#6040c055",
             "effect": "damage",
-            "dps": 6.0
+            "dps": 5.2
+          },
+          {
+            "cx": 0.22,
+            "cy": 0.72,
+            "r": 0.07,
+            "color": "#6ecf8a40",
+            "effect": "heal",
+            "hps": 1.9
           }
         ],
         "obstacles": [
@@ -658,14 +757,24 @@
             "y": 9,
             "w": 2,
             "h": 6,
-            "color": "#1a1438"
+            "color": "#1a1438",
+            "style": "wall"
           },
           {
             "x": 34,
             "y": 16,
             "w": 5,
             "h": 2,
-            "color": "#1a1438"
+            "color": "#1a1438",
+            "style": "wall"
+          },
+          {
+            "x": 8,
+            "y": 20,
+            "w": 3,
+            "h": 2,
+            "color": "#221848",
+            "style": "wall"
           }
         ],
         "chests": [
@@ -696,7 +805,7 @@
           "id": "g1",
           "type": "trial",
           "title": "天河乱流",
-          "kill_goal": 9
+          "kill_goal": 8
         },
         {
           "id": "g2",
@@ -708,7 +817,7 @@
           "id": "g3",
           "type": "trial",
           "title": "陨星坠空",
-          "kill_goal": 11
+          "kill_goal": 10
         },
         {
           "id": "g4",
@@ -731,26 +840,33 @@
       "lore": "世界壁垒碎裂之处。界影游荡，古战卒不灭，是踏入通玄之上的前夜。",
       "order": 5,
       "next_id": "universe",
-      "kill_target": 52,
-      "spawn_interval": 0.6,
-      "max_alive": 22,
+      "kill_target": 42,
+      "spawn_interval": 0.55,
+      "max_alive": 18,
       "boss_id": "rift_lord",
-      "boss_at_kill": 40,
+      "boss_at_kill": 32,
       "accent": "#d4b06a",
       "waves": [
         {
           "at_kills": 0,
           "hint": "裂隙",
-          "spawn_interval_mult": 1.0
+          "spawn_interval_mult": 1.05,
+          "max_alive_bonus": 0
         },
         {
-          "at_kills": 22,
+          "at_kills": 12,
+          "hint": "界影",
+          "spawn_interval_mult": 0.88,
+          "max_alive_bonus": 2
+        },
+        {
+          "at_kills": 24,
           "hint": "战卒",
-          "spawn_interval_mult": 0.82,
-          "max_alive_bonus": 4
+          "spawn_interval_mult": 0.8,
+          "max_alive_bonus": 3
         },
         {
-          "at_kills": 38,
+          "at_kills": 32,
           "hint": "领主",
           "spawn_interval_mult": 0.72,
           "max_alive_bonus": 2
@@ -773,7 +889,7 @@
             "r": 0.09,
             "color": "#e0607055",
             "effect": "damage",
-            "dps": 7.0
+            "dps": 5.5
           },
           {
             "cx": 0.35,
@@ -781,7 +897,15 @@
             "r": 0.07,
             "color": "#a0405044",
             "effect": "slow",
-            "speed_mult": 0.68
+            "speed_mult": 0.7
+          },
+          {
+            "cx": 0.78,
+            "cy": 0.72,
+            "r": 0.07,
+            "color": "#6ecf8a40",
+            "effect": "heal",
+            "hps": 1.8
           }
         ],
         "obstacles": [
@@ -790,21 +914,24 @@
             "y": 12,
             "w": 3,
             "h": 4,
-            "color": "#2a1012"
+            "color": "#2a1012",
+            "style": "ash"
           },
           {
             "x": 40,
             "y": 10,
             "w": 4,
             "h": 3,
-            "color": "#2a1012"
+            "color": "#2a1012",
+            "style": "ash"
           },
           {
             "x": 26,
             "y": 22,
             "w": 6,
             "h": 1,
-            "color": "#3a1820"
+            "color": "#3a1820",
+            "style": "wall"
           }
         ],
         "chests": [
@@ -870,29 +997,56 @@
       "lore": "宇宙本源。星骸沉眠，混沌种萌发——通玄之上的尽头，亦是一切的起点。",
       "order": 6,
       "next_id": "",
-      "kill_target": 66,
-      "spawn_interval": 0.55,
-      "max_alive": 24,
+      "kill_target": 48,
+      "spawn_interval": 0.52,
+      "max_alive": 18,
       "boss_id": "chaos_overlord",
-      "boss_at_kill": 50,
+      "boss_at_kill": 36,
       "accent": "#5ec4b0",
       "waves": [
         {
           "at_kills": 0,
           "hint": "星海",
-          "spawn_interval_mult": 1.0
+          "spawn_interval_mult": 1.05,
+          "max_alive_bonus": 0
         },
         {
-          "at_kills": 25,
+          "at_kills": 12,
           "hint": "星骸",
-          "spawn_interval_mult": 0.8,
-          "max_alive_bonus": 4
+          "spawn_interval_mult": 0.88,
+          "max_alive_bonus": 2,
+          "spawns": [
+            {
+              "enemy_id": "star_wraith",
+              "weight": 70
+            },
+            {
+              "enemy_id": "chaos_seed",
+              "weight": 30
+            }
+          ]
         },
         {
-          "at_kills": 45,
+          "at_kills": 24,
+          "hint": "种萌",
+          "spawn_interval_mult": 0.8,
+          "max_alive_bonus": 3,
+          "spawns": [
+            {
+              "enemy_id": "star_wraith",
+              "weight": 40
+            },
+            {
+              "enemy_id": "chaos_seed",
+              "weight": 60
+            }
+          ]
+        },
+        {
+          "at_kills": 36,
           "hint": "主宰",
-          "spawn_interval_mult": 0.68,
-          "max_alive_bonus": 3
+          "spawn_interval_mult": 0.7,
+          "max_alive_bonus": 2
         }
       ],
       "map": {
@@ -909,10 +1063,10 @@
           {
             "cx": 0.5,
             "cy": 0.4,
-            "r": 0.11,
+            "r": 0.1,
             "color": "#70c8ff55",
             "effect": "damage",
-            "dps": 8.0
+            "dps": 5.8
           },
           {
             "cx": 0.4,
@@ -920,15 +1074,23 @@
             "r": 0.08,
             "color": "#4060a055",
             "effect": "slow",
-            "speed_mult": 0.66
+            "speed_mult": 0.7
           },
           {
             "cx": 0.62,
             "cy": 0.32,
-            "r": 0.06,
+            "r": 0.07,
             "color": "#80ffc044",
             "effect": "heal",
-            "hps": 3.0
+            "hps": 2.4
+          },
+          {
+            "cx": 0.2,
+            "cy": 0.75,
+            "r": 0.06,
+            "color": "#6ecf8a38",
+            "effect": "heal",
+            "hps": 1.8
           }
         ],
         "obstacles": [
@@ -937,21 +1099,24 @@
             "y": 14,
             "w": 2,
             "h": 5,
-            "color": "#080810"
+            "color": "#080810",
+            "style": "wall"
           },
           {
             "x": 44,
             "y": 12,
             "w": 3,
             "h": 4,
-            "color": "#080810"
+            "color": "#080810",
+            "style": "wall"
           },
           {
             "x": 24,
             "y": 24,
             "w": 8,
             "h": 2,
-            "color": "#0a1028"
+            "color": "#0a1028",
+            "style": "wall"
           }
         ],
         "chests": [
@@ -986,7 +1151,7 @@
           "id": "u1",
           "type": "trial",
           "title": "星骸沉眠",
-          "kill_goal": 12
+          "kill_goal": 10
         },
         {
           "id": "u2",
@@ -998,7 +1163,7 @@
           "id": "u3",
           "type": "trial",
           "title": "混沌萌发",
-          "kill_goal": 14
+          "kill_goal": 12
         },
         {
           "id": "u4",

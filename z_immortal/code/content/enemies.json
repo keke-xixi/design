@@ -347,10 +347,10 @@
       "id": "dynasty_general",
       "name": "镇国将军",
       "is_boss": true,
-      "hp": 180,
-      "attack": 16,
+      "hp": 170,
+      "attack": 15,
       "defense": 5,
-      "speed": 40,
+      "speed": 42,
       "size": 10,
       "sprite": "mob_general_clear.png",
       "sprite_scale": 0.248,
@@ -358,11 +358,11 @@
       "xp_attack": 10,
       "boss_skill": {
         "id": "dash_strike",
-        "cooldown": 3.8,
-        "telegraph": 1.4,
-        "recover": 1.0,
+        "cooldown": 3.5,
+        "telegraph": 1.15,
+        "recover": 1.1,
         "range": 145,
-        "damage": 18
+        "damage": 17
       },
       "loot": [
         {
@@ -394,10 +394,12 @@
       "xp_attack": 12,
       "boss_skill": {
         "id": "summon",
-        "cooldown": 5.5,
-        "telegraph": 0.9,
+        "cooldown": 5.0,
+        "telegraph": 1.1,
+        "recover": 1.0,
         "count": 3,
-        "enemy_id": "dust_worm"
+        "enemy_id": "dust_worm",
+        "radius": 78
       },
       "loot": [
         {
@@ -423,10 +425,11 @@
       "xp_attack": 14,
       "boss_skill": {
         "id": "spread_shots",
-        "cooldown": 4.0,
-        "telegraph": 0.75,
+        "cooldown": 3.8,
+        "telegraph": 0.95,
+        "recover": 0.95,
         "count": 6,
-        "damage": 12
+        "damage": 11
       },
       "loot": [
         {
@@ -452,11 +455,12 @@
       "xp_attack": 16,
       "boss_skill": {
         "id": "void_pull",
-        "cooldown": 4.8,
-        "telegraph": 0.9,
+        "cooldown": 4.4,
+        "telegraph": 1.05,
+        "recover": 1.0,
         "radius": 120,
-        "damage": 16,
-        "pull": 55
+        "damage": 15,
+        "pull": 50
       },
       "loot": [
         {
@@ -482,10 +486,11 @@
       "xp_attack": 20,
       "boss_skill": {
         "id": "aoe_ring",
-        "cooldown": 3.6,
-        "telegraph": 1.0,
-        "radius": 110,
-        "damage": 22
+        "cooldown": 3.4,
+        "telegraph": 1.15,
+        "recover": 1.05,
+        "radius": 105,
+        "damage": 20
       },
       "loot": [
         {

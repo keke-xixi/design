@@ -45,7 +45,7 @@ const _CITY_NEAR := Color(1.0, 0.82, 0.35)
 const _CRISIS_PULSE_HZ := 0.007
 
 var _skill_was_ready: Array[bool] = [true, true, true, true] # edge-detect CD→ready flash
-var _skill_max_cd: Array[float] = [2.3, 4.4, 1.2, 7.2]
+var _skill_max_cd: Array[float] = [2.15, 3.4, 1.15, 5.8]
 ## KeyI empty-pill grey — track so we restyle only on edge.
 var _pill_was_empty := false
 var _stone_base_col := Color(0.68, 0.82, 0.9, 0.82)
@@ -137,15 +137,20 @@ func _is_sect_yard() -> bool:
 func _is_dynasty_city() -> bool:
 	return GameState.stage_id == "country" or _map_pattern() == "city"
 
+func _is_planet_crater() -> bool:
+	# 荒星 radar — ash top-bar / kill language (not yard teal or city gold).
+	return GameState.stage_id == "planet" or _map_pattern() == "crater"
+
 func _restyle_top_for_stage() -> void:
-	# Top bar rim tracks stage radar: teal for 宗门, warm gold for 王朝.
+	# Top bar rim tracks stage radar: teal / warm gold / ash.
 	var yard := _is_sect_yard()
 	var dynasty := _is_dynasty_city()
-	var rim := _SECT_TEAL if yard else (_CITY_NEAR if dynasty else Color(0.78, 0.68, 0.42, 0.55))
-	var fill := Color(0.04, 0.08, 0.08, 0.82) if yard else (Color(0.09, 0.06, 0.03, 0.84) if dynasty else Color(0.05, 0.07, 0.1, 0.78))
-	var border_a := 0.72 if dynasty else 0.55
+	var crater := _is_planet_crater()
+	var rim := _SECT_TEAL if yard else (_CITY_NEAR if dynasty else (Color(1.0, 0.68, 0.32, 0.6) if crater else Color(0.78, 0.68, 0.42, 0.55)))
+	var fill := Color(0.04, 0.08, 0.08, 0.82) if yard else (Color(0.09, 0.06, 0.03, 0.84) if dynasty else (Color(0.1, 0.05, 0.03, 0.84) if crater else Color(0.05, 0.07, 0.1, 0.78)))
+	var border_a := 0.72 if dynasty or crater else 0.55
 	var top_sb := _UiStyle.panel(fill, Color(rim.r, rim.g, rim.b, border_a), 5)
-	if dynasty:
+	if dynasty or crater:
 		top_sb.set_border_width_all(2)
 	top_sb.content_margin_left = 6
 	top_sb.content_margin_right = 6
@@ -153,16 +158,16 @@ func _restyle_top_for_stage() -> void:
 	top_sb.content_margin_bottom = 4
 	_top_bar.add_theme_stylebox_override("panel", top_sb)
 	if _kill_bg:
-		_kill_bg.color = Color(0.05, 0.1, 0.1, 0.94) if yard else (Color(0.14, 0.1, 0.05, 0.94) if dynasty else Color(0.08, 0.1, 0.12, 0.92))
+		_kill_bg.color = Color(0.05, 0.1, 0.1, 0.94) if yard else (Color(0.14, 0.1, 0.05, 0.94) if dynasty else (Color(0.14, 0.08, 0.04, 0.94) if crater else Color(0.08, 0.1, 0.12, 0.92)))
 	if _kill_label:
 		_kill_label.add_theme_color_override(
 			"font_color",
-			Color(0.55, 0.85, 0.8, 0.9) if yard else (Color(1.0, 0.88, 0.5, 0.95) if dynasty else Color(0.78, 0.74, 0.58, 0.88))
+			Color(0.55, 0.85, 0.8, 0.9) if yard else (Color(1.0, 0.88, 0.5, 0.95) if dynasty else (Color(1.0, 0.78, 0.42, 0.95) if crater else Color(0.78, 0.74, 0.58, 0.88)))
 		)
 	if _stage_label:
 		_stage_label.add_theme_color_override(
 			"font_color",
-			Color(0.72, 0.92, 0.9, 0.95) if yard else (Color(1.0, 0.9, 0.55, 0.98) if dynasty else Color(0.9, 0.86, 0.72, 0.92))
+			Color(0.72, 0.92, 0.9, 0.95) if yard else (Color(1.0, 0.9, 0.55, 0.98) if dynasty else (Color(1.0, 0.82, 0.5, 0.98) if crater else Color(0.9, 0.86, 0.72, 0.92)))
 		)
 
 ## Dynasty open beat — top bar + kill fill punch warm gold (pairs with wipe ritual).
@@ -327,8 +332,27 @@ func _process(_delta: float) -> void:
 			_breath_sect_near_clear_edges()
 			if not _hp_heal_flashing:
 				_hp_fill.modulate = Color.WHITE
-		elif not _hp_heal_flashing:
-			_hp_fill.modulate = Color.WHITE
+		else:
+			if not _hp_heal_flashing:
+				_hp_fill.modulate = Color.WHITE
+			# Idle beauty: soft stage-tint breath on the top bar (yields to crisis / near-clear).
+			_breath_stage_top_idle()
+
+## Soft top-bar crest — sect teal / dynasty gold at ~0.4Hz, never stomps flash_*_top tweens.
+func _breath_stage_top_idle() -> void:
+	if _top_bar == null or GameState.dead:
+		return
+	# Skip while an open-beat tween still owns modulate (flash leaves ~1.0 when done).
+	var m := _top_bar.modulate
+	if m.r > 1.08 or m.g > 1.08 or m.b > 1.08:
+		return
+	var breath := 0.5 + 0.5 * sin(Time.get_ticks_msec() * 0.004)
+	if _is_sect_yard():
+		_top_bar.modulate = Color(1.0 + 0.025 * breath, 1.0 + 0.04 * breath, 1.0 + 0.035 * breath)
+	elif _is_dynasty_city():
+		_top_bar.modulate = Color(1.0 + 0.04 * breath, 1.0 + 0.03 * breath, 1.0 + 0.012 * breath)
+	else:
+		_top_bar.modulate = Color.WHITE
 
 ## Low-HP: edges + HP bar crest together (same CRISIS_PULSE_HZ as player / minimap).
 func _tick_crisis_pulse(zone_busy: bool) -> void:
@@ -453,7 +477,7 @@ func _update_skill_bar() -> void:
 			if not ready:
 				var acc: Color = _SKILL_ACCENTS[i]
 				# Near-ready: brighter fill so the last beat reads before the flash.
-				var near := cd_left <= 0.55
+				var near := cd_left <= 0.7
 				var lift := 0.72 if near else 0.55
 				var a := 0.62 if near else 0.48
 				cd_fill.color = Color(acc.r * lift, acc.g * lift, acc.b * lift, a)
@@ -464,20 +488,20 @@ func _update_skill_bar() -> void:
 		if i < _skill_was_ready.size():
 			_skill_was_ready[i] = ready
 		if not ready:
-			# Sub-3s show one decimal so short CDs feel responsive; last 0.5s stays loud.
+			# Sub-3s show one decimal so short CDs feel responsive; last 0.7s stays loud.
 			if cd_left < 3.0:
 				labels[i].text = "%.1f" % cd_left
 			else:
 				labels[i].text = "%.0f" % ceil(cd_left)
 			var acc2: Color = _SKILL_ACCENTS[i]
-			var near2 := cd_left <= 0.55
+			var near2 := cd_left <= 0.7
 			var ink := 1.05 if near2 else 0.85
 			labels[i].modulate = Color(minf(acc2.r * ink, 1.2), minf(acc2.g * ink, 1.15), minf(acc2.b * ink, 1.1), 0.98)
 			var casting: bool = int(_skill_cast_flash.get(_KEY_NODES[i], 0)) > 0
 			if key_panel and key_panel.modulate.r < 1.2 and not casting:
 				if near2:
 					# Soft accent breath on the key — "almost ready" without a full flash.
-					var pulse := 0.55 + 0.45 * sin(Time.get_ticks_msec() * 0.02)
+					var pulse := 0.55 + 0.45 * sin(Time.get_ticks_msec() * 0.022)
 					key_panel.modulate = Color(
 						0.82 + 0.18 * pulse * acc2.r,
 						0.82 + 0.18 * pulse * acc2.g,
@@ -576,6 +600,17 @@ func _flash_skill_ready(idx: int, label: Label, key_panel: CanvasItem) -> void:
 			1.0
 		)
 	# Soft dock wash — whole bar notices a skill returned.
+	# Per-skill edge tint: gold 环 / jade 丹 / ember 爆 (dash has its own path).
+	match idx:
+		1:
+			_spawn_edge_flash(Color(0.95, 0.82, 0.4, 0.28), 8.0, 0.2)
+		2:
+			_spawn_edge_flash(Color(0.4, 0.92, 0.6, 0.26), 8.0, 0.2)
+		3:
+			_spawn_edge_flash(Color(1.0, 0.55, 0.35, 0.3), 9.0, 0.22)
+		_:
+			pass
+	_spawn_edge_flash(Color(accent.r, accent.g, accent.b, 0.18), 5.0, 0.14)
 	if _skill_dock:
 		_skill_dock.modulate = Color(
 			minf(1.0 + accent.r * 0.18, 1.28),
@@ -635,7 +670,18 @@ func show_clear(custom: String = "") -> void:
 	tw.tween_callback(func() -> void: _clear.visible = false)
 
 func _on_mystic() -> void:
-	show_clear("通玄")
+	# Crossing into 通玄之上 — louder than a normal breakthrough tick.
+	show_clear("通玄之上")
+	_spawn_edge_flash(Color(0.45, 0.75, 1.0, 0.55), 16.0, 0.48)
+	_spawn_edge_flash(Color(0.75, 0.9, 1.0, 0.28), 8.0, 0.3)
+	if _top_bar:
+		_top_bar.modulate = Color(0.75, 0.95, 1.35)
+		var tw := create_tween()
+		tw.tween_property(_top_bar, "modulate", Color.WHITE, 0.55).set_trans(Tween.TRANS_SINE)
+	if _kill_fill:
+		_kill_fill.modulate = Color(0.7, 1.15, 1.4)
+		var ktw := create_tween()
+		ktw.tween_property(_kill_fill, "modulate", Color.WHITE, 0.4)
 	_refresh()
 
 func _on_any(_a = null) -> void:
@@ -780,24 +826,44 @@ func _on_combo_milestone(count: int) -> void:
 	var shout_col := Color(1.0, 0.92, 0.55, 1.0)
 	var yard := _is_sect_yard()
 	var dynasty := _is_dynasty_city()
+	var crater := _is_planet_crater()
 	match count:
 		2:
 			shout = "二连"
-			# Sect teal vs dynasty gold — pairs first-kill 斩 / 市斩 language.
+			# Sect teal / dynasty gold / planet ash — pairs first-kill language.
 			if yard:
 				shout_col = Color(0.5, 0.98, 0.9, 1.0)
 				_combo_label.modulate = Color(0.55, 0.98, 0.92)
 			elif dynasty:
 				shout_col = Color(1.0, 0.88, 0.42, 1.0)
 				_combo_label.modulate = Color(1.0, 0.9, 0.48)
+			elif crater:
+				shout_col = Color(1.0, 0.72, 0.38, 1.0)
+				_combo_label.modulate = Color(1.0, 0.78, 0.42)
 			else:
 				shout_col = Color(1.0, 0.96, 0.72, 1.0)
 		3:
 			shout = "三连"
-			shout_col = Color(1.0, 0.94, 0.6, 1.0)
+			if yard:
+				shout_col = Color(0.55, 0.96, 0.88, 1.0)
+			elif dynasty:
+				shout_col = Color(1.0, 0.9, 0.48, 1.0)
+			elif crater:
+				shout_col = Color(1.0, 0.76, 0.4, 1.0)
+			else:
+				shout_col = Color(1.0, 0.94, 0.6, 1.0)
 		5:
 			shout = "五连 · 伤↑"
 			shout_col = Color(1.0, 0.86, 0.4, 1.0)
+			if yard:
+				shout = "五连 · 灵涌"
+				shout_col = Color(0.55, 0.95, 0.85, 1.0)
+			elif dynasty:
+				shout = "五连 · 杀势"
+				shout_col = Color(1.0, 0.82, 0.38, 1.0)
+			elif crater:
+				shout = "五连 · 星烬"
+				shout_col = Color(1.0, 0.68, 0.32, 1.0)
 		8:
 			# 疯斩 赤金 — same family as boss drop / minimap 8-combo hot rim.
 			shout = "八连 · 疯斩"
@@ -822,11 +888,17 @@ func _on_combo_milestone(count: int) -> void:
 			kick = 0.1
 		elif count == 2:
 			kick = 0.08
+		elif count == 3 and GameState.early_kill_hook():
+			kick = 0.09
 		player.pulse_camera(kick)
 	if count >= 8:
 		var world := get_tree().get_first_node_in_group("game_world")
 		if world and world.has_method("hitstop"):
 			world.hitstop(0.03)
+	elif count == 5 and (yard or dynasty):
+		var world5 := get_tree().get_first_node_in_group("game_world")
+		if world5 and world5.has_method("hitstop"):
+			world5.hitstop(0.022)
 	elif count == 2:
 		var world2 := get_tree().get_first_node_in_group("game_world")
 		if world2 and world2.has_method("hitstop"):
@@ -864,6 +936,17 @@ func _flash_combo_edges(count: int) -> void:
 		else:
 			_spawn_edge_flash(Color(1.0, 0.9, 0.55, 0.32), 10.0, 0.24)
 		return
+	# 三连: softer stage-tint dual rim — keeps early streak readable.
+	if count == 3:
+		if _is_sect_yard():
+			_spawn_edge_flash(Color(0.42, 0.92, 0.86, 0.32), 9.0, 0.22)
+			_spawn_edge_flash(Color(0.6, 0.98, 0.92, 0.14), 4.0, 0.14)
+		elif _is_dynasty_city():
+			_spawn_edge_flash(Color(1.0, 0.86, 0.42, 0.32), 9.0, 0.22)
+			_spawn_edge_flash(Color(1.0, 0.94, 0.62, 0.14), 4.0, 0.14)
+		else:
+			_spawn_edge_flash(Color(1.0, 0.9, 0.55, 0.26), 9.0, 0.2)
+		return
 	# 疯斩 赤金 dual rim — hotter than 五连 gold, same family as boss 赤金 land.
 	if count >= 8:
 		_spawn_edge_flash(Color(1.0, 0.52, 0.22, 0.58), 16.0, 0.44)
@@ -872,7 +955,12 @@ func _flash_combo_edges(count: int) -> void:
 	var intensity := 0.28 if count < 5 else 0.4
 	var gold := Color(1.0, 0.82, 0.35, intensity)
 	if count >= 5:
-		gold = Color(1.0, 0.72, 0.32, intensity)
+		if _is_sect_yard():
+			gold = Color(0.5, 0.92, 0.82, intensity)
+		elif _is_dynasty_city():
+			gold = Color(1.0, 0.78, 0.35, intensity)
+		else:
+			gold = Color(1.0, 0.72, 0.32, intensity)
 	_spawn_edge_flash(gold, 10.0, 0.28)
 
 ## Boss recover punish window — soft gold rim, same family as combo flash.
@@ -1073,7 +1161,12 @@ func _refresh_combo_label(force_show: bool = false) -> void:
 	var per := float(ContentDB.section("combat").get("combo_damage_per_stack", 0.03))
 	var bonus_pct := int(round(per * float(c) * 100.0))
 	if c == 1:
-		_combo_label.text = "市斩" if _is_dynasty_city() and GameState.early_kill_hook() else "斩"
+		if _is_dynasty_city() and GameState.early_kill_hook():
+			_combo_label.text = "市斩"
+		elif _is_planet_crater() and GameState.early_kill_hook():
+			_combo_label.text = "星斩"
+		else:
+			_combo_label.text = "斩"
 	elif bonus_pct > 0 and c >= 3:
 		_combo_label.text = "%d连 · 伤+%d%%" % [c, bonus_pct]
 	else:
@@ -1119,10 +1212,13 @@ func _check_boss_kill_phase_enter() -> void:
 		_boss_kill_land_t = 0.0
 
 func _punch_early_kill() -> void:
-	# Opening minute: sect teal「斩」vs dynasty warm「市斩」.
+	# Opening minute: sect teal「斩」/ dynasty「市斩」/ planet「星斩」.
 	var dynasty := _is_dynasty_city()
+	var crater := _is_planet_crater()
 	if _is_sect_yard():
 		_kill_fill.modulate = Color(1.35, 1.7, 1.6)
+	elif crater:
+		_kill_fill.modulate = Color(1.55, 1.25, 0.9)
 	else:
 		_kill_fill.modulate = Color(1.7, 1.65, 1.45)
 	_combo_label.visible = true
@@ -1147,6 +1243,13 @@ func _punch_early_kill() -> void:
 			_spawn_edge_flash(Color(0.4, 0.95, 0.88, 0.48), 13.0, 0.3)
 			_spawn_edge_flash(Color(0.65, 1.0, 0.95, 0.22), 7.0, 0.2)
 			_punch_sect_zhan_kill_bar()
+		elif crater:
+			_combo_label.text = "星斩"
+			_combo_label.modulate = Color(1.0, 0.78, 0.4)
+			show_clear("星斩")
+			_spawn_edge_flash(Color(1.0, 0.68, 0.3, 0.48), 13.0, 0.3)
+			_spawn_edge_flash(Color(1.0, 0.82, 0.45, 0.22), 7.0, 0.2)
+			_punch_planet_xingzhan_kill_bar()
 		else:
 			show_clear("斩")
 			_spawn_edge_flash(Color(1.0, 0.98, 0.88, 0.42), 12.0, 0.26)
@@ -1155,6 +1258,8 @@ func _punch_early_kill() -> void:
 			_spawn_edge_flash(Color(0.45, 0.9, 0.85, 0.2), 8.0, 0.18)
 		elif dynasty:
 			_spawn_edge_flash(Color(1.0, 0.84, 0.4, 0.24), 8.0, 0.18)
+		elif crater:
+			_spawn_edge_flash(Color(1.0, 0.7, 0.35, 0.24), 8.0, 0.18)
 		else:
 			_spawn_edge_flash(Color(1.0, 0.96, 0.82, 0.22), 8.0, 0.18)
 
@@ -1209,10 +1314,47 @@ func _punch_sect_zhan_kill_bar() -> void:
 			_refresh()
 	)
 
-func _on_growth_ping(stat: String, _value: int) -> void:
-	# Brief top-bar flash so kill-growth is felt even if float text is missed.
-	var tip := "悟性↑" if stat == "wisdom" else "体魄↑"
+## Planet first「星斩」— kill bar ash kick (pairs 市斩 / 斩).
+func _punch_planet_xingzhan_kill_bar() -> void:
+	if _kill_fill == null:
+		return
+	var target_w := _kill_fill.size.x
+	var from_w := maxf(target_w - 10.0, 2.0)
+	_kill_fill.size.x = from_w
+	_kill_fill.color = Color(0.95, 0.5, 0.22)
+	_kill_fill.modulate = Color(1.5, 1.15, 0.8)
+	if _kill_bg:
+		_kill_bg.modulate = Color(1.3, 0.95, 0.65)
+	_kill_fill.pivot_offset = Vector2(0, _kill_fill.size.y * 0.5)
+	_kill_fill.scale = Vector2(1.0, 1.35)
+	var tw := create_tween()
+	tw.tween_property(_kill_fill, "size:x", target_w + 4.0, 0.09).set_trans(Tween.TRANS_BACK)
+	tw.parallel().tween_property(_kill_fill, "scale", Vector2(1.0, 1.0), 0.1)
+	tw.tween_property(_kill_fill, "size:x", target_w, 0.1).set_trans(Tween.TRANS_SINE)
+	tw.parallel().tween_property(_kill_fill, "modulate", Color.WHITE, 0.22)
+	if _kill_bg:
+		tw.parallel().tween_property(_kill_bg, "modulate", Color.WHITE, 0.22)
+	tw.tween_callback(func() -> void:
+		if _kill_fill:
+			_refresh()
+	)
+
+func _on_growth_ping(stat: String, value: int) -> void:
+	# Louder top-bar flash so kill-growth is felt even if float text is missed.
+	var tip := "悟性↑%d" % value if stat == "wisdom" else "体魄↑%d" % value
 	show_clear(tip)
+	# Edge + top-bar punch — early retention: growth must read as a spike.
+	var col := Color(0.55, 0.85, 1.0, 0.42) if stat == "wisdom" else Color(0.95, 0.78, 0.45, 0.42)
+	_spawn_edge_flash(col, 12.0, 0.32)
+	_spawn_edge_flash(Color(col.r, col.g, col.b, 0.18), 6.0, 0.18)
+	if _top_bar:
+		_top_bar.modulate = Color(0.75, 1.05, 1.25) if stat == "wisdom" else Color(1.25, 1.05, 0.75)
+		var tw := create_tween()
+		tw.tween_property(_top_bar, "modulate", Color.WHITE, 0.4).set_trans(Tween.TRANS_SINE)
+	if _kill_fill:
+		_kill_fill.modulate = Color(0.7, 1.1, 1.3) if stat == "wisdom" else Color(1.25, 1.05, 0.7)
+		var ktw := create_tween()
+		ktw.tween_property(_kill_fill, "modulate", Color.WHITE, 0.32)
 
 func _on_skill_denied(skill_id: String, reason: String) -> void:
 	var idx := _SKILL_IDS.find(skill_id)

@@ -163,7 +163,7 @@
     "death_pity_stones": 5,
     "death_pity_stones_doc": "Once per stage entry on first death",
     "early_death_pity_bonus": 7,
-    "early_death_pity_bonus_doc": "Extra pity stones on sect/country first death — pulls hub spend",
+    "early_death_pity_bonus_doc": "Extra pity stones on sect/country/planet first death — pulls hub spend",
     "early_revive_temp_damage": 0.1,
     "early_revive_hurt_reduce": 1,
     "early_revive_pill_id": "white_pill"

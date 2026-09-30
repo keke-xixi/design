@@ -108,7 +108,8 @@ func _spawn_trail() -> void:
 	# Shared budget across all bolts — 12-way 灵爆 used to spawn 100+ trail nodes.
 	# Cap is global (not per-bolt) so dense autos + 灵爆 share one overdraw budget.
 	var live := get_tree().get_nodes_in_group("bolt_trail_fx").size()
-	if live >= 18:
+	# Harder cap under load — keeps 灵爆 volleys from hitching mid-wave.
+	if live >= 14:
 		return
 	if _style == "burst":
 		# Streak only — skip extra glow plate when the volley is already loud.
@@ -141,6 +142,9 @@ func _spawn_trail() -> void:
 		tws.tween_property(streak2, "modulate:a", 0.0, 0.14)
 		tws.parallel().tween_property(streak2, "width", 0.5, 0.14)
 		tws.tween_callback(streak2.queue_free)
+		return
+	# Auto bolt — drop mote when budget is already half-full.
+	if live >= 8:
 		return
 	var bit := Polygon2D.new()
 	bit.add_to_group("bolt_trail_fx")
